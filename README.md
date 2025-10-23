@@ -1,61 +1,167 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Docker Setup cho Balance Flow Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Yêu cầu hệ thống
+- Docker
+- Docker Compose
 
-## About Laravel
+## Cài đặt và chạy dự án
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Clone và setup môi trường
+```bash
+# Clone repository
+git clone <repository-url>
+cd balance-flow-be
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# Copy file environment cho Docker
+cp .env.example .env
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+# Tạo key cho ứng dụng
+php artisan key:generate
+```
 
-## Learning Laravel
+### 2. Chạy với Docker Compose
+```bash
+# Build và chạy containers
+docker-compose up -d
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+# Hoặc build lại nếu có thay đổi
+docker-compose up -d --build
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 3. Cài đặt dependencies
+```bash
+# Cài đặt Composer dependencies
+docker-compose exec app composer install
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# Cài đặt NPM dependencies (nếu cần)
+docker-compose exec app npm install
+```
 
-## Laravel Sponsors
+### 4. Chạy migrations
+```bash
+# Chạy database migrations
+docker-compose exec app php artisan migrate
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Chạy seeders (nếu có)
+docker-compose exec app php artisan db:seed
+```
 
-### Premium Partners
+## Truy cập ứng dụng
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Ứng dụng**: http://localhost:80
+- **Database**: localhost:5432
+- **Redis**: localhost:6379
+- **Mailpit**: http://localhost:8025
 
-## Contributing
+## Các lệnh hữu ích
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Laravel Commands
+```bash
+# Chạy artisan commands
+docker-compose exec app php artisan <command>
 
-## Code of Conduct
+# Ví dụ:
+docker-compose exec app php artisan make:controller UserController
+docker-compose exec app php artisan migrate
+docker-compose exec app php artisan tinker
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Database
+```bash
+# Truy cập PostgreSQL
+docker-compose exec pgsql psql -U sail -d balance_flow
 
-## Security Vulnerabilities
+# Backup database
+docker-compose exec pgsql pg_dump -U sail balance_flow > backup.sql
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Restore database
+docker-compose exec -T pgsql psql -U sail balance_flow < backup.sql
+```
 
-## License
+### Logs
+```bash
+# Xem logs của tất cả services
+docker-compose logs
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Xem logs của service cụ thể
+docker-compose logs app
+docker-compose logs pgsql
+docker-compose logs redis
+```
+
+### Debugging
+```bash
+# Truy cập container
+docker-compose exec app bash
+
+# Xem cấu hình PHP
+docker-compose exec app php -i
+
+# Test database connection
+docker-compose exec app php artisan tinker
+# Trong tinker: DB::connection()->getPdo();
+```
+
+## Cấu trúc Docker
+
+### Services
+- **app**: Laravel application với PHP 8.4
+- **pgsql**: PostgreSQL 17 database
+- **redis**: Redis cache
+- **mailpit**: Email testing tool
+
+### Volumes
+- `sailpgsql`: PostgreSQL data
+- `sailredis`: Redis data
+
+### Networks
+- `sail`: Bridge network cho tất cả services
+
+## Troubleshooting
+
+### Port conflicts
+Nếu gặp lỗi port đã được sử dụng, thay đổi ports trong file `.env`:
+```env
+APP_PORT=8080
+FORWARD_DB_PORT=5433
+FORWARD_REDIS_PORT=6380
+```
+
+### Permission issues
+```bash
+# Fix permissions
+sudo chown -R $USER:$USER .
+```
+
+### Rebuild containers
+```bash
+# Xóa containers và volumes
+docker-compose down -v
+
+# Build lại
+docker-compose up -d --build
+```
+
+## Development
+
+### Hot reload
+Để enable hot reload cho development:
+```bash
+# Chạy Vite dev server
+docker-compose exec app npm run dev
+```
+
+### Xdebug
+Xdebug đã được cấu hình sẵn. Để sử dụng:
+1. Cài đặt Xdebug extension trong IDE
+2. Set breakpoints
+3. Start debugging session
+
+## Production
+
+Để deploy production, cần:
+1. Thay đổi `APP_ENV=production` trong `.env`
+2. Set `APP_DEBUG=false`
+3. Cấu hình database production
+4. Setup SSL certificates
+5. Cấu hình reverse proxy (nginx/apache)
