@@ -1,73 +1,73 @@
-FROM ubuntu:24.04
+# Multi-stage build: PHP-FPM + Nginx
+FROM php:8.4-fpm-alpine AS app
 
 LABEL maintainer="Balance Flow Team"
 
-ARG WWWGROUP
-ARG NODE_VERSION=22
-ARG POSTGRES_VERSION=17
+# Install system dependencies
+RUN apk add --no-cache \
+    git \
+    curl \
+    libpng-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    postgresql-dev \
+    oniguruma-dev \
+    libzip-dev \
+    nodejs \
+    npm
 
+# Install PHP extensions
+RUN docker-php-ext-install \
+    pdo_pgsql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
 WORKDIR /var/www/html
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=UTC
-ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80"
-ENV SUPERVISOR_PHP_USER="sail"
-ENV PLAYWRIGHT_BROWSERS_PATH=0 
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
 
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 
-RUN echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
-    echo "Acquire::http::No-Cache true;" >> /etc/apt/apt.conf.d/99custom && \
-    echo "Acquire::BrokenProxy    true;" >> /etc/apt/apt.conf.d/99custom
+# Copy application code
+COPY . .
 
-RUN apt-get update && apt-get upgrade -y \
-    && mkdir -p /etc/apt/keyrings \
-    && apt-get install -y gnupg gosu curl ca-certificates zip unzip git supervisor sqlite3 libcap2-bin libpng-dev python3 dnsutils librsvg2-bin fswatch ffmpeg nano  \
-    && curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xb8dc7e53946656efbce4c1dd71daeaab4ad4cab6' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null \
-    && echo "deb [signed-by=/etc/apt/keyrings/ppa_ondrej_php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu noble main" > /etc/apt/sources.list.d/ppa_ondrej_php.list \
-    && apt-get update \
-    && apt-get install -y php8.4-cli php8.4-dev \
-       php8.4-pgsql \
-       php8.4-gd \
-       php8.4-curl \
-       php8.4-mbstring \
-       php8.4-xml php8.4-zip php8.4-bcmath php8.4-soap \
-       php8.4-intl php8.4-readline \
-       php8.4-redis php8.4-swoole \
-       php8.4-memcached php8.4-pcov php8.4-imagick php8.4-xdebug \
-    && curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update \
-    && apt-get install -y nodejs \
-    && npm install -g npm \
-# Removed pnpm, bun, and Playwright dependencies to slim image \
-# Removed Yarn repository and yarn installation \
-# Removed PostgreSQL client and PGDG repo setup \
-    && apt-get -y autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
-RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.4
+# Generate optimized autoloader
+RUN composer dump-autoload --optimize
 
-RUN userdel -r ubuntu
-RUN groupadd --force -g $WWWGROUP sail
-RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
-RUN git config --global --add safe.directory /var/www/html
+# PHP-FPM configuration
+COPY docker/configs/php/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+COPY docker/configs/php/php.ini /usr/local/etc/php/conf.d/99-custom.ini
 
-# Copy start-container script
-COPY docker/scripts/start-container /usr/local/bin/start-container
-RUN chmod +x /usr/local/bin/start-container
+EXPOSE 9000
 
-# Copy supervisord config
-COPY docker/configs/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+CMD ["php-fpm"]
 
-# Copy supervisor program configs
-COPY docker/configs/supervisor/ /etc/supervisor/conf.d/supervisor/
+# Nginx stage
+FROM nginx:alpine AS nginx
 
-# Copy PHP ini config
-COPY docker/configs/php.ini /etc/php/8.4/cli/conf.d/99-sail.ini
+# Copy nginx configuration
+COPY docker/configs/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY docker/configs/nginx/default.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80/tcp
+# Copy public assets (if any)
+COPY --from=app /var/www/html/public /var/www/html/public
 
-ENTRYPOINT ["start-container"]
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
