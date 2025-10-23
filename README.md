@@ -15,6 +15,9 @@ cd balance-flow-be
 # Copy file environment cho Docker
 cp .env.example .env
 
+# Setup Docker resources (volumes và networks)
+./setup-docker.sh
+
 # Tạo key cho ứng dụng
 php artisan key:generate
 ```
