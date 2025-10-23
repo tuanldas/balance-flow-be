@@ -43,7 +43,6 @@ services:
             - './storage/app/public:/var/www/html/storage/app/public'
         networks:
             - default
-            - external
         depends_on:
             - app
         healthcheck:
@@ -84,9 +83,8 @@ services:
             timeout: 3s
 
 networks:
-    external:
-        external: true
-        name: ${PROJECT_NAME:-balance-flow-be}_external
+    default:
+        driver: bridge
 
 volumes:
     database:
