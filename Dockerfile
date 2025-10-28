@@ -15,7 +15,10 @@ RUN apk add --no-cache \
     oniguruma-dev \
     libzip-dev \
     nodejs \
-    npm
+    npm \
+    bash \
+    zsh \
+    supervisor
 
 # Install PHP extensions
 RUN docker-php-ext-install \
@@ -60,4 +63,19 @@ COPY docker/configs/php/php.ini /usr/local/etc/php/conf.d/99-custom.ini
 
 EXPOSE 9000
 
-CMD ["php-fpm"]
+# Supervisor configuration
+COPY docker/configs/supervisor/supervisord.conf /etc/supervisord.conf
+RUN mkdir -p /var/log/supervisor
+
+# Optional: install Oh My Zsh for a nicer shell experience
+RUN set -eux; \
+    if [ ! -d "/root/.oh-my-zsh" ]; then \
+      apk add --no-cache ca-certificates; \
+      update-ca-certificates; \
+      curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o /tmp/install-ohmyzsh.sh; \
+      CHSH=no RUNZSH=no KEEP_ZSHRC=yes sh /tmp/install-ohmyzsh.sh --unattended; \
+      rm -f /tmp/install-ohmyzsh.sh; \
+    fi; \
+    { echo 'export ZSH="/root/.oh-my-zsh"'; echo 'ZSH_THEME="frisk"'; echo 'plugins=(git)'; echo 'source $ZSH/oh-my-zsh.sh'; } >> /root/.zshrc
+
+CMD ["supervisord", "-c", "/etc/supervisord.conf", "-n"]

@@ -31,7 +31,20 @@ services:
             timeout: 10s
             retries: 3
 
-    # nginx service removed; using external Nginx
+    nginx:
+        image: nginx:alpine
+        depends_on:
+            - app
+        ports:
+            - '${APP_PORT:-80}:80'
+        volumes:
+            - './docker/configs/nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
+            - './docker/configs/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro'
+            - './public:/var/www/app/public:ro'
+            - './storage/app/public:/var/www/app/storage/app/public'
+        networks:
+            - default
+
 
     pgsql:
         image: 'postgres:17-alpine'
@@ -47,7 +60,7 @@ services:
         networks:
             - default
         healthcheck:
-            test: ["CMD", "pg_isready", "-U", "${DB_USERNAME:-sail}"]
+            test: ["CMD", "pg_isready", "-U", "${DB_USERNAME:-sail}", "-d", "${DB_DATABASE:-balance_flow}"]
             retries: 5
             timeout: 5s
 
