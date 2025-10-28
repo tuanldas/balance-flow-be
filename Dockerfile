@@ -77,15 +77,9 @@ COPY --from=app /var/www/app/public /var/www/app/public
 COPY --from=app /var/www/app/storage /var/www/app/storage
 COPY --from=app /var/www/app/bootstrap /var/www/app/bootstrap
 
-# Create non-root user for security
-RUN addgroup -g 1000 -S appuser && \
-    adduser -u 1000 -S appuser -G appuser
-
-# Set proper permissions
-RUN chown -R appuser:appuser /var/www/app
-
-# Switch to non-root user
-USER appuser
+# Ensure cache directories exist with proper ownership
+RUN mkdir -p /var/cache/nginx/client_temp && \
+    chown -R nginx:nginx /var/cache/nginx
 
 EXPOSE 80
 
