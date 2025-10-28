@@ -67,9 +67,6 @@ setup-docker.sh
 *.backup
 *.tmp
 
-# Vendor (will be installed in container)
-vendor/
-
 # Node modules (will be installed in container)
 node_modules/
 package-lock.json

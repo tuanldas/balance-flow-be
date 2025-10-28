@@ -18,8 +18,7 @@ services:
             REDIS_HOST: '${REDIS_HOST:-redis}'
             REDIS_PORT: '${REDIS_PORT:-6379}'
         volumes:
-            - './storage:/var/www/app/storage'
-            - './bootstrap/cache:/var/www/app/bootstrap/cache'
+            - './:/var/www/app:delegated'
         networks:
             - default
         depends_on:
