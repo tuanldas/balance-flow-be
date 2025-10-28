@@ -37,8 +37,8 @@ WORKDIR /var/www/app
 # Copy composer files first for better caching
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
+# Install PHP dependencies (include dev for local Docker environment)
+RUN composer install --optimize-autoloader --no-scripts --no-interaction
 
 # Copy application code
 COPY . .
@@ -61,26 +61,3 @@ COPY docker/configs/php/php.ini /usr/local/etc/php/conf.d/99-custom.ini
 EXPOSE 9000
 
 CMD ["php-fpm"]
-
-# Nginx stage
-FROM nginx:alpine AS nginx
-
-# Install wget for health checks
-RUN apk add --no-cache wget
-
-# Copy nginx configuration
-COPY docker/configs/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY docker/configs/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Copy public assets and necessary files
-COPY --from=app /var/www/app/public /var/www/app/public
-COPY --from=app /var/www/app/storage /var/www/app/storage
-COPY --from=app /var/www/app/bootstrap /var/www/app/bootstrap
-
-# Ensure cache directories exist with proper ownership
-RUN mkdir -p /var/cache/nginx/client_temp && \
-    chown -R nginx:nginx /var/cache/nginx
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]

@@ -30,26 +30,10 @@ services:
             interval: 30s
             timeout: 10s
             retries: 3
-
-    nginx:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            target: nginx
-        image: balance-flow-nginx
         ports:
-            - '${APP_PORT:-80}:80'
-        volumes:
-            - './storage/app/public:/var/www/app/storage/app/public'
-        networks:
-            - default
-        depends_on:
-            - app
-        healthcheck:
-            test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
+            - '${APP_FPM_PORT:-9000}:9000'
+
+    # nginx service removed; using external Nginx
 
     pgsql:
         image: 'postgres:17-alpine'
