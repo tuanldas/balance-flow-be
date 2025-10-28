@@ -32,7 +32,7 @@ RUN docker-php-ext-install \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www/html
+WORKDIR /var/www/app
 
 # Copy composer files first for better caching
 COPY composer.json composer.lock ./
@@ -43,10 +43,11 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 # Copy application code
 COPY . .
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+# Ensure required directories exist and set proper permissions
+RUN mkdir -p /var/www/app/storage /var/www/app/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/app \
+    && chmod -R 755 /var/www/app/storage \
+    && chmod -R 755 /var/www/app/bootstrap/cache
 
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize
@@ -77,16 +78,16 @@ COPY docker/configs/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/configs/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Copy public assets and necessary files
-COPY --from=app /var/www/html/public /var/www/html/public
-COPY --from=app /var/www/html/storage /var/www/html/storage
-COPY --from=app /var/www/html/bootstrap /var/www/html/bootstrap
+COPY --from=app /var/www/app/public /var/www/app/public
+COPY --from=app /var/www/app/storage /var/www/app/storage
+COPY --from=app /var/www/app/bootstrap /var/www/app/bootstrap
 
 # Create non-root user for security
 RUN addgroup -g 1000 -S appuser && \
     adduser -u 1000 -S appuser -G appuser
 
 # Set proper permissions
-RUN chown -R appuser:appuser /var/www/html
+RUN chown -R appuser:appuser /var/www/app
 
 # Switch to non-root user
 USER appuser
