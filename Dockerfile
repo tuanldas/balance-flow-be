@@ -56,12 +56,7 @@ RUN composer dump-autoload --optimize
 COPY docker/configs/php/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 COPY docker/configs/php/php.ini /usr/local/etc/php/conf.d/99-custom.ini
 
-# Create non-root user for security
-RUN addgroup -g 1000 -S appuser && \
-    adduser -u 1000 -S appuser -G appuser
-
-# Switch to non-root user
-USER appuser
+# Keep running as root for PHP-FPM (pool config runs as www-data)
 
 EXPOSE 9000
 
