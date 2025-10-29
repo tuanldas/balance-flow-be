@@ -56,7 +56,6 @@ final class AuthController extends Controller
             'success' => true,
             'message' => __('messages.auth.login_success'),
             'data' => [
-                'user' => $user,
                 'access_token' => $token,
                 'token_type' => 'Bearer',
             ],
