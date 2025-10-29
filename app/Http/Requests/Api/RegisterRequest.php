@@ -25,7 +25,7 @@ final class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'string', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::min(8)],
+            'password' => ['required', 'confirmed', Password::min(6)],
         ];
     }
 
@@ -45,7 +45,7 @@ final class RegisterRequest extends FormRequest
             'email.max' => __('validation.max.string', ['attribute' => __('validation.attributes.email'), 'max' => 255]),
             'password.required' => __('validation.required', ['attribute' => __('validation.attributes.password')]),
             'password.confirmed' => __('validation.confirmed', ['attribute' => __('validation.attributes.password')]),
-            'password.min' => __('validation.min.string', ['attribute' => __('validation.attributes.password'), 'min' => 8]),
+            'password.min' => __('validation.min.string', ['attribute' => __('validation.attributes.password'), 'min' => 6]),
         ];
     }
 }
