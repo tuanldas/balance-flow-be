@@ -35,11 +35,11 @@ final class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email là bắt buộc',
-            'email.email' => 'Email không đúng định dạng',
-            'email.max' => 'Email không được vượt quá 255 ký tự',
-            'password.required' => 'Mật khẩu là bắt buộc',
-            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'email.required' => __('validation.required', ['attribute' => __('validation.attributes.email')]),
+            'email.email' => __('validation.email', ['attribute' => __('validation.attributes.email')]),
+            'email.max' => __('validation.max.string', ['attribute' => __('validation.attributes.email'), 'max' => 255]),
+            'password.required' => __('validation.required', ['attribute' => __('validation.attributes.password')]),
+            'password.min' => __('validation.min.string', ['attribute' => __('validation.attributes.password'), 'min' => 8]),
         ];
     }
 }

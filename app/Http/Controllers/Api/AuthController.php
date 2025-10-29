@@ -28,7 +28,7 @@ final class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Đăng ký thành công',
+            'message' => __('messages.auth.register_success'),
             'data' => [
                 'user' => $user,
                 'access_token' => $token,
@@ -45,7 +45,7 @@ final class AuthController extends Controller
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'success' => false,
-                'message' => 'Email hoặc mật khẩu không đúng',
+                'message' => __('messages.auth.login_failed'),
             ], 401);
         }
 
@@ -54,7 +54,7 @@ final class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Đăng nhập thành công',
+            'message' => __('messages.auth.login_success'),
             'data' => [
                 'user' => $user,
                 'access_token' => $token,
@@ -85,7 +85,7 @@ final class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Đăng xuất thành công',
+            'message' => __('messages.auth.logout_success'),
         ]);
     }
 }
