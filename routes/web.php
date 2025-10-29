@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+    return view('pages.coming-soon');
+});
+
+// Demo 1 routes (giữ lại để tham khảo)
+Route::get('/demo1', function () {
     return view('pages.demo1.index');
 });
 

@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+---
+<development-guidelines>
+=== git & commit rules ===
+
+## Quy định commit
+- Commit message bắt buộc phải viết bằng **tiếng Việt**, nội dung phải rõ ràng, giải thích được ý nghĩa của thay đổi.
+- Luôn tuân thủ nghiêm ngặt các quy định trong file `contributing.md` và `.editorconfig`.
+
+## Quy tắc phân nhóm nhánh (Gitflow)
+- Nhánh sản xuất (production): `main`
+- Nhánh phát triển (next release): `dev`
+- Prefix nhánh:
+  - `feature/`: phát triển tính năng mới
+  - `bugfix/`: sửa lỗi không khẩn cấp
+  - `hotfix/`: sửa lỗi khẩn cấp trên production
+  - `release/`: chuẩn bị phát hành
+  - `support/`: các nhánh hỗ trợ đặc thù
+- Tag phiên bản: Tuân thủ định dạng `v<MAJOR>.<MINOR>.<PATCH>` (ví dụ: `v1.2.3`).
+
+=== code & api rules ===
+
+## Quy định chung về Code & API
+- **API Phân trang:** Tất cả các API dùng để lấy thông tin (GET) bắt buộc phải được phân trang.
+- **UUID:** Luôn luôn sử dụng **UUID v7** cho các định danh mới.
+
+## Quy định về Comment
+- **Ngôn ngữ:** Tất cả các comment giải thích code (logic, lý do...) phải được viết bằng tiếng Việt.
+- **Quy tắc dọn dẹp:** Khi xóa comment, chỉ xóa các comment giải thích logic. Phải giữ lại toàn bộ các khối comment tài liệu (ví dụ: PHPDocs).
+
+=== project rules ===
+
+## Cấu trúc Repository
+- Không bao giờ commit thư mục `.cursor` vào repository.
+
+=== docker rules ===
+
+## Chạy lệnh với Docker (Compose V2)
+- **Thực thi lệnh:** Luôn chạy tất cả các lệnh qua Docker Compose V2 (sử dụng cú pháp `docker compose ...`).
+- **Quy trình khởi động:** Đối với các lệnh yêu cầu cờ `up -d`, quy trình chuẩn là phải chạy `docker compose down` trước, sau đó mới chạy `docker compose up -d` để đảm bảo môi trường được làm mới.
+
+</development-guidelines>
