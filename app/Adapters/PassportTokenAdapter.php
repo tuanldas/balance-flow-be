@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Adapters;
 
-use App\Services\Contracts\TokenServiceInterface;
+use App\Adapters\Contracts\TokenAdapterInterface;
 use Illuminate\Support\Facades\Http;
 
-final readonly class TokenService implements TokenServiceInterface
+final readonly class PassportTokenAdapter implements TokenAdapterInterface
 {
     /**
      * Lấy token theo Password Grant

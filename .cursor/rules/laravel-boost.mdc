@@ -262,6 +262,9 @@ app/
 ├── Repositories/       # Data access layer
 │   ├── Contracts/     # Repository interfaces
 │   └── *.php         # Repository implementations
+├── Adapters/          # External system adapters
+│   ├── Contracts/    # Adapter interfaces
+│   └── *.php         # Adapter implementations
 └── Providers/         # Service container bindings
 ```
 
@@ -269,7 +272,7 @@ app/
 - Services should be `final readonly` classes
 - Services implement interfaces for testability
 - Services handle business logic, validation, and orchestration
-- Services can depend on other services and repositories
+- Services can depend on repositories and adapters
 - Use constructor property promotion for dependencies
 
 <code-snippet name="Service Implementation" lang="php">
@@ -277,7 +280,7 @@ final readonly class AuthService implements AuthServiceInterface
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
-        private TokenServiceInterface $tokenService,
+        private TokenAdapterInterface $tokenAdapter,
     ) {
     }
 
@@ -310,10 +313,33 @@ final readonly class UserRepository implements UserRepositoryInterface
 }
 </code-snippet>
 
+### Adapter Layer Rules
+- Adapters should be `final readonly` classes
+- Adapters implement interfaces for testability
+- Adapters handle external system integration (tokens, APIs, etc.)
+- Use constructor property promotion for dependencies
+- Keep adapters focused on single external system
+
+<code-snippet name="Adapter Implementation" lang="php">
+final readonly class PassportTokenAdapter implements TokenAdapterInterface
+{
+    public function getPasswordGrantToken(string $username, string $password): array
+    {
+        // Passport-specific token generation
+    }
+
+    public function refreshGrantToken(string $refreshToken): array
+    {
+        // Passport-specific token refresh
+    }
+}
+</code-snippet>
+
 ### Interface Rules
 - Place interfaces in appropriate Contracts/ subfolders
 - Repository interfaces in `Repositories/Contracts/`
 - Service interfaces in `Services/Contracts/`
+- Adapter interfaces in `Adapters/Contracts/`
 - Interfaces define clear contracts with proper type hints
 - Use descriptive method names and PHPDoc blocks
 
@@ -372,12 +398,14 @@ public function register(): void
     // Đăng ký repositories
     $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
 
+    // Đăng ký adapters
+    $this->app->singleton(TokenAdapterInterface::class, PassportTokenAdapter::class);
+
     // Đăng ký services
-    $this->app->singleton(TokenServiceInterface::class, TokenService::class);
     $this->app->singleton(AuthServiceInterface::class, function ($app) {
         return new AuthService(
             $app->make(UserRepositoryInterface::class),
-            $app->make(TokenServiceInterface::class)
+            $app->make(TokenAdapterInterface::class)
         );
     });
 }

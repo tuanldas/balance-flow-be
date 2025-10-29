@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Services\Contracts\AuthServiceInterface;
+use App\Adapters\Contracts\TokenAdapterInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
-use App\Services\Contracts\TokenServiceInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,7 +13,7 @@ final readonly class AuthService implements AuthServiceInterface
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
-        private TokenServiceInterface $tokenService,
+        private TokenAdapterInterface $tokenAdapter,
     ) {
     }
 
@@ -31,7 +30,7 @@ final readonly class AuthService implements AuthServiceInterface
             'password' => Hash::make($password),
         ]);
 
-        $tokenPayload = $this->tokenService->getPasswordGrantToken($email, $password);
+        $tokenPayload = $this->tokenAdapter->getPasswordGrantToken($email, $password);
 
         return [
             'user' => $user,
@@ -49,7 +48,7 @@ final readonly class AuthService implements AuthServiceInterface
      */
     public function login(string $email, string $password): ?array
     {
-        $tokenPayload = $this->tokenService->getPasswordGrantToken($email, $password);
+        $tokenPayload = $this->tokenAdapter->getPasswordGrantToken($email, $password);
 
         if (!isset($tokenPayload['access_token'])) {
             return null;
@@ -70,7 +69,7 @@ final readonly class AuthService implements AuthServiceInterface
      */
     public function refreshToken(string $refreshToken): ?array
     {
-        $tokenPayload = $this->tokenService->refreshGrantToken($refreshToken);
+        $tokenPayload = $this->tokenAdapter->refreshGrantToken($refreshToken);
 
         if (!isset($tokenPayload['access_token'])) {
             return null;

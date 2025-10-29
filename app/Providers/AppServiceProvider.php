@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Adapters\Contracts\TokenAdapterInterface;
+use App\Adapters\PassportTokenAdapter;
 use App\Services\Contracts\AuthServiceInterface;
-use App\Services\Contracts\TokenServiceInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
-use App\Services\TokenService;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -23,12 +23,14 @@ class AppServiceProvider extends ServiceProvider
         // Đăng ký repositories
         $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
 
+        // Đăng ký adapters
+        $this->app->singleton(TokenAdapterInterface::class, PassportTokenAdapter::class);
+
         // Đăng ký services
-        $this->app->singleton(TokenServiceInterface::class, TokenService::class);
         $this->app->singleton(AuthServiceInterface::class, function ($app) {
             return new AuthService(
                 $app->make(UserRepositoryInterface::class),
-                $app->make(TokenServiceInterface::class)
+                $app->make(TokenAdapterInterface::class)
             );
         });
     }

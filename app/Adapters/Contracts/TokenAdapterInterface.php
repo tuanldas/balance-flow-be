@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Contracts;
+namespace App\Adapters\Contracts;
 
-interface TokenServiceInterface
+interface TokenAdapterInterface
 {
     /**
      * Lấy token theo Password Grant
