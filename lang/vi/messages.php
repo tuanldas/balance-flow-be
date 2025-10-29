@@ -22,6 +22,11 @@ return [
         'forbidden' => 'Truy cập bị từ chối',
         'token_expired' => 'Token đã hết hạn',
         'token_invalid' => 'Token không hợp lệ',
+        'refresh_token_required' => 'Refresh token là bắt buộc',
+        'refresh_token_invalid' => 'Refresh token không hợp lệ',
+        'refresh_token_expired' => 'Refresh token đã hết hạn',
+        'refresh_success' => 'Làm mới token thành công',
+        'refresh_failed' => 'Làm mới token thất bại',
     ],
 
     // General messages

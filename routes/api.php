@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 // Public routes (không cần authentication)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/refresh', [AuthController::class, 'refresh']);
 
 // Protected routes (cần authentication)
 Route::middleware('auth:api')->group(function () {

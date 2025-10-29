@@ -66,6 +66,26 @@
           "response": []
         },
         {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "refresh"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Logout",
           "request": {
             "method": "POST",
@@ -87,6 +107,7 @@
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8083" },
     { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
     { "key": "timestamp", "value": "{{$timestamp}}" }
   ]
 }
