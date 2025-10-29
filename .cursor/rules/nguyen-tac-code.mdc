@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Luôn tuân thủ contributing.md và .editorconfig
+- Các api lấy thông tin luôn được phân trang
+- Luôn luôn sử dụng UUID v7
+- Khi xóa comment hãy xóa các comment giải thích code nhưng hãy giữ lại comment của php docs
+- Các comment code luôn luôn dùng tiếng việt
+- Không commit folder .cursor

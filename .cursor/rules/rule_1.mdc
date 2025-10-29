@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Chạy lệnh với Docker (Compose V2)
+- Luôn chạy tất cả lệnh thông qua Docker Compose V2.
+- Với các lệnh cần `up -d`, luôn chạy `docker compose down` trước rồi mới `docker compose up -d`.
+
+## Quy tắc phân nhóm nhánh (Gitflow)
+- Nhánh sản xuất (production): `main`
+- Nhánh phát triển (next release): `dev`
+- Prefix nhánh:
+  - `feature/`: phát triển tính năng mới
+  - `release/`: chuẩn bị phát hành
+  - `hotfix/`: sửa lỗi khẩn cấp trên production
+  - `support/`: các nhánh hỗ trợ đặc thù
+  - `bugfix/`: sửa lỗi không khẩn cấp
+- Tag phiên bản: `v<MAJOR>.<MINOR>.<PATCH>` (ví dụ: `v1.2.3`)
+
+## Quy định commit
+- Commit message sử dụng tiếng Việt, rõ nghĩa.
+- Tuân thủ `CONTRIBUTING.md` và `.editorconfig`.
