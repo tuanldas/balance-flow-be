@@ -38,7 +38,7 @@ final class AuthController extends Controller
     }
 
     /**
-     * Đăng nhập
+     * Đăng nhập sử dụng OAuth2 Password Grant
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -51,23 +51,42 @@ final class AuthController extends Controller
             ], 401);
         }
 
-        $user = Auth::user();
+        // Sử dụng OAuth2 Password Grant
+        $http = new \GuzzleHttp\Client();
         
-        // Tạo token với refresh token
-        $tokenResult = $user->createToken('auth-token');
-        $token = $tokenResult->accessToken;
-        $refreshToken = $tokenResult->refreshToken;
+        try {
+            $response = $http->post(config('app.url') . '/oauth/token', [
+                'form_params' => [
+                    'grant_type' => 'password',
+                    'client_id' => config('passport.password_grant_client.id'),
+                    'client_secret' => config('passport.password_grant_client.secret'),
+                    'username' => $request->email,
+                    'password' => $request->password,
+                    'scope' => '*',
+                ],
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => __('messages.auth.login_success'),
-            'data' => [
-                'access_token' => $token,
-                'refresh_token' => $refreshToken,
-                'token_type' => 'Bearer',
-                'expires_in' => $tokenResult->token->expires_at->diffInSeconds(now()),
-            ],
-        ]);
+            $tokenData = json_decode($response->getBody(), true);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.auth.login_success'),
+                'data' => [
+                    'access_token' => $tokenData['access_token'],
+                    'refresh_token' => $tokenData['refresh_token'],
+                    'token_type' => $tokenData['token_type'],
+                    'expires_in' => $tokenData['expires_in'],
+                ],
+            ]);
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $error = json_decode($e->getResponse()->getBody(), true);
+            
+            return response()->json([
+                'success' => false,
+                'message' => $error['message'] ?? __('messages.auth.login_failed'),
+            ], 401);
+        }
     }
 
     /**
@@ -84,7 +103,7 @@ final class AuthController extends Controller
     }
 
     /**
-     * Refresh token
+     * Refresh token sử dụng OAuth2
      */
     public function refresh(Request $request): JsonResponse
     {
@@ -97,52 +116,39 @@ final class AuthController extends Controller
             ], 400);
         }
 
+        $http = new \GuzzleHttp\Client();
+        
         try {
-            // Tìm refresh token trong database
-            $token = \Laravel\Passport\RefreshToken::where('id', $refreshToken)->first();
-            
-            if (!$token || $token->revoked) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('messages.auth.refresh_token_invalid'),
-                ], 401);
-            }
+            $response = $http->post(config('app.url') . '/oauth/token', [
+                'form_params' => [
+                    'grant_type' => 'refresh_token',
+                    'client_id' => config('passport.password_grant_client.id'),
+                    'client_secret' => config('passport.password_grant_client.secret'),
+                    'refresh_token' => $refreshToken,
+                    'scope' => '*',
+                ],
+            ]);
 
-            // Kiểm tra token hết hạn
-            if ($token->expires_at < now()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('messages.auth.refresh_token_expired'),
-                ], 401);
-            }
-
-            $user = $token->accessToken->user;
-            
-            // Revoke old tokens
-            $token->accessToken->revoke();
-            $token->revoke();
-
-            // Tạo token mới
-            $tokenResult = $user->createToken('auth-token');
-            $newAccessToken = $tokenResult->accessToken;
-            $newRefreshToken = $tokenResult->refreshToken;
+            $tokenData = json_decode($response->getBody(), true);
 
             return response()->json([
                 'success' => true,
                 'message' => __('messages.auth.refresh_success'),
                 'data' => [
-                    'access_token' => $newAccessToken,
-                    'refresh_token' => $newRefreshToken,
-                    'token_type' => 'Bearer',
-                    'expires_in' => $tokenResult->token->expires_at->diffInSeconds(now()),
+                    'access_token' => $tokenData['access_token'],
+                    'refresh_token' => $tokenData['refresh_token'],
+                    'token_type' => $tokenData['token_type'],
+                    'expires_in' => $tokenData['expires_in'],
                 ],
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $error = json_decode($e->getResponse()->getBody(), true);
+            
             return response()->json([
                 'success' => false,
-                'message' => __('messages.auth.refresh_failed'),
-            ], 500);
+                'message' => $error['message'] ?? __('messages.auth.refresh_failed'),
+            ], 401);
         }
     }
 
