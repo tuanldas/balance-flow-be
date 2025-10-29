@@ -43,4 +43,16 @@ return [
 
     'connection' => env('PASSPORT_CONNECTION'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Password Grant Client Credentials
+    |--------------------------------------------------------------------------
+    |
+    | Sử dụng cho Password Grant. Nên cấu hình qua biến môi trường.
+    |
+    */
+
+    'password_client_id' => env('PASSPORT_PASSWORD_CLIENT_ID'),
+    'password_client_secret' => env('PASSPORT_PASSWORD_CLIENT_SECRET'),
+
 ];

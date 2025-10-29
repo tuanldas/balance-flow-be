@@ -24,7 +24,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Tuan LDAS\",\n  \"email\": \"tuanldas+{{timestamp}}@gmail.com\",\n  \"password\": \"12312345\",\n  \"password_confirmation\": \"12312345\"\n}"
+              "raw": "{\n  \"name\": \"Tuan LDAS\",\n  \"email\": \"tuanldas+{{timestamp}}@gmail.com\",\n  \"password\": \"123123\",\n  \"password_confirmation\": \"123123\"\n}"
             }
           },
           "response": []
@@ -61,6 +61,59 @@
               "raw": "{{baseUrl}}/api/me",
               "host": ["{{baseUrl}}"],
               "path": ["api", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OAuth2 Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/oauth/token",
+              "host": ["{{baseUrl}}"],
+              "path": ["oauth", "token"]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type", "value": "password" },
+                { "key": "client_id", "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" },
+                { "key": "username", "value": "tuanldas@gmail.com" },
+                { "key": "password", "value": "123123" },
+                { "key": "scope", "value": "*" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OAuth2 Refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/oauth/token",
+              "host": ["{{baseUrl}}"],
+              "path": ["oauth", "token"]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type", "value": "refresh_token" },
+                { "key": "client_id", "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" },
+                { "key": "refresh_token", "value": "{{refresh_token}}" },
+                { "key": "scope", "value": "*" }
+              ]
             }
           },
           "response": []
@@ -108,6 +161,8 @@
     { "key": "baseUrl", "value": "http://localhost:8083" },
     { "key": "access_token", "value": "" },
     { "key": "refresh_token", "value": "" },
+    { "key": "client_id", "value": "019a2e13-c16a-73c1-aaed-5c0a74f4ff7a" },
+    { "key": "client_secret", "value": "FYmmvGE6ZOFXPE8uLXC5aEp4pOEzaQ947zlDOgBE" },
     { "key": "timestamp", "value": "{{$timestamp}}" }
   ]
 }
