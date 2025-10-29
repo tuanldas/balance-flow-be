@@ -13,11 +13,14 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 - php - 8.4.14
 - laravel/framework (LARAVEL) - v12
+- laravel/passport (PASSPORT) - v13
 - laravel/prompts (PROMPTS) - v0
 - laravel/mcp (MCP) - v0
 - laravel/pint (PINT) - v1
 - laravel/sail (SAIL) - v1
 - phpunit/phpunit (PHPUNIT) - v11
+- alpinejs (ALPINEJS) - v3
+- tailwindcss (TAILWINDCSS) - v3
 
 
 ## Conventions
@@ -203,4 +206,222 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - To run all tests: `php artisan test`.
 - To run all tests in a file: `php artisan test tests/Feature/ExampleTest.php`.
 - To filter on a particular test name: `php artisan test --filter=testName` (recommended after making a change to a related file).
+
+
+=== tailwindcss/core rules ===
+
+## Tailwind Core
+
+- Use Tailwind CSS classes to style HTML, check and use existing tailwind conventions within the project before writing your own.
+- Offer to extract repeated patterns into components that match the project's conventions (i.e. Blade, JSX, Vue, etc..)
+- Think through class placement, order, priority, and defaults - remove redundant classes, add classes to parent or child carefully to limit repetition, group elements logically
+- You can use the `search-docs` tool to get exact examples from the official documentation when needed.
+
+### Spacing
+- When listing items, use gap utilities for spacing, don't use margins.
+
+    <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
+        <div class="flex gap-8">
+            <div>Superior</div>
+            <div>Michigan</div>
+            <div>Erie</div>
+        </div>
+    </code-snippet>
+
+
+### Dark Mode
+- If existing pages and components support dark mode, new pages and components must support dark mode in a similar way, typically using `dark:`.
+
+
+=== tailwindcss/v3 rules ===
+
+## Tailwind 3
+
+- Always use Tailwind CSS v3 - verify you're using only classes supported by this version.
+
+
+=== service-repository-pattern rules ===
+
+## Service-Repository Pattern
+
+This application follows the Service-Repository pattern for clean architecture and separation of concerns.
+
+### Architecture Overview
+- **Controllers** handle HTTP requests/responses only
+- **Services** contain business logic and orchestrate operations
+- **Repositories** handle data access and database operations
+- **Interfaces** define contracts for dependency inversion
+
+### Folder Structure
+```
+app/
+├── Http/Controllers/     # HTTP layer - thin controllers
+├── Services/           # Business logic layer
+│   ├── Contracts/      # Service interfaces
+│   └── *.php          # Service implementations
+├── Repositories/       # Data access layer
+│   ├── Contracts/     # Repository interfaces
+│   └── *.php         # Repository implementations
+├── Adapters/          # External system adapters
+│   ├── Contracts/    # Adapter interfaces
+│   └── *.php         # Adapter implementations
+└── Providers/         # Service container bindings
+```
+
+### Service Layer Rules
+- Services should be `final readonly` classes
+- Services implement interfaces for testability
+- Services handle business logic, validation, and orchestration
+- Services can depend on repositories and adapters
+- Use constructor property promotion for dependencies
+
+<code-snippet name="Service Implementation" lang="php">
+final readonly class AuthService implements AuthServiceInterface
+{
+    public function __construct(
+        private UserRepositoryInterface $userRepository,
+        private TokenAdapterInterface $tokenAdapter,
+    ) {
+    }
+
+    public function register(string $name, string $email, string $password): array
+    {
+        // Business logic here
+    }
+}
+</code-snippet>
+
+### Repository Layer Rules
+- Repositories should be `final readonly` classes
+- Repositories implement interfaces for testability
+- Repositories handle only data access operations
+- Use Eloquent models and relationships
+- Avoid business logic in repositories
+
+<code-snippet name="Repository Implementation" lang="php">
+final readonly class UserRepository implements UserRepositoryInterface
+{
+    public function create(array $data): User
+    {
+        return User::create($data);
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+}
+</code-snippet>
+
+### Adapter Layer Rules
+- Adapters should be `final readonly` classes
+- Adapters implement interfaces for testability
+- Adapters handle external system integration (tokens, APIs, etc.)
+- Use constructor property promotion for dependencies
+- Keep adapters focused on single external system
+
+<code-snippet name="Adapter Implementation" lang="php">
+final readonly class PassportTokenAdapter implements TokenAdapterInterface
+{
+    public function getPasswordGrantToken(string $username, string $password): array
+    {
+        // Passport-specific token generation
+    }
+
+    public function refreshGrantToken(string $refreshToken): array
+    {
+        // Passport-specific token refresh
+    }
+}
+</code-snippet>
+
+### Interface Rules
+- Place interfaces in appropriate Contracts/ subfolders
+- Repository interfaces in `Repositories/Contracts/`
+- Service interfaces in `Services/Contracts/`
+- Adapter interfaces in `Adapters/Contracts/`
+- Interfaces define clear contracts with proper type hints
+- Use descriptive method names and PHPDoc blocks
+
+<code-snippet name="Interface Definition" lang="php">
+interface AuthServiceInterface
+{
+    /**
+     * Đăng ký user mới và tạo token
+     *
+     * @return array<string, mixed>
+     */
+    public function register(string $name, string $email, string $password): array;
+}
+</code-snippet>
+
+### Controller Rules
+- Controllers should be `final` classes
+- Controllers depend on service interfaces, not implementations
+- Controllers handle only HTTP concerns (requests, responses, status codes)
+- Use constructor property promotion for service injection
+- Keep controllers thin - delegate to services
+
+<code-snippet name="Controller Implementation" lang="php">
+final class AuthController extends Controller
+{
+    public function __construct(
+        private readonly AuthServiceInterface $authService,
+    ) {
+    }
+
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $result = $this->authService->register(
+            name: $request->name,
+            email: $request->email,
+            password: $request->password
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+        ], 201);
+    }
+}
+</code-snippet>
+
+### Service Provider Rules
+- Register interfaces as singletons in `AppServiceProvider`
+- Bind interfaces to implementations
+- Use closure for complex dependency resolution
+- Follow dependency injection best practices
+
+<code-snippet name="Service Provider Registration" lang="php">
+public function register(): void
+{
+    // Đăng ký repositories
+    $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
+
+    // Đăng ký adapters
+    $this->app->singleton(TokenAdapterInterface::class, PassportTokenAdapter::class);
+
+    // Đăng ký services
+    $this->app->singleton(AuthServiceInterface::class, function ($app) {
+        return new AuthService(
+            $app->make(UserRepositoryInterface::class),
+            $app->make(TokenAdapterInterface::class)
+        );
+    });
+}
+</code-snippet>
+
+### Testing Rules
+- Mock interfaces, not concrete implementations
+- Test services independently with mocked dependencies
+- Use factories for test data creation
+- Test all happy paths, failure paths, and edge cases
+- Services should be easily unit testable
+
+### Benefits
+- **Separation of Concerns** - Clear boundaries between layers
+- **Testability** - Easy to mock interfaces for unit tests
+- **Maintainability** - Changes isolated to specific layers
+- **Reusability** - Services can be reused across controllers
+- **SOLID Compliance** - Follows dependency inversion principle
 </laravel-boost-guidelines>
