@@ -235,4 +235,162 @@ protected function isAccessible(User $user, ?string $path = null): bool
 ## Tailwind 3
 
 - Always use Tailwind CSS v3 - verify you're using only classes supported by this version.
+
+
+=== service-repository-pattern rules ===
+
+## Service-Repository Pattern
+
+This application follows the Service-Repository pattern for clean architecture and separation of concerns.
+
+### Architecture Overview
+- **Controllers** handle HTTP requests/responses only
+- **Services** contain business logic and orchestrate operations
+- **Repositories** handle data access and database operations
+- **Interfaces** define contracts for dependency inversion
+
+### Folder Structure
+```
+app/
+├── Http/Controllers/     # HTTP layer - thin controllers
+├── Services/           # Business logic layer
+│   ├── Contracts/      # Service interfaces
+│   └── *.php          # Service implementations
+├── Repositories/       # Data access layer
+│   ├── Contracts/     # Repository interfaces
+│   └── *.php         # Repository implementations
+└── Providers/         # Service container bindings
+```
+
+### Service Layer Rules
+- Services should be `final readonly` classes
+- Services implement interfaces for testability
+- Services handle business logic, validation, and orchestration
+- Services can depend on other services and repositories
+- Use constructor property promotion for dependencies
+
+<code-snippet name="Service Implementation" lang="php">
+final readonly class AuthService implements AuthServiceInterface
+{
+    public function __construct(
+        private UserRepositoryInterface $userRepository,
+        private TokenServiceInterface $tokenService,
+    ) {
+    }
+
+    public function register(string $name, string $email, string $password): array
+    {
+        // Business logic here
+    }
+}
+</code-snippet>
+
+### Repository Layer Rules
+- Repositories should be `final readonly` classes
+- Repositories implement interfaces for testability
+- Repositories handle only data access operations
+- Use Eloquent models and relationships
+- Avoid business logic in repositories
+
+<code-snippet name="Repository Implementation" lang="php">
+final readonly class UserRepository implements UserRepositoryInterface
+{
+    public function create(array $data): User
+    {
+        return User::create($data);
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+}
+</code-snippet>
+
+### Interface Rules
+- Place interfaces in appropriate Contracts/ subfolders
+- Repository interfaces in `Repositories/Contracts/`
+- Service interfaces in `Services/Contracts/`
+- Interfaces define clear contracts with proper type hints
+- Use descriptive method names and PHPDoc blocks
+
+<code-snippet name="Interface Definition" lang="php">
+interface AuthServiceInterface
+{
+    /**
+     * Đăng ký user mới và tạo token
+     *
+     * @return array<string, mixed>
+     */
+    public function register(string $name, string $email, string $password): array;
+}
+</code-snippet>
+
+### Controller Rules
+- Controllers should be `final` classes
+- Controllers depend on service interfaces, not implementations
+- Controllers handle only HTTP concerns (requests, responses, status codes)
+- Use constructor property promotion for service injection
+- Keep controllers thin - delegate to services
+
+<code-snippet name="Controller Implementation" lang="php">
+final class AuthController extends Controller
+{
+    public function __construct(
+        private readonly AuthServiceInterface $authService,
+    ) {
+    }
+
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $result = $this->authService->register(
+            name: $request->name,
+            email: $request->email,
+            password: $request->password
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+        ], 201);
+    }
+}
+</code-snippet>
+
+### Service Provider Rules
+- Register interfaces as singletons in `AppServiceProvider`
+- Bind interfaces to implementations
+- Use closure for complex dependency resolution
+- Follow dependency injection best practices
+
+<code-snippet name="Service Provider Registration" lang="php">
+public function register(): void
+{
+    // Đăng ký repositories
+    $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
+
+    // Đăng ký services
+    $this->app->singleton(TokenServiceInterface::class, TokenService::class);
+    $this->app->singleton(AuthServiceInterface::class, function ($app) {
+        return new AuthService(
+            $app->make(UserRepositoryInterface::class),
+            $app->make(TokenServiceInterface::class)
+        );
+    });
+}
+</code-snippet>
+
+### Testing Rules
+- Mock interfaces, not concrete implementations
+- Test services independently with mocked dependencies
+- Use factories for test data creation
+- Test all happy paths, failure paths, and edge cases
+- Services should be easily unit testable
+
+### Benefits
+- **Separation of Concerns** - Clear boundaries between layers
+- **Testability** - Easy to mock interfaces for unit tests
+- **Maintainability** - Changes isolated to specific layers
+- **Reusability** - Services can be reused across controllers
+- **SOLID Compliance** - Follows dependency inversion principle
 </laravel-boost-guidelines>
