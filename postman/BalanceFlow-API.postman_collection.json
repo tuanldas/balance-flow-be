@@ -220,6 +220,38 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Verify Email (Signed URL)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/verify-email/{{verification_id}}/{{verification_hash}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "verify-email", "{{verification_id}}", "{{verification_hash}}"],
+              "query": []
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resend Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/email/verification-notification",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "email", "verification-notification"]
+            }
+          },
+          "response": []
         }
       ]
     }
@@ -229,6 +261,8 @@
     { "key": "access_token", "value": "" },
     { "key": "refresh_token", "value": "" },
     { "key": "timestamp", "value": "{{$timestamp}}" },
-    { "key": "reset_token", "value": "" }
+    { "key": "reset_token", "value": "" },
+    { "key": "verification_id", "value": "" },
+    { "key": "verification_hash", "value": "" }
   ]
 }

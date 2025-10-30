@@ -445,3 +445,24 @@ public function register(): void
 - Postman
   - Đã thêm requests: Forgot Password, Reset Password
   - Biến `reset_token` trong Collection Variables để test nhanh
+
+## API Notes (Email Verification)
+
+- Endpoints
+  - POST `/api/register` → tạo user và gửi email xác minh tự động
+  - GET `/api/verify-email/{id}/{hash}` → xác minh email qua signed URL (middleware `signed`)
+  - POST `/api/email/verification-notification` → gửi lại email xác minh (yêu cầu Bearer token, throttle `6,1`)
+
+- Hành vi
+  - Sau đăng ký: Laravel gửi `sendEmailVerificationNotification()` cho `User` (có `MustVerifyEmail`)
+  - Xác minh: service kiểm tra `hash === sha1($user->getEmailForVerification())` và gọi `markEmailAsVerified()`
+  - Đăng nhập: nếu chưa verify trả `403` với `messages.auth.verification_required`; đã verify sẽ cấp token Passport
+  - Lưu ý: Register vẫn cấp token; nếu cần chặn, thêm middleware `verified` cho các route cần bảo vệ
+
+- Postman
+  - Đã có requests: "Verify Email (Signed URL)", "Resend Verification Email"
+  - Biến: `verification_id`, `verification_hash`
+
+- Cấu hình gợi ý
+  - Có thể tuỳ biến URL xác minh tương tự Reset Password nếu cần redirect về frontend
+  - Đảm bảo cấu hình Mail `.env` để gửi email xác minh

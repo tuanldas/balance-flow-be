@@ -7,9 +7,11 @@ namespace App\Providers;
 use App\Adapters\Contracts\TokenAdapterInterface;
 use App\Adapters\PassportTokenAdapter;
 use App\Services\Contracts\AuthServiceInterface;
+use App\Services\Contracts\EmailVerificationServiceInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
+use App\Services\EmailVerificationService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Str;
@@ -33,6 +35,12 @@ class AppServiceProvider extends ServiceProvider
             return new AuthService(
                 $app->make(UserRepositoryInterface::class),
                 $app->make(TokenAdapterInterface::class)
+            );
+        });
+
+        $this->app->singleton(EmailVerificationServiceInterface::class, function ($app) {
+            return new EmailVerificationService(
+                $app->make(UserRepositoryInterface::class),
             );
         });
     }

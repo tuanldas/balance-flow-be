@@ -56,6 +56,13 @@ final class AuthController extends Controller
             ], 401);
         }
 
+        if (isset($result['requires_verification']) && $result['requires_verification'] === true) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.auth.verification_required'),
+            ], 403);
+        }
+
         return response()->json([
             'success' => true,
             'message' => __('messages.auth.login_success'),

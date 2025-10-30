@@ -33,6 +33,11 @@ return [
         'forgot_send_failed' => 'Gửi email đặt lại mật khẩu thất bại',
         'reset_success' => 'Đặt lại mật khẩu thành công',
         'reset_failed' => 'Đặt lại mật khẩu thất bại hoặc token không hợp lệ',
+        'verification_sent' => 'Đã gửi email xác minh',
+        'already_verified' => 'Email đã được xác minh',
+        'verify_success' => 'Xác minh email thành công',
+        'verify_failed' => 'Xác minh email thất bại hoặc liên kết không hợp lệ',
+        'verification_required' => 'Vui lòng xác minh email trước khi tiếp tục',
     ],
 
     // General messages

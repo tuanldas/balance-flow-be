@@ -32,6 +32,11 @@ final readonly class AuthService implements AuthServiceInterface
             'password' => Hash::make($password),
         ]);
 
+        // Gửi email xác minh sau khi đăng ký
+        if (method_exists($user, 'sendEmailVerificationNotification')) {
+            $user->sendEmailVerificationNotification();
+        }
+
         $tokenPayload = $this->tokenAdapter->getPasswordGrantToken($email, $password);
 
         return [
@@ -50,14 +55,26 @@ final readonly class AuthService implements AuthServiceInterface
      */
     public function login(string $email, string $password): ?array
     {
-        $tokenPayload = $this->tokenAdapter->getPasswordGrantToken($email, $password);
-
-        if (!isset($tokenPayload['access_token'])) {
+        $user = $this->userRepository->findByEmail($email);
+        if (!$user instanceof User) {
             return null;
         }
 
+        if (!Hash::check($password, (string) $user->getAuthPassword())) {
+            return null;
+        }
+
+        // Yêu cầu email đã được xác minh trước khi cấp token
+        if (method_exists($user, 'hasVerifiedEmail') && !$user->hasVerifiedEmail()) {
+            return [
+                'requires_verification' => true,
+            ];
+        }
+
+        $tokenPayload = $this->tokenAdapter->getPasswordGrantToken($email, $password);
+
         return [
-            'access_token' => $tokenPayload['access_token'],
+            'access_token' => $tokenPayload['access_token'] ?? null,
             'refresh_token' => $tokenPayload['refresh_token'] ?? null,
             'token_type' => $tokenPayload['token_type'] ?? 'Bearer',
             'expires_in' => $tokenPayload['expires_in'] ?? null,

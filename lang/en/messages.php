@@ -29,6 +29,11 @@ return [
         'forgot_send_failed' => 'Failed to send password reset email',
         'reset_success' => 'Password has been reset successfully',
         'reset_failed' => 'Password reset failed or token is invalid',
+        'verification_sent' => 'Verification email has been sent',
+        'already_verified' => 'Email is already verified',
+        'verify_success' => 'Email verified successfully',
+        'verify_failed' => 'Email verification failed or link invalid',
+        'verification_required' => 'Please verify your email to continue',
     ],
 
     // General messages
