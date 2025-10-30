@@ -466,3 +466,15 @@ public function register(): void
 - Cấu hình gợi ý
   - Có thể tuỳ biến URL xác minh tương tự Reset Password nếu cần redirect về frontend
   - Đảm bảo cấu hình Mail `.env` để gửi email xác minh
+
+## CORS API (Cross-Origin Resource Sharing)
+- Để cho phép frontend truy cập API từ domain khác (SPA hoặc web khác port) sử dụng cookie/token:
+    - Đảm bảo có file config/cors.php (artisan config:publish cors)
+    - Sửa 'allowed_origins' thành:
+      'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000')],
+    - Sửa 'supports_credentials' thành:
+      'supports_credentials' => true,
+    - Clear lại config cache: php artisan config:cache
+    - Thiết lập FRONTEND_URL đúng domain frontend (ví dụ: http://localhost:3000)
+- Nếu cần cho phép nhiều domain, truyền mảng hoặc parse từ env.
+- Tất cả request sẽ nhận header CORS hợp lệ, cho phép credential (cookie, authorization).
