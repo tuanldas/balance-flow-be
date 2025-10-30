@@ -11,6 +11,8 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -45,5 +47,13 @@ class AppServiceProvider extends ServiceProvider
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));
         Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+
+        // Tuỳ biến URL đặt lại mật khẩu cho môi trường API-first
+        ResetPassword::createUrlUsing(function ($notifiable, string $token): string {
+            $frontend = rtrim((string) config('app.frontend_url'), '/');
+            $email = urlencode((string) ($notifiable->email ?? ''));
+
+            return $frontend . '/reset-password?token=' . $token . '&email=' . $email;
+        });
     }
 }

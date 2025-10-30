@@ -25,6 +25,10 @@ return [
         'refresh_failed' => 'Failed to refresh token',
         'change_password_success' => 'Password changed successfully',
         'incorrect_current_password' => 'Current password is incorrect',
+        'forgot_send_success' => 'Password reset email sent',
+        'forgot_send_failed' => 'Failed to send password reset email',
+        'reset_success' => 'Password has been reset successfully',
+        'reset_failed' => 'Password reset failed or token is invalid',
     ],
 
     // General messages

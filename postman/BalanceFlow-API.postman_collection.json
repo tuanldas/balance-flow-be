@@ -180,6 +180,46 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "forgot-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tuanldas@gmail.com\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reset-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tuanldas@gmail.com\",\n  \"token\": \"{{reset_token}}\",\n  \"password\": \"NewPass123\",\n  \"password_confirmation\": \"NewPass123\"\n}"
+            }
+          },
+          "response": []
         }
       ]
     }
@@ -188,6 +228,7 @@
     { "key": "baseUrl", "value": "http://localhost:8083" },
     { "key": "access_token", "value": "" },
     { "key": "refresh_token", "value": "" },
-    { "key": "timestamp", "value": "{{$timestamp}}" }
+    { "key": "timestamp", "value": "{{$timestamp}}" },
+    { "key": "reset_token", "value": "" }
   ]
 }

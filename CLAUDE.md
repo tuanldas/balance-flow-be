@@ -422,3 +422,26 @@ public function register(): void
 - **Reusability** - Services can be reused across controllers
 - **SOLID Compliance** - Follows dependency inversion principle
 </laravel-boost-guidelines>
+
+## API Notes (Reset Password)
+
+- Endpoints
+  - POST `/api/forgot-password` → gửi email reset (dùng Password Broker)
+  - POST `/api/reset-password` → đặt lại mật khẩu bằng `token`, `email`, `password`, `password_confirmation`
+
+- Validation (đồng nhất giữa các API)
+  - Mật khẩu: `required|string|min:6|confirmed`
+
+- Cấu hình URL email reset
+  - Sử dụng `ResetPassword::createUrlUsing` trong `App\Providers\AppServiceProvider`
+  - Link email: `${config('app.frontend_url')}/reset-password?token=...&email=...`
+  - Thêm `config('app.frontend_url')` (env: `FRONTEND_URL` – fallback `APP_URL`)
+
+- Lưu ý triển khai
+  - Cần bảng `password_reset_tokens` (đã có sẵn trong schema)
+  - Cấu hình Mail (.env) để gửi email
+  - Nếu dùng domain backend cho link, có thể thêm route web redirect sang frontend ở `routes/web.php`
+
+- Postman
+  - Đã thêm requests: Forgot Password, Reset Password
+  - Biến `reset_token` trong Collection Variables để test nhanh

@@ -38,4 +38,14 @@ interface AuthServiceInterface
      * Đổi mật khẩu người dùng
      */
     public function changePassword(User $user, string $currentPassword, string $newPassword): bool;
+
+    /**
+     * Gửi email chứa liên kết đặt lại mật khẩu
+     */
+    public function sendPasswordResetLink(string $email): bool;
+
+    /**
+     * Đặt lại mật khẩu bằng token hợp lệ
+     */
+    public function resetPassword(string $email, string $token, string $newPassword): bool;
 }

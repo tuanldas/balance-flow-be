@@ -1,0 +1,35 @@
+# Reset Password Guide
+
+## Endpoints
+- POST `/api/forgot-password`
+  - Body: `{ "email": "user@example.com" }`
+  - Response: thành công sẽ gửi email chứa link reset.
+
+- POST `/api/reset-password`
+  - Body: `{ "email": "user@example.com", "token": "<token>", "password": "NewPass123", "password_confirmation": "NewPass123" }`
+
+## Validation
+- `password`: `required|string|min:6|confirmed` (đồng nhất với register/change-password)
+
+## Email Reset URL
+- Được tuỳ biến trong `App\Providers\AppServiceProvider` qua `ResetPassword::createUrlUsing`.
+- Link: `${config('app.frontend_url')}/reset-password?token=<token>&email=<email>`
+
+## Configuration
+- `config/app.php`: thêm `frontend_url` lấy từ env `FRONTEND_URL` (fallback `APP_URL`).
+- Thiết lập `.env`:
+  - `FRONTEND_URL=http://localhost:3000` (ví dụ)
+  - Mail SMTP (Mailtrap/Gmail/SES...) để gửi email.
+
+## Database
+- Yêu cầu bảng `password_reset_tokens` (đã có trong schema Postgres của dự án).
+
+## Postman
+- Collection `postman/BalanceFlow-API.postman_collection.json` đã có:
+  - Forgot Password
+  - Reset Password
+- Biến `reset_token` để thử nhanh.
+
+## Troubleshooting
+- 404 khi mở link reset: set đúng `FRONTEND_URL` hoặc thêm route `GET /reset-password` ở backend để redirect sang frontend.
+- Lỗi route `password.reset` không tồn tại: đã xử lý bằng `createUrlUsing`, chỉ cần clear cache nếu cần.
