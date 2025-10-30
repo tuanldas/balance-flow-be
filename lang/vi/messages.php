@@ -29,6 +29,10 @@ return [
         'refresh_failed' => 'Làm mới token thất bại',
         'change_password_success' => 'Đổi mật khẩu thành công',
         'incorrect_current_password' => 'Mật khẩu hiện tại không đúng',
+        'forgot_send_success' => 'Đã gửi email đặt lại mật khẩu',
+        'forgot_send_failed' => 'Gửi email đặt lại mật khẩu thất bại',
+        'reset_success' => 'Đặt lại mật khẩu thành công',
+        'reset_failed' => 'Đặt lại mật khẩu thất bại hoặc token không hợp lệ',
     ],
 
     // General messages

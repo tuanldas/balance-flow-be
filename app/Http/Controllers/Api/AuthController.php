@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\ChangePasswordRequest;
+use App\Http\Requests\Api\ForgotPasswordRequest;
+use App\Http\Requests\Api\ResetPasswordRequest;
 use App\Services\Contracts\AuthServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -138,6 +140,50 @@ final class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('messages.auth.change_password_success'),
+        ]);
+    }
+
+    /**
+     * Gửi email chứa liên kết đặt lại mật khẩu
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        $ok = $this->authService->sendPasswordResetLink($request->input('email'));
+
+        if (!$ok) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.auth.forgot_send_failed'),
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.auth.forgot_send_success'),
+        ]);
+    }
+
+    /**
+     * Đặt lại mật khẩu bằng token
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        $ok = $this->authService->resetPassword(
+            email: $request->input('email'),
+            token: $request->input('token'),
+            newPassword: $request->input('password')
+        );
+
+        if (!$ok) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.auth.reset_failed'),
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.auth.reset_success'),
         ]);
     }
 }

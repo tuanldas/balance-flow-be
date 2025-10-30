@@ -9,6 +9,7 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Models\User;
 use App\Services\Contracts\AuthServiceInterface;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 
 final readonly class AuthService implements AuthServiceInterface
 {
@@ -111,5 +112,45 @@ final readonly class AuthService implements AuthServiceInterface
         }
 
         return true;
+    }
+
+    /**
+     * Gửi email chứa liên kết đặt lại mật khẩu
+     */
+    public function sendPasswordResetLink(string $email): bool
+    {
+        // Laravel sẽ xử lý tạo token và gửi email theo cấu hình mail
+        $status = Password::sendResetLink([
+            'email' => $email,
+        ]);
+
+        return $status === Password::RESET_LINK_SENT;
+    }
+
+    /**
+     * Đặt lại mật khẩu bằng token hợp lệ
+     */
+    public function resetPassword(string $email, string $token, string $newPassword): bool
+    {
+        $status = Password::reset(
+            [
+                'email' => $email,
+                'token' => $token,
+                'password' => $newPassword,
+                'password_confirmation' => $newPassword,
+            ],
+            function (User $user) use ($newPassword): void {
+                $this->userRepository->update($user, [
+                    'password' => Hash::make($newPassword),
+                ]);
+
+                // Revoke toàn bộ token sau khi reset để đảm bảo an toàn
+                if (method_exists($user, 'tokens')) {
+                    $user->tokens()->update(['revoked' => true]);
+                }
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET;
     }
 }
