@@ -27,6 +27,8 @@ return [
         'refresh_token_expired' => 'Refresh token đã hết hạn',
         'refresh_success' => 'Làm mới token thành công',
         'refresh_failed' => 'Làm mới token thất bại',
+        'change_password_success' => 'Đổi mật khẩu thành công',
+        'incorrect_current_password' => 'Mật khẩu hiện tại không đúng',
     ],
 
     // General messages

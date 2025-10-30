@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Adapters\Contracts\TokenAdapterInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Models\User;
+use App\Services\Contracts\AuthServiceInterface;
 use Illuminate\Support\Facades\Hash;
 
 final readonly class AuthService implements AuthServiceInterface
@@ -89,5 +90,26 @@ final readonly class AuthService implements AuthServiceInterface
     public function logout(User $user): void
     {
         $user->token()->revoke();
+    }
+
+    /**
+     * Đổi mật khẩu người dùng
+     */
+    public function changePassword(User $user, string $currentPassword, string $newPassword): bool
+    {
+        if (!Hash::check($currentPassword, (string) $user->getAuthPassword())) {
+            return false;
+        }
+
+        $this->userRepository->update($user, [
+            'password' => Hash::make($newPassword),
+        ]);
+
+        // Revoke toàn bộ token hiện có để đảm bảo an toàn
+        if (method_exists($user, 'tokens')) {
+            $user->tokens()->update(['revoked' => true]);
+        }
+
+        return true;
     }
 }

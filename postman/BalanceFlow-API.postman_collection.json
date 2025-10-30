@@ -47,7 +47,29 @@
               "raw": "{\n  \"email\": \"tuanldas@gmail.com\",\n  \"password\": \"123123\"\n}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  const access = (json && (json.data && (json.data.access_token || (json.data.token && json.data.token.access_token)))) || json.access_token;",
+                  "  const refresh = (json && (json.data && json.data.refresh_token)) || json.refresh_token;",
+                  "  if (access) { pm.collectionVariables.set('access_token', access); }",
+                  "  if (refresh) { pm.collectionVariables.set('refresh_token', refresh); }",
+                  "  pm.test('Saved tokens to collection variables', function () {",
+                  "    pm.expect(pm.collectionVariables.get('access_token')).to.exist;",
+                  "  });",
+                  "} catch (e) {",
+                  "  console.warn('Token save script error:', e);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Me",
@@ -61,59 +83,6 @@
               "raw": "{{baseUrl}}/api/me",
               "host": ["{{baseUrl}}"],
               "path": ["api", "me"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "OAuth2 Login",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/oauth/token",
-              "host": ["{{baseUrl}}"],
-              "path": ["oauth", "token"]
-            },
-            "body": {
-              "mode": "urlencoded",
-              "urlencoded": [
-                { "key": "grant_type", "value": "password" },
-                { "key": "client_id", "value": "{{client_id}}" },
-                { "key": "client_secret", "value": "{{client_secret}}" },
-                { "key": "username", "value": "tuanldas@gmail.com" },
-                { "key": "password", "value": "123123" },
-                { "key": "scope", "value": "*" }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "OAuth2 Refresh",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/oauth/token",
-              "host": ["{{baseUrl}}"],
-              "path": ["oauth", "token"]
-            },
-            "body": {
-              "mode": "urlencoded",
-              "urlencoded": [
-                { "key": "grant_type", "value": "refresh_token" },
-                { "key": "client_id", "value": "{{client_id}}" },
-                { "key": "client_secret", "value": "{{client_secret}}" },
-                { "key": "refresh_token", "value": "{{refresh_token}}" },
-                { "key": "scope", "value": "*" }
-              ]
             }
           },
           "response": []
@@ -136,7 +105,29 @@
               "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  const access = (json && (json.data && (json.data.access_token || (json.data.token && json.data.token.access_token)))) || json.access_token;",
+                  "  const refresh = (json && (json.data && json.data.refresh_token)) || json.refresh_token;",
+                  "  if (access) { pm.collectionVariables.set('access_token', access); }",
+                  "  if (refresh) { pm.collectionVariables.set('refresh_token', refresh); }",
+                  "  pm.test('Updated tokens from refresh', function () {",
+                  "    pm.expect(pm.collectionVariables.get('access_token')).to.exist;",
+                  "  });",
+                  "} catch (e) {",
+                  "  console.warn('Refresh token save script error:', e);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Logout",
@@ -152,6 +143,42 @@
               "path": ["api", "logout"]
             }
           },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('access_token');",
+                  "pm.collectionVariables.unset('refresh_token');",
+                  "pm.test('Cleared tokens after logout', function () {",
+                  "  pm.expect(pm.collectionVariables.get('access_token')).to.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "change-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"123123\",\n  \"new_password\": \"12312345\",\n  \"new_password_confirmation\": \"12312345\"\n}"
+            }
+          },
           "response": []
         }
       ]
@@ -161,8 +188,6 @@
     { "key": "baseUrl", "value": "http://localhost:8083" },
     { "key": "access_token", "value": "" },
     { "key": "refresh_token", "value": "" },
-    { "key": "client_id", "value": "019a2e13-c16a-73c1-aaed-5c0a74f4ff7a" },
-    { "key": "client_secret", "value": "FYmmvGE6ZOFXPE8uLXC5aEp4pOEzaQ947zlDOgBE" },
     { "key": "timestamp", "value": "{{$timestamp}}" }
   ]
 }

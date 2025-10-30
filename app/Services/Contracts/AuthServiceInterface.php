@@ -33,4 +33,9 @@ interface AuthServiceInterface
      * Đăng xuất user
      */
     public function logout(User $user): void;
+
+    /**
+     * Đổi mật khẩu người dùng
+     */
+    public function changePassword(User $user, string $currentPassword, string $newPassword): bool;
 }

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
+use App\Http\Requests\Api\ChangePasswordRequest;
 use App\Services\Contracts\AuthServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -113,6 +114,30 @@ final class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('messages.auth.logout_success'),
+        ]);
+    }
+
+    /**
+     * Đổi mật khẩu
+     */
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        $ok = $this->authService->changePassword(
+            user: $request->user(),
+            currentPassword: $request->input('current_password'),
+            newPassword: $request->input('new_password')
+        );
+
+        if (!$ok) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.auth.incorrect_current_password'),
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.auth.change_password_success'),
         ]);
     }
 }
