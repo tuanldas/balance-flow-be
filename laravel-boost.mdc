@@ -56,12 +56,6 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 
 
-## Verification Scripts
-
-- Do not create verification scripts or tinker when tests cover that functionality and prove it works. Unit and feature tests are more important.
-
-
-
 ## Application Structure & Architecture
 
 - Stick to existing directory structure - don't create new base folders without approval.
@@ -85,6 +79,26 @@ This application is a Laravel application and its main Laravel ecosystems packag
 ## Documentation Files
 
 - You must only create documentation files if explicitly requested by the user.
+
+
+
+## CORS API (Cross-Origin Resource Sharing)
+- Cho phép truy cập API từ các domain frontend khác (SPA, nhiều port/dev/prod...)
+    - Đảm bảo có file config/cors.php (artisan config:publish cors)
+    - Đặt 'allowed_origins':
+      'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000')],
+    - Đặt 'supports_credentials':
+      'supports_credentials' => true,
+    - Clear config cache: php artisan config:cache
+    - Env: FRONTEND_URL=domain frontend cần truy cập
+- Nếu cần đồng thời nhiều domain, sửa thành mảng hoặc custom env parse.
+- Mọi request từ các origin hợp lệ sẽ được trả header CORS đúng, cho phép credentials.
+
+
+
+## Verification Scripts
+
+- Do not create verification scripts or tinker when tests cover that functionality and prove it works. Unit and feature tests are more important.
 
 
 
