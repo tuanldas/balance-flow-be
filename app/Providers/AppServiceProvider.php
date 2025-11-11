@@ -14,6 +14,7 @@ use App\Services\AuthService;
 use App\Services\EmailVerificationService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
 
@@ -62,6 +63,15 @@ class AppServiceProvider extends ServiceProvider
             $email = urlencode((string) ($notifiable->email ?? ''));
 
             return $frontend . '/reset-password?token=' . $token . '&email=' . $email;
+        });
+
+        // Tuỳ biến URL xác minh email: chuyển về FE với path /verify-email?id=<id>&hash=<hash>
+        VerifyEmail::createUrlUsing(function ($notifiable): string {
+            $frontend = rtrim((string) config('app.frontend_url'), '/');
+            $id = (string) $notifiable->getKey();
+            $hash = sha1($notifiable->getEmailForVerification());
+
+            return $frontend . '/verify-email?id=' . urlencode($id) . '&hash=' . $hash;
         });
     }
 }

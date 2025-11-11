@@ -25,7 +25,6 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // Email verification public verify endpoint (đường dẫn đã ký)
 Route::get('/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-    ->middleware(['signed'])
     ->name('verification.verify');
 
 // Protected routes (cần authentication)
