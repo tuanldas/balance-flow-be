@@ -1,3 +1,199 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+<project-specific-rules>
+=== project context ===
+
+## Project Overview
+Balance Flow Backend is a Laravel 12 backend API built with a Docker-first approach. This is a **Vietnamese-developed project** with specific language requirements for documentation and commits.
+
+## Critical Language Requirements
+- **Commit messages**: MUST be written in Vietnamese
+- **Code comments**: MUST be written in Vietnamese (including PHPDoc descriptions, but type hints remain standard)
+- **API documentation**: Vietnamese preferred
+- **Never** write commit messages or comments in English unless explicitly requested
+
+## Technology Stack
+- **Backend**: Laravel 12.0, PHP 8.4
+- **Database**: PostgreSQL 17
+- **Cache**: Redis 7
+- **Frontend**: Alpine.js 3.13, Tailwind CSS 3.3, Metronic UI
+- **Bundler**: Vite 5.0
+- **Testing**: PHPUnit 11.5
+
+## Docker-First Development
+This project uses Docker Compose V2 exclusively. **Never run commands directly on the host system.**
+
+### Running Commands
+```bash
+# Execute ALL commands through Docker
+docker compose exec app <command>
+
+# Examples:
+docker compose exec app php artisan migrate
+docker compose exec app composer install
+docker compose exec app npm run build
+docker compose exec app vendor/bin/pint
+```
+
+### Important Docker Workflow
+- Always use `docker compose` (V2 syntax), not `docker-compose`
+- Before running `docker compose up -d`, first run `docker compose down` to ensure clean state
+- The app service has full bind-mount for live code synchronization
+
+## Essential Commands
+
+### Development
+```bash
+# Full project setup (first time)
+docker compose exec app composer setup
+
+# Start development servers (Artisan serve, queue, Vite)
+docker compose exec app composer dev
+
+# Run Vite dev server for hot reload
+docker compose exec app npm run dev
+
+# Build frontend assets for production
+docker compose exec app npm run build
+```
+
+### Testing
+```bash
+# Run all tests
+docker compose exec app composer test
+
+# Run specific test file
+docker compose exec app php artisan test tests/Feature/ExampleTest.php
+
+# Run specific test by name filter
+docker compose exec app php artisan test --filter=testName
+```
+
+### Code Quality
+```bash
+# Format code with Laravel Pint (REQUIRED before commits)
+docker compose exec app vendor/bin/pint
+
+# Run Pint on only changed files
+docker compose exec app vendor/bin/pint --dirty
+```
+
+=== architectural rules ===
+
+## Mandatory Architectural Patterns
+
+### Repository and Service Pattern
+This project **requires** the Repository and Service pattern for all business logic:
+
+```
+app/
+├── Repositories/          # Data access layer
+│   └── UserRepository.php
+├── Services/              # Business logic layer
+│   └── UserService.php
+└── Http/Controllers/      # Presentation layer
+    └── UserController.php
+```
+
+### Controller Design
+- Controllers MUST be `final` classes
+- Controllers MUST be read-only (no property mutations)
+- Keep controllers thin - delegate to services
+- Use method injection for dependencies
+
+```php
+final class UserController extends Controller
+{
+    public function index(UserService $userService): JsonResponse
+    {
+        // Delegate to service
+    }
+}
+```
+
+### Model Design
+- Models MUST be `final` classes
+- Use `casts()` method instead of `$casts` property
+- Always define explicit relationships with return type hints
+
+```php
+final class User extends Model
+{
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+        ];
+    }
+}
+```
+
+### Service Classes
+- Services MUST be `final` classes
+- Organize in `app/Services/` directory
+- Group by feature/domain (e.g., `UserService`, `OrderService`)
+
+## API Requirements
+
+### UUID v7 Identifiers
+- **Always** use UUID v7 for all new entity identifiers
+- Never use auto-incrementing integers for new models
+
+### Pagination
+- **All GET APIs MUST be paginated**
+- Use Laravel's built-in pagination
+- No exceptions for list endpoints
+
+### API Versioning
+- Use API versioning for all endpoints
+- Structure: `/api/v1/resource`
+- Use Eloquent API Resources for responses
+
+## Git Workflow
+
+### Gitflow Branching Strategy
+- Production: `main`
+- Development: `dev`
+- Feature branches: `feature/<tên-tính-năng>`
+- Bugfix branches: `bugfix/<tên-lỗi>`
+- Hotfix branches: `hotfix/<tên-lỗi-khẩn-cấp>`
+- Release branches: `release/v<version>`
+
+### Version Tagging
+- Follow semantic versioning: `v<MAJOR>.<MINOR>.<PATCH>`
+- Example: `v1.2.3`
+
+### Repository Rules
+- **Never commit the `.cursor` directory**
+- Always run Pint before committing
+- Follow `.editorconfig` and `contributing.md` guidelines
+
+## Routing
+- Create separate route files for each major feature
+- Example: `routes/user.php`, `routes/order.php`
+- Register in `bootstrap/app.php`
+- Use named routes consistently
+
+## Frontend Integration
+
+### Metronic UI Framework
+- This project uses Metronic UI components
+- Components use `kt-*` prefixed classes
+- Check `resources/js/app.js` and `resources/css/app.css` for utilities
+
+### Alpine.js
+- Use Alpine.js for client-side interactivity
+- Keep JavaScript minimal and component-based
+
+### Vite
+- Run `composer dev` or `npm run dev` for hot reload during development
+- Run `npm run build` before deploying
+- If frontend changes don't appear, ask user to restart Vite
+
+</project-specific-rules>
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
