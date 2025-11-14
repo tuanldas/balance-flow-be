@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmailVerificationController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,11 +16,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public routes (không cần authentication)
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/refresh', [AuthController::class, 'refresh']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('throttle:10,1');
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1');
+Route::post('/refresh', [AuthController::class, 'refresh'])
+    ->middleware('throttle:10,1');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
+    ->middleware('throttle:5,1');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+    ->middleware('throttle:5,1');
 
 // Email verification public verify endpoint (đường dẫn đã ký)
 Route::get('/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])

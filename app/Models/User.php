@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -11,10 +13,10 @@ use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 use Ramsey\Uuid\Uuid;
 
-class User extends Authenticatable implements OAuthenticatable, MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasUuids;
+    use HasApiTokens, HasFactory, HasUuids, Notifiable;
 
     /**
      * The attributes that are mass assignable.

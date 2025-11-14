@@ -24,8 +24,8 @@ final class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email:rfc,dns'],
-            'token' => ['required', 'string'],
+            'email' => ['required', 'string', 'email:rfc', 'max:255'],
+            'token' => ['required', 'string', 'max:500'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ];
     }
@@ -47,5 +47,3 @@ final class ResetPasswordRequest extends FormRequest
         ];
     }
 }
-
-

@@ -12,8 +12,7 @@ final readonly class EmailVerificationService implements EmailVerificationServic
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
-    ) {
-    }
+    ) {}
 
     public function sendVerification(User $user): void
     {
@@ -30,26 +29,27 @@ final readonly class EmailVerificationService implements EmailVerificationServic
     {
         $user = $this->userRepository->findById($userId);
 
-        if (!$user instanceof User) {
+        // User không tồn tại
+        if (! $user instanceof User) {
             return false;
         }
 
         // Kiểm tra hash theo chuẩn Laravel: sha1(email-for-verification)
         $expected = sha1($user->getEmailForVerification());
-        if (!hash_equals($expected, $hash)) {
+        if (! hash_equals($expected, $hash)) {
             return false;
         }
 
+        // Đã verify rồi thì trả về true
         if (method_exists($user, 'hasVerifiedEmail') && $user->hasVerifiedEmail()) {
             return true;
         }
 
+        // Thực hiện verify
         if (method_exists($user, 'markEmailAsVerified')) {
-            return $user->markEmailAsVerified();
+            return (bool) $user->markEmailAsVerified();
         }
 
         return false;
     }
 }
-
-

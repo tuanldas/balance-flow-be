@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\LoginRequest;
-use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\ChangePasswordRequest;
 use App\Http\Requests\Api\ForgotPasswordRequest;
+use App\Http\Requests\Api\LoginRequest;
+use App\Http\Requests\Api\RefreshTokenRequest;
+use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\ResetPasswordRequest;
 use App\Services\Contracts\AuthServiceInterface;
 use Illuminate\Http\JsonResponse;
@@ -18,8 +19,7 @@ final class AuthController extends Controller
 {
     public function __construct(
         private readonly AuthServiceInterface $authService,
-    ) {
-    }
+    ) {}
 
     /**
      * Đăng ký tài khoản mới
@@ -49,7 +49,7 @@ final class AuthController extends Controller
             password: $request->password
         );
 
-        if (!$result) {
+        if (! $result) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.auth.login_failed'),
@@ -86,20 +86,11 @@ final class AuthController extends Controller
     /**
      * Refresh token sử dụng Passport
      */
-    public function refresh(Request $request): JsonResponse
+    public function refresh(RefreshTokenRequest $request): JsonResponse
     {
-        $refreshToken = $request->input('refresh_token');
+        $result = $this->authService->refreshToken($request->input('refresh_token'));
 
-        if (!$refreshToken) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.auth.refresh_token_required'),
-            ], 400);
-        }
-
-        $result = $this->authService->refreshToken($refreshToken);
-
-        if (!$result) {
+        if (! $result) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.auth.refresh_failed'),
@@ -137,7 +128,7 @@ final class AuthController extends Controller
             newPassword: $request->input('new_password')
         );
 
-        if (!$ok) {
+        if (! $ok) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.auth.incorrect_current_password'),
@@ -157,7 +148,7 @@ final class AuthController extends Controller
     {
         $ok = $this->authService->sendPasswordResetLink($request->input('email'));
 
-        if (!$ok) {
+        if (! $ok) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.auth.forgot_send_failed'),
@@ -181,7 +172,7 @@ final class AuthController extends Controller
             newPassword: $request->input('password')
         );
 
-        if (!$ok) {
+        if (! $ok) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.auth.reset_failed'),
