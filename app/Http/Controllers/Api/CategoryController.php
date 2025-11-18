@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace App\Http\Controllers\Api;
 
@@ -27,6 +27,7 @@ final class CategoryController extends Controller
     public function index(Request $request): JsonResponse
     {
         $type = $request->query('type'); // 'income' hoặc 'expense' hoặc null (all)
+        $perPage = $request->query('per_page', 15); // Số items mỗi trang, mặc định 15
 
         if ($type !== null && ! in_array($type, ['income', 'expense'])) {
             return response()->json([
@@ -35,15 +36,32 @@ final class CategoryController extends Controller
             ], 422);
         }
 
+        // Validate per_page parameter
+        if (! is_numeric($perPage) || (int) $perPage < 1 || (int) $perPage > 100) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.pagination.invalid_per_page'),
+            ], 422);
+        }
+
         $categories = $this->categoryService->getAllAccessibleCategories(
             $request->user()->id,
-            $type
+            $type,
+            (int) $perPage
         );
 
         return response()->json([
             'success' => true,
             'data' => [
-                'categories' => CategoryResource::collection($categories),
+                'categories' => CategoryResource::collection($categories->items()),
+                'pagination' => [
+                    'total' => $categories->total(),
+                    'per_page' => $categories->perPage(),
+                    'current_page' => $categories->currentPage(),
+                    'last_page' => $categories->lastPage(),
+                    'from' => $categories->firstItem(),
+                    'to' => $categories->lastItem(),
+                ],
             ],
         ]);
     }

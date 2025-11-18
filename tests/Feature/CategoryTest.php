@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace Tests\Feature;
 
@@ -75,9 +75,19 @@ class CategoryTest extends TestCase
                             'updated_at',
                         ],
                     ],
+                    'pagination' => [
+                        'total',
+                        'per_page',
+                        'current_page',
+                        'last_page',
+                        'from',
+                        'to',
+                    ],
                 ],
             ])
-            ->assertJsonCount(2, 'data.categories');
+            ->assertJsonCount(2, 'data.categories')
+            ->assertJsonPath('data.pagination.total', 2)
+            ->assertJsonPath('data.pagination.current_page', 1);
     }
 
     /**
@@ -557,5 +567,114 @@ class CategoryTest extends TestCase
             'id' => $transaction->id,
             'category_id' => $systemCategory->id,
         ]);
+    }
+
+    /**
+     * Test: User can paginate categories
+     */
+    public function test_user_can_paginate_categories(): void
+    {
+        Passport::actingAs($this->user);
+
+        // Create 25 categories
+        Category::factory()->count(25)->create(['user_id' => $this->user->id]);
+
+        // Test page 1 with default per_page (15)
+        $response = $this->getJson('/api/categories');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.pagination.total', 25)
+            ->assertJsonPath('data.pagination.per_page', 15)
+            ->assertJsonPath('data.pagination.current_page', 1)
+            ->assertJsonPath('data.pagination.last_page', 2)
+            ->assertJsonCount(15, 'data.categories');
+
+        // Test page 2
+        $response = $this->getJson('/api/categories?page=2');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.pagination.current_page', 2)
+            ->assertJsonCount(10, 'data.categories');
+    }
+
+    /**
+     * Test: User can specify custom per_page value
+     */
+    public function test_user_can_specify_custom_per_page(): void
+    {
+        Passport::actingAs($this->user);
+
+        // Create 30 categories
+        Category::factory()->count(30)->create(['user_id' => $this->user->id]);
+
+        // Test with per_page=10
+        $response = $this->getJson('/api/categories?per_page=10');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.pagination.per_page', 10)
+            ->assertJsonPath('data.pagination.total', 30)
+            ->assertJsonPath('data.pagination.last_page', 3)
+            ->assertJsonCount(10, 'data.categories');
+
+        // Test with per_page=25
+        $response = $this->getJson('/api/categories?per_page=25');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.pagination.per_page', 25)
+            ->assertJsonCount(25, 'data.categories');
+    }
+
+    /**
+     * Test: Invalid per_page values return validation error
+     */
+    public function test_invalid_per_page_returns_error(): void
+    {
+        Passport::actingAs($this->user);
+
+        // Test per_page = 0
+        $response = $this->getJson('/api/categories?per_page=0');
+
+        $response->assertStatus(422)
+            ->assertJsonPath('success', false);
+
+        // Test per_page > 100
+        $response = $this->getJson('/api/categories?per_page=101');
+
+        $response->assertStatus(422)
+            ->assertJsonPath('success', false);
+
+        // Test per_page with non-numeric value
+        $response = $this->getJson('/api/categories?per_page=abc');
+
+        $response->assertStatus(422)
+            ->assertJsonPath('success', false);
+    }
+
+    /**
+     * Test: Pagination works with type filter
+     */
+    public function test_pagination_works_with_type_filter(): void
+    {
+        Passport::actingAs($this->user);
+
+        // Create 20 income categories and 15 expense categories
+        Category::factory()->count(20)->income()->create(['user_id' => $this->user->id]);
+        Category::factory()->count(15)->expense()->create(['user_id' => $this->user->id]);
+
+        // Test filtering income with pagination
+        $response = $this->getJson('/api/categories?type=income&per_page=10');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.pagination.total', 20)
+            ->assertJsonPath('data.pagination.per_page', 10)
+            ->assertJsonCount(10, 'data.categories');
+
+        // Test filtering expense with pagination
+        $response = $this->getJson('/api/categories?type=expense&per_page=10');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.pagination.total', 15)
+            ->assertJsonPath('data.pagination.per_page', 10)
+            ->assertJsonCount(10, 'data.categories');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace App\Services;
 
@@ -9,6 +9,7 @@ use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
 use App\Services\Contracts\CategoryServiceInterface;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -22,13 +23,21 @@ final readonly class CategoryService implements CategoryServiceInterface
     ) {}
 
     /**
-     * Lấy tất cả categories có thể truy cập bởi user (system + user's own)
+     * Lấy tất cả categories có thể truy cập bởi user (system + user's own) với phân trang
+     */
+    public function getAllAccessibleCategories(string $userId, ?string $type = null, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->categoryRepository->getAccessibleByUser($userId, $type, $perPage);
+    }
+
+    /**
+     * Lấy tất cả categories có thể truy cập bởi user (system + user's own) không phân trang
      *
      * @return Collection<int, Category>
      */
-    public function getAllAccessibleCategories(string $userId, ?string $type = null): Collection
+    public function getAllAccessibleCategoriesWithoutPagination(string $userId, ?string $type = null): Collection
     {
-        return $this->categoryRepository->getAccessibleByUser($userId, $type);
+        return $this->categoryRepository->getAllAccessibleByUser($userId, $type);
     }
 
     /**

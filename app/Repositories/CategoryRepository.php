@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace App\Repositories;
 
 use App\Models\Category;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 final readonly class CategoryRepository implements CategoryRepositoryInterface
@@ -29,11 +30,27 @@ final readonly class CategoryRepository implements CategoryRepositoryInterface
     }
 
     /**
-     * Lấy tất cả categories có thể truy cập bởi user (system + user's own)
+     * Lấy tất cả categories có thể truy cập bởi user (system + user's own) với phân trang
+     */
+    public function getAccessibleByUser(string $userId, ?string $type = null, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = Category::accessibleByUser($userId);
+
+        if ($type !== null) {
+            $query->ofType($type);
+        }
+
+        return $query->orderBy('is_system', 'desc')
+            ->orderBy('name')
+            ->paginate($perPage);
+    }
+
+    /**
+     * Lấy tất cả categories có thể truy cập bởi user (system + user's own) không phân trang
      *
      * @return Collection<int, Category>
      */
-    public function getAccessibleByUser(string $userId, ?string $type = null): Collection
+    public function getAllAccessibleByUser(string $userId, ?string $type = null): Collection
     {
         $query = Category::accessibleByUser($userId);
 

@@ -48,6 +48,11 @@ return [
     'server_error' => 'Lỗi máy chủ',
     'bad_request' => 'Yêu cầu không hợp lệ',
 
+    // Pagination messages
+    'pagination' => [
+        'invalid_per_page' => 'Số items mỗi trang phải từ 1 đến 100',
+    ],
+
     // User messages
     'user' => [
         'created' => 'Người dùng đã được tạo',

@@ -44,6 +44,11 @@ return [
     'server_error' => 'Server error',
     'bad_request' => 'Bad request',
 
+    // Pagination messages
+    'pagination' => [
+        'invalid_per_page' => 'Items per page must be between 1 and 100',
+    ],
+
     // User messages
     'user' => [
         'created' => 'User has been created',

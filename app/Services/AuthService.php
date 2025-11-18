@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace App\Services;
 
 use App\Adapters\Contracts\TokenAdapterInterface;
-use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\Contracts\AuthServiceInterface;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;

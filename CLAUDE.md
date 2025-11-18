@@ -208,13 +208,38 @@ The application implements a **dual category system** for flexible financial cat
 
 #### API Endpoints
 ```
-GET    /api/categories                           # List accessible categories
-GET    /api/categories?type=income               # Filter by type
+GET    /api/categories                           # List accessible categories (paginated)
+GET    /api/categories?type=income               # Filter by type (paginated)
+GET    /api/categories?per_page=20               # Custom items per page (1-100)
+GET    /api/categories?page=2                    # Get specific page
 POST   /api/categories                           # Create user category
 GET    /api/categories/{id}                      # Get category details
 PUT    /api/categories/{id}                      # Update user category
 DELETE /api/categories/{id}                      # Delete category
 GET    /api/categories/{id}/transactions-count   # Count transactions
+```
+
+**Pagination Parameters:**
+- `per_page`: Number of items per page (default: 15, max: 100)
+- `page`: Page number (default: 1)
+- Pagination works with all filters (type, etc.)
+
+**Pagination Response Format:**
+```json
+{
+  "success": true,
+  "data": {
+    "categories": [...],
+    "pagination": {
+      "total": 50,
+      "per_page": 15,
+      "current_page": 1,
+      "last_page": 4,
+      "from": 1,
+      "to": 15
+    }
+  }
+}
 ```
 
 #### Default System Categories
@@ -250,6 +275,69 @@ The API supports Vietnamese (vi) and English (en) via the `SetLocale` middleware
 - **Translation Files**: `lang/en/messages.php` and `lang/vi/messages.php`
 
 All API responses use `__('messages.auth.key')` for localized messages.
+
+### API Pagination
+
+**All list/retrieval endpoints MUST be paginated** to ensure good performance and scalability.
+
+**Standard Implementation Pattern:**
+
+1. **Repository Layer** - Add pagination support:
+   ```php
+   public function getAll(int $perPage = 15): LengthAwarePaginator
+   {
+       return Model::query()
+           ->orderBy('created_at', 'desc')
+           ->paginate($perPage);
+   }
+   ```
+
+2. **Service Layer** - Pass through pagination parameter:
+   ```php
+   public function getAll(int $perPage = 15): LengthAwarePaginator
+   {
+       return $this->repository->getAll($perPage);
+   }
+   ```
+
+3. **Controller Layer** - Validate and handle pagination:
+   ```php
+   public function index(Request $request): JsonResponse
+   {
+       $perPage = $request->query('per_page', 15);
+
+       // Validate per_page (1-100)
+       if (!is_numeric($perPage) || (int)$perPage < 1 || (int)$perPage > 100) {
+           return response()->json([
+               'success' => false,
+               'message' => __('messages.pagination.invalid_per_page'),
+           ], 422);
+       }
+
+       $data = $this->service->getAll((int)$perPage);
+
+       return response()->json([
+           'success' => true,
+           'data' => [
+               'items' => ResourceClass::collection($data->items()),
+               'pagination' => [
+                   'total' => $data->total(),
+                   'per_page' => $data->perPage(),
+                   'current_page' => $data->currentPage(),
+                   'last_page' => $data->lastPage(),
+                   'from' => $data->firstItem(),
+                   'to' => $data->lastItem(),
+               ],
+           ],
+       ]);
+   }
+   ```
+
+**Pagination Rules:**
+- Default: 15 items per page
+- Maximum: 100 items per page
+- Query parameters: `?page=2&per_page=20`
+- Validation error for invalid `per_page` values
 
 ## Configuration Notes
 
@@ -295,7 +383,7 @@ Configured in `config/cors.php` to allow credentials from frontend domain.
 ```
 tests/
 ├── Feature/              # Integration tests
-│   ├── CategoryTest.php  # 22 category endpoint tests
+│   ├── CategoryTest.php  # 26 category endpoint tests (includes pagination)
 │   └── ...
 ├── Unit/                 # Unit tests
 │   └── ...
@@ -373,7 +461,6 @@ public function test_user_can_create_category(): void
 ## Code Style
 
 ### PHP Standards
-- **Strict Types**: All PHP files must start with `declare(strict_types=1);`
 - **Type Hints**: Explicit return types required on all methods and properties
 - **Constructor Promotion**: Use PHP 8+ constructor property promotion where possible
 - **Formatting**: Run `vendor/bin/pint --dirty` before committing
@@ -723,7 +810,8 @@ curl -s -X POST http://localhost:8083/api/categories \
 - **Health Check**: Built-in Laravel health endpoint at `/up`
 - **Rate Limiting**: Email verification resend throttled to 6 requests per minute
 - **UUID v7**: All primary keys use UUID v7 for better performance
-- **Test Coverage**: 22 tests for category endpoints, all passing
+- **Pagination**: All list endpoints are paginated (default: 15 items/page, max: 100)
+- **Test Coverage**: 26 tests for category endpoints (includes pagination tests), all passing
 - **Code Formatting**: Always run `vendor/bin/pint --dirty` before committing
 
 ## Development Workflow

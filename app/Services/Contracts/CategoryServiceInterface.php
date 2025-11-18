@@ -1,20 +1,26 @@
 <?php
 
-declare(strict_types=1);
+
 
 namespace App\Services\Contracts;
 
 use App\Models\Category;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 interface CategoryServiceInterface
 {
     /**
-     * Lấy tất cả categories có thể truy cập bởi user (system + user's own)
+     * Lấy tất cả categories có thể truy cập bởi user (system + user's own) với phân trang
+     */
+    public function getAllAccessibleCategories(string $userId, ?string $type = null, int $perPage = 15): LengthAwarePaginator;
+
+    /**
+     * Lấy tất cả categories có thể truy cập bởi user (system + user's own) không phân trang
      *
      * @return Collection<int, Category>
      */
-    public function getAllAccessibleCategories(string $userId, ?string $type = null): Collection;
+    public function getAllAccessibleCategoriesWithoutPagination(string $userId, ?string $type = null): Collection;
 
     /**
      * Tạo category mới cho user

@@ -22,7 +22,6 @@ Dependencies
 PHP and Laravel Standards
 - Leverage PHP 8.4+ features when appropriate (e.g., typed properties, match expressions).
 - Adhere to PSR-12 coding standards for consistent code style.
-- Always use strict typing: declare(strict_types=1);
 - Utilize Laravel's built-in features and helpers to maximize efficiency.
 - Follow Laravel's directory structure and file naming conventions.
 - Implement robust error handling and logging:
