@@ -3,7 +3,7 @@
     "_postman_id": "7a6b3c3e-1c2f-4a9a-9f6b-uuid7-demo",
     "name": "BalanceFlow API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Collection các API cho xác thực sử dụng Laravel Passport"
+    "description": "BalanceFlow API Collection - Personal Finance Management\n\n**Features:**\n- ✅ Laravel Passport OAuth2 Authentication\n- ✅ Category Management (System + User Categories)\n- ✅ Multi-language Support (Vietnamese/English)\n- ✅ Auto-save tokens to variables\n\n**Quick Start:**\n1. Run 'Login' to get access token\n2. Explore 'Categories' folder for CRUD operations\n3. Check QUICKSTART.md for 5-minute guide\n\n**Endpoints:**\n- Auth: Register, Login, Logout, Password Reset, Email Verification\n- Categories: List, Create, Update, Delete, Transaction Count\n\n**Variables:**\n- access_token: Auto-saved from Login\n- category_id: Auto-saved from Create Category\n\nSee README.md for detailed documentation."
   },
   "item": [
     {
@@ -254,6 +254,198 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"],
+              "query": []
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Categories (Filter by Income)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?type=income",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"],
+              "query": [
+                { "key": "type", "value": "income" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Categories (Filter by Expense)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?type=expense",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"],
+              "query": [
+                { "key": "type", "value": "expense" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Coffee & Breakfast\",\n  \"type\": \"expense\",\n  \"icon_svg\": \"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"25\\\" height=\\\"25\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"2\\\"><circle cx=\\\"12\\\" cy=\\\"12\\\" r=\\\"10\\\"/><path d=\\\"M12 6v6l4 2\\\"/></svg>\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.category && json.data.category.id) {",
+                  "    pm.collectionVariables.set('category_id', json.data.category.id);",
+                  "    pm.test('Saved category_id to collection variables', function () {",
+                  "      pm.expect(pm.collectionVariables.get('category_id')).to.exist;",
+                  "    });",
+                  "  }",
+                  "} catch (e) {",
+                  "  console.warn('Category ID save script error:', e);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{category_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{category_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{category_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{category_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Morning Coffee Updated\",\n  \"type\": \"expense\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transaction Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{category_id}}/transactions-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{category_id}}", "transactions-count"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category (No Transactions)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{category_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{category_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category (With Transaction Transfer)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{category_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{category_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transfer_to_category_id\": \"{{transfer_category_id}}\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -263,6 +455,8 @@
     { "key": "timestamp", "value": "{{$timestamp}}" },
     { "key": "reset_token", "value": "" },
     { "key": "verification_id", "value": "" },
-    { "key": "verification_hash", "value": "" }
+    { "key": "verification_hash", "value": "" },
+    { "key": "category_id", "value": "" },
+    { "key": "transfer_category_id", "value": "" }
   ]
 }

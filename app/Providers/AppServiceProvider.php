@@ -6,16 +6,21 @@ namespace App\Providers;
 
 use App\Adapters\Contracts\TokenAdapterInterface;
 use App\Adapters\PassportTokenAdapter;
-use App\Services\Contracts\AuthServiceInterface;
-use App\Services\Contracts\EmailVerificationServiceInterface;
+use App\Repositories\CategoryRepository;
+use App\Repositories\Contracts\CategoryRepositoryInterface;
+use App\Repositories\Contracts\TransactionRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\TransactionRepository;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
+use App\Services\CategoryService;
+use App\Services\Contracts\AuthServiceInterface;
+use App\Services\Contracts\CategoryServiceInterface;
+use App\Services\Contracts\EmailVerificationServiceInterface;
 use App\Services\EmailVerificationService;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
-use Illuminate\Support\Str;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Đăng ký repositories
         $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->singleton(CategoryRepositoryInterface::class, CategoryRepository::class);
+        $this->app->singleton(TransactionRepositoryInterface::class, TransactionRepository::class);
 
         // Đăng ký adapters
         $this->app->singleton(TokenAdapterInterface::class, PassportTokenAdapter::class);
@@ -42,6 +49,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(EmailVerificationServiceInterface::class, function ($app) {
             return new EmailVerificationService(
                 $app->make(UserRepositoryInterface::class),
+            );
+        });
+
+        $this->app->singleton(CategoryServiceInterface::class, function ($app) {
+            return new CategoryService(
+                $app->make(CategoryRepositoryInterface::class),
+                $app->make(TransactionRepositoryInterface::class)
             );
         });
     }
@@ -62,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
             $frontend = rtrim((string) config('app.frontend_url'), '/');
             $email = urlencode((string) ($notifiable->email ?? ''));
 
-            return $frontend . '/reset-password?token=' . $token . '&email=' . $email;
+            return $frontend.'/reset-password?token='.$token.'&email='.$email;
         });
 
         // Tuỳ biến URL xác minh email: chuyển về FE với path /verify-email?id=<id>&hash=<hash>
@@ -71,7 +85,7 @@ class AppServiceProvider extends ServiceProvider
             $id = (string) $notifiable->getKey();
             $hash = sha1($notifiable->getEmailForVerification());
 
-            return $frontend . '/verify-email?id=' . urlencode($id) . '&hash=' . $hash;
+            return $frontend.'/verify-email?id='.urlencode($id).'&hash='.$hash;
         });
     }
 }

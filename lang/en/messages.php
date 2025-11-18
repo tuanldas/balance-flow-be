@@ -60,6 +60,52 @@ return [
         'rate_limited' => 'You have exceeded the request limit',
     ],
 
+    // Category messages
+    'category' => [
+        'created' => 'Category has been created',
+        'updated' => 'Category has been updated',
+        'deleted' => 'Category has been deleted',
+        'not_found' => 'Category not found',
+        'unauthorized' => 'You are not authorized to modify this category',
+        'has_transactions' => 'This category has :count transactions. Please transfer transactions to another category before deleting',
+        'transfer_target_not_found' => 'Target category for transaction transfer not found',
+        'transfer_target_unauthorized' => 'You are not authorized to transfer transactions to this category',
+        'transfer_type_mismatch' => 'Cannot transfer transactions to a category with a different type',
+        'validation' => [
+            'name_required' => 'Category name is required',
+            'name_string' => 'Category name must be a string',
+            'name_max' => 'Category name must not exceed 255 characters',
+            'type_required' => 'Category type is required',
+            'type_invalid' => 'Invalid category type. Only "income" or "expense" are accepted',
+            'icon_required' => 'Icon is required',
+            'icon_string' => 'Icon must be an SVG string',
+            'transfer_category_invalid' => 'Invalid target category ID',
+        ],
+    ],
+
+    // Category names (system categories)
+    'categories' => [
+        'income' => [
+            'salary' => 'Salary',
+            'bonus' => 'Bonus',
+            'investment' => 'Investment',
+            'freelance' => 'Freelance',
+            'gift' => 'Gift',
+            'other' => 'Other Income',
+        ],
+        'expense' => [
+            'food' => 'Food & Dining',
+            'transportation' => 'Transportation',
+            'housing' => 'Housing',
+            'utilities' => 'Utilities',
+            'healthcare' => 'Healthcare',
+            'entertainment' => 'Entertainment',
+            'shopping' => 'Shopping',
+            'education' => 'Education',
+            'insurance' => 'Insurance',
+            'savings' => 'Savings',
+            'other' => 'Other Expenses',
+        ],
+    ],
+
 ];
-
-

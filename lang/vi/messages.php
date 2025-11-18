@@ -64,4 +64,52 @@ return [
         'rate_limited' => 'Bạn đã vượt quá giới hạn yêu cầu',
     ],
 
+    // Category messages
+    'category' => [
+        'created' => 'Danh mục đã được tạo',
+        'updated' => 'Danh mục đã được cập nhật',
+        'deleted' => 'Danh mục đã được xóa',
+        'not_found' => 'Không tìm thấy danh mục',
+        'unauthorized' => 'Bạn không có quyền chỉnh sửa danh mục này',
+        'has_transactions' => 'Danh mục này có :count giao dịch. Vui lòng chuyển giao dịch sang danh mục khác trước khi xóa',
+        'transfer_target_not_found' => 'Không tìm thấy danh mục đích để chuyển giao dịch',
+        'transfer_target_unauthorized' => 'Bạn không có quyền chuyển giao dịch sang danh mục này',
+        'transfer_type_mismatch' => 'Không thể chuyển giao dịch sang danh mục có loại khác',
+        'validation' => [
+            'name_required' => 'Tên danh mục là bắt buộc',
+            'name_string' => 'Tên danh mục phải là chuỗi',
+            'name_max' => 'Tên danh mục không được vượt quá 255 ký tự',
+            'type_required' => 'Loại danh mục là bắt buộc',
+            'type_invalid' => 'Loại danh mục không hợp lệ. Chỉ chấp nhận "income" hoặc "expense"',
+            'icon_required' => 'Biểu tượng là bắt buộc',
+            'icon_string' => 'Biểu tượng phải là chuỗi SVG',
+            'transfer_category_invalid' => 'ID danh mục đích không hợp lệ',
+        ],
+    ],
+
+    // Category names (system categories)
+    'categories' => [
+        'income' => [
+            'salary' => 'Lương',
+            'bonus' => 'Thưởng',
+            'investment' => 'Đầu tư',
+            'freelance' => 'Làm tự do',
+            'gift' => 'Quà tặng',
+            'other' => 'Thu nhập khác',
+        ],
+        'expense' => [
+            'food' => 'Ăn uống',
+            'transportation' => 'Di chuyển',
+            'housing' => 'Nhà ở',
+            'utilities' => 'Tiện ích',
+            'healthcare' => 'Y tế',
+            'entertainment' => 'Giải trí',
+            'shopping' => 'Mua sắm',
+            'education' => 'Giáo dục',
+            'insurance' => 'Bảo hiểm',
+            'savings' => 'Tiết kiệm',
+            'other' => 'Chi phí khác',
+        ],
+    ],
+
 ];
