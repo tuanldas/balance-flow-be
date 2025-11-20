@@ -85,6 +85,8 @@ return [
             'icon_required' => 'Icon is required',
             'icon_string' => 'Icon must be an SVG string',
             'transfer_category_invalid' => 'Invalid target category ID',
+            'sort_by_invalid' => 'Invalid sort field. Only "name", "type", or "created_at" are accepted',
+            'sort_direction_invalid' => 'Invalid sort direction. Only "asc" or "desc" are accepted',
         ],
     ],
 

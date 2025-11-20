@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -28,6 +26,8 @@ final class CategoryController extends Controller
     {
         $type = $request->query('type'); // 'income' hoặc 'expense' hoặc null (all)
         $perPage = $request->query('per_page', 15); // Số items mỗi trang, mặc định 15
+        $sortBy = $request->query('sort_by', 'name'); // Trường sắp xếp, mặc định 'name'
+        $sortDirection = $request->query('sort_direction', 'asc'); // Hướng sắp xếp, mặc định 'asc'
 
         if ($type !== null && ! in_array($type, ['income', 'expense'])) {
             return response()->json([
@@ -44,10 +44,28 @@ final class CategoryController extends Controller
             ], 422);
         }
 
+        // Validate sort_by parameter
+        if (! in_array($sortBy, ['name', 'type', 'created_at'])) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.category.validation.sort_by_invalid'),
+            ], 422);
+        }
+
+        // Validate sort_direction parameter
+        if (! in_array($sortDirection, ['asc', 'desc'])) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.category.validation.sort_direction_invalid'),
+            ], 422);
+        }
+
         $categories = $this->categoryService->getAllAccessibleCategories(
             $request->user()->id,
             $type,
-            (int) $perPage
+            (int) $perPage,
+            $sortBy,
+            $sortDirection
         );
 
         return response()->json([

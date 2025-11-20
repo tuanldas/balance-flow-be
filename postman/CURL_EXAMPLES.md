@@ -62,7 +62,52 @@ curl -X GET "http://localhost:8083/api/categories?type=expense" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### 4. Create Category
+### 4. List Categories - Custom Pagination
+
+```bash
+# 20 items per page, page 2
+curl -X GET "http://localhost:8083/api/categories?per_page=20&page=2" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 5. List Categories - Sort by Name (Descending)
+
+```bash
+# Sort A-Z descending
+curl -X GET "http://localhost:8083/api/categories?sort_by=name&sort_direction=desc" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 6. List Categories - Sort by Type
+
+```bash
+# Sort by type (expense, then income), with secondary sort by name
+curl -X GET "http://localhost:8083/api/categories?sort_by=type&sort_direction=asc" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 7. List Categories - Sort by Created Date (Newest First)
+
+```bash
+# Sort by creation date descending
+curl -X GET "http://localhost:8083/api/categories?sort_by=created_at&sort_direction=desc" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 8. List Categories - Combined Filters
+
+```bash
+# Income categories, 10 items per page, sorted by created date (newest)
+curl -X GET "http://localhost:8083/api/categories?type=income&per_page=10&page=1&sort_by=created_at&sort_direction=desc" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 9. Create Category
 
 ```bash
 curl -X POST http://localhost:8083/api/categories \
@@ -102,7 +147,7 @@ Lưu category ID:
 export CATEGORY_ID="018d1234-5678-7abc-def0-123456789abc"
 ```
 
-### 5. Get Category by ID
+### 10. Get Category by ID
 
 ```bash
 curl -X GET "http://localhost:8083/api/categories/$CATEGORY_ID" \
@@ -110,7 +155,7 @@ curl -X GET "http://localhost:8083/api/categories/$CATEGORY_ID" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### 6. Update Category
+### 11. Update Category
 
 ```bash
 curl -X PUT "http://localhost:8083/api/categories/$CATEGORY_ID" \
@@ -123,7 +168,7 @@ curl -X PUT "http://localhost:8083/api/categories/$CATEGORY_ID" \
   }'
 ```
 
-### 7. Get Transaction Count
+### 12. Get Transaction Count
 
 ```bash
 curl -X GET "http://localhost:8083/api/categories/$CATEGORY_ID/transactions-count" \
@@ -141,7 +186,7 @@ curl -X GET "http://localhost:8083/api/categories/$CATEGORY_ID/transactions-coun
 }
 ```
 
-### 8. Delete Category (No Transactions)
+### 13. Delete Category (No Transactions)
 
 ```bash
 curl -X DELETE "http://localhost:8083/api/categories/$CATEGORY_ID" \
@@ -149,7 +194,7 @@ curl -X DELETE "http://localhost:8083/api/categories/$CATEGORY_ID" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### 9. Delete Category (With Transaction Transfer)
+### 14. Delete Category (With Transaction Transfer)
 
 ```bash
 # Lưu target category ID

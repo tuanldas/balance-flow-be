@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\Repositories;
 
 use App\Models\Category;
@@ -32,7 +30,7 @@ final readonly class CategoryRepository implements CategoryRepositoryInterface
     /**
      * Lấy tất cả categories có thể truy cập bởi user (system + user's own) với phân trang
      */
-    public function getAccessibleByUser(string $userId, ?string $type = null, int $perPage = 15): LengthAwarePaginator
+    public function getAccessibleByUser(string $userId, ?string $type = null, int $perPage = 15, string $sortBy = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
     {
         $query = Category::accessibleByUser($userId);
 
@@ -40,9 +38,15 @@ final readonly class CategoryRepository implements CategoryRepositoryInterface
             $query->ofType($type);
         }
 
-        return $query->orderBy('is_system', 'desc')
-            ->orderBy('name')
-            ->paginate($perPage);
+        // Apply sorting based on parameters
+        $query->orderBy($sortBy, $sortDirection);
+
+        // Add secondary sorting by name if sorting by other fields
+        if ($sortBy !== 'name') {
+            $query->orderBy('name', 'asc');
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**

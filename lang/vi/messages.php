@@ -89,6 +89,8 @@ return [
             'icon_required' => 'Biểu tượng là bắt buộc',
             'icon_string' => 'Biểu tượng phải là chuỗi SVG',
             'transfer_category_invalid' => 'ID danh mục đích không hợp lệ',
+            'sort_by_invalid' => 'Trường sắp xếp không hợp lệ. Chỉ chấp nhận "name", "type", hoặc "created_at"',
+            'sort_direction_invalid' => 'Hướng sắp xếp không hợp lệ. Chỉ chấp nhận "asc" hoặc "desc"',
         ],
     ],
 

@@ -212,6 +212,9 @@ GET    /api/categories                           # List accessible categories (p
 GET    /api/categories?type=income               # Filter by type (paginated)
 GET    /api/categories?per_page=20               # Custom items per page (1-100)
 GET    /api/categories?page=2                    # Get specific page
+GET    /api/categories?sort_by=name&sort_direction=desc  # Sort by name descending
+GET    /api/categories?sort_by=type              # Sort by type
+GET    /api/categories?sort_by=created_at&sort_direction=desc  # Sort by date (newest)
 POST   /api/categories                           # Create user category
 GET    /api/categories/{id}                      # Get category details
 PUT    /api/categories/{id}                      # Update user category
@@ -219,10 +222,13 @@ DELETE /api/categories/{id}                      # Delete category
 GET    /api/categories/{id}/transactions-count   # Count transactions
 ```
 
-**Pagination Parameters:**
+**Query Parameters:**
 - `per_page`: Number of items per page (default: 15, max: 100)
 - `page`: Page number (default: 1)
-- Pagination works with all filters (type, etc.)
+- `type`: Filter by type (income/expense)
+- `sort_by`: Sort field (name/type/created_at, default: name)
+- `sort_direction`: Sort direction (asc/desc, default: asc)
+- All parameters can be combined freely
 
 **Pagination Response Format:**
 ```json

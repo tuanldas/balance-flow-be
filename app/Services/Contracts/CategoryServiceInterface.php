@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\Services\Contracts;
 
 use App\Models\Category;
@@ -13,7 +11,7 @@ interface CategoryServiceInterface
     /**
      * Lấy tất cả categories có thể truy cập bởi user (system + user's own) với phân trang
      */
-    public function getAllAccessibleCategories(string $userId, ?string $type = null, int $perPage = 15): LengthAwarePaginator;
+    public function getAllAccessibleCategories(string $userId, ?string $type = null, int $perPage = 15, string $sortBy = 'name', string $sortDirection = 'asc'): LengthAwarePaginator;
 
     /**
      * Lấy tất cả categories có thể truy cập bởi user (system + user's own) không phân trang

@@ -1,0 +1,1013 @@
+{
+	"info": {
+		"_postman_id": "balance-flow-api-collection",
+		"name": "BalanceFlow API",
+		"description": "Complete API collection for BalanceFlow backend - Personal Finance Management System\n\nFeatures:\n- Authentication with Laravel Passport OAuth2\n- Category Management (System + User categories)\n- Multi-language support (Vietnamese/English)\n- Pagination support for list endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.data.access_token);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refresh_token);",
+									"    pm.test(\"Access token saved\", function() {",
+									"        pm.expect(jsonData.data.access_token).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "register"]
+						},
+						"description": "Register a new user account. Returns access token and refresh token."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.data.access_token);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refresh_token);",
+									"    pm.test(\"Login successful\", function() {",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"tuanldas@gmail.com\",\n    \"password\": \"123123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "login"]
+						},
+						"description": "Login with email and password. Email must be verified."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "me"]
+						},
+						"description": "Get current authenticated user information."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.data.access_token);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refresh_token);",
+									"    pm.test(\"Token refreshed\", function() {",
+									"        pm.expect(jsonData.data.access_token).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/refresh",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "refresh"]
+						},
+						"description": "Exchange refresh token for new access token."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    pm.collectionVariables.set(\"access_token\", \"\");",
+									"    pm.collectionVariables.set(\"refresh_token\", \"\");",
+									"    pm.test(\"Logged out successfully\", function() {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "logout"]
+						},
+						"description": "Logout and revoke current access token."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"newpassword123\",\n    \"new_password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/change-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "change-password"]
+						},
+						"description": "Change password for authenticated user. Revokes all existing tokens."
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "forgot-password"]
+						},
+						"description": "Request password reset link. Email will be sent to user."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"reset-token-from-email\",\n    \"email\": \"user@example.com\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "reset-password"]
+						},
+						"description": "Reset password using token from email. Revokes all existing tokens."
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Verification Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/email/verification-notification",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "email", "verification-notification"]
+						},
+						"description": "Resend email verification link. Rate limited to 6 requests per minute."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints using Laravel Passport OAuth2"
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "List All Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"]
+						},
+						"description": "Get all accessible categories (system + user's own). Returns paginated results.\n\nDefault: 15 items per page"
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?per_page=20&page=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Items per page (1-100, default: 15)"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								}
+							]
+						},
+						"description": "Get categories with custom pagination.\n\nQuery Parameters:\n- per_page: 1-100 (default: 15)\n- page: Page number (default: 1)\n\nReturns pagination metadata including total, current_page, last_page, etc."
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories (Filter by Income)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?type=income",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "type",
+									"value": "income",
+									"description": "Filter by category type"
+								}
+							]
+						},
+						"description": "Get only income categories (paginated, default 15 items/page)."
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories (Filter by Expense)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?type=expense",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "type",
+									"value": "expense",
+									"description": "Filter by category type"
+								}
+							]
+						},
+						"description": "Get only expense categories (paginated, default 15 items/page)."
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories (Sort by Name Desc)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?sort_by=name&sort_direction=desc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "sort_by",
+									"value": "name",
+									"description": "Sort by field (name, type, created_at)"
+								},
+								{
+									"key": "sort_direction",
+									"value": "desc",
+									"description": "Sort direction (asc, desc)"
+								}
+							]
+						},
+						"description": "Get categories sorted by name in descending order (Z-A)."
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories (Sort by Type)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?sort_by=type&sort_direction=asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "sort_by",
+									"value": "type",
+									"description": "Sort by field (name, type, created_at)"
+								},
+								{
+									"key": "sort_direction",
+									"value": "asc",
+									"description": "Sort direction (asc, desc)"
+								}
+							]
+						},
+						"description": "Get categories sorted by type (expense, then income) with secondary sort by name."
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories (Sort by Created Date)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?sort_by=created_at&sort_direction=desc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "sort_by",
+									"value": "created_at",
+									"description": "Sort by field (name, type, created_at)"
+								},
+								{
+									"key": "sort_direction",
+									"value": "desc",
+									"description": "Sort direction (asc, desc)"
+								}
+							]
+						},
+						"description": "Get categories sorted by creation date (newest first)."
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories (Combined Filters)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?type=income&per_page=10&page=2&sort_by=created_at&sort_direction=desc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "type",
+									"value": "income",
+									"description": "Filter by category type (income/expense)"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Items per page (1-100)"
+								},
+								{
+									"key": "page",
+									"value": "2",
+									"description": "Page number"
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at",
+									"description": "Sort by field (name, type, created_at)"
+								},
+								{
+									"key": "sort_direction",
+									"value": "desc",
+									"description": "Sort direction (asc, desc)"
+								}
+							]
+						},
+						"description": "Get income categories with custom pagination and sorting - page 2, 10 items per page, sorted by creation date (newest first).\n\nAll query parameters can be combined freely."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"category_id\", jsonData.data.category.id);",
+									"    pm.test(\"Category created\", function() {",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.data.category.id).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Coffee & Breakfast\",\n    \"type\": \"expense\",\n    \"icon_svg\": \"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"25\\\" height=\\\"25\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"2\\\"><circle cx=\\\"12\\\" cy=\\\"12\\\" r=\\\"10\\\"/><path d=\\\"M12 6v6l4 2\\\"/></svg>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"]
+						},
+						"description": "Create a new user category. Category ID is automatically saved to collection variables.\n\nRequired fields:\n- name: string\n- type: income|expense\n- icon_svg: SVG string (25x25px recommended)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/{{category_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Get details of a specific category by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Morning Coffee Updated\",\n    \"type\": \"expense\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/{{category_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Update a user category. Only owner can update. System categories cannot be updated.\n\nPartial updates supported - only include fields to change."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transactions Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/{{category_id}}/transactions-count",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "{{category_id}}", "transactions-count"]
+						},
+						"description": "Get the count of transactions for a specific category.\n\nUseful before deleting a category to check if transfer is needed."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category (No Transactions)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/{{category_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Delete a category that has no transactions.\n\nRestrictions:\n- Cannot delete system categories\n- Cannot delete categories with transactions (use transfer endpoint)\n- Only owner can delete"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category (With Transaction Transfer)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"transfer_to_category_id\": \"{{transfer_category_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/{{category_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Delete a category and transfer all its transactions to another category.\n\nRequired:\n- transfer_to_category_id: Must be same type (income→income, expense→expense)\n\nBefore using:\n1. Create/identify target category\n2. Set {{transfer_category_id}} variable with target ID\n3. Run this request"
+					},
+					"response": []
+				}
+			],
+			"description": "Category management endpoints - supports system and user categories"
+		},
+		{
+			"name": "Multi-language Examples",
+			"item": [
+				{
+					"name": "List Categories (Vietnamese)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "vi",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"]
+						},
+						"description": "Get categories with Vietnamese translations (default language)."
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories (English)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"]
+						},
+						"description": "Get categories with English translations."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Vietnamese)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "vi",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"tuanldas@gmail.com\",\n    \"password\": \"123123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "login"]
+						},
+						"description": "Login with Vietnamese response messages."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (English)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "en",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"tuanldas@gmail.com\",\n    \"password\": \"123123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "login"]
+						},
+						"description": "Login with English response messages."
+					},
+					"response": []
+				}
+			],
+			"description": "Examples demonstrating multi-language support using Accept-Language header"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8083",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "transfer_category_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

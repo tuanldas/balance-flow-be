@@ -39,15 +39,42 @@ Postman collection cho BalanceFlow API với đầy đủ authentication và cat
 ```
 GET /api/categories
 ```
-Lấy tất cả categories (system + user's own)
+Lấy tất cả categories (system + user's own) với phân trang
 
 **Query Parameters:**
 - `type`: Filter theo loại (income/expense)
+- `per_page`: Số items mỗi trang (1-100, default: 15)
+- `page`: Số trang (default: 1)
+- `sort_by`: Trường sắp xếp (name/type/created_at, default: name)
+- `sort_direction`: Hướng sắp xếp (asc/desc, default: asc)
 
 **Examples:**
 - Tất cả categories: `/api/categories`
 - Income only: `/api/categories?type=income`
 - Expense only: `/api/categories?type=expense`
+- Custom pagination: `/api/categories?per_page=20&page=2`
+- Sort by name descending: `/api/categories?sort_by=name&sort_direction=desc`
+- Sort by type: `/api/categories?sort_by=type&sort_direction=asc`
+- Sort by created date (newest first): `/api/categories?sort_by=created_at&sort_direction=desc`
+- Combined filters: `/api/categories?type=income&per_page=10&page=1&sort_by=created_at&sort_direction=desc`
+
+**Response includes pagination metadata:**
+```json
+{
+  "success": true,
+  "data": {
+    "categories": [...],
+    "pagination": {
+      "total": 50,
+      "per_page": 15,
+      "current_page": 1,
+      "last_page": 4,
+      "from": 1,
+      "to": 15
+    }
+  }
+}
+```
 
 ### 2. Create Category
 ```

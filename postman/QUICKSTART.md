@@ -37,9 +37,17 @@ TOKEN=$(curl -s -X POST http://localhost:8083/api/login \
 
 echo "Token: $TOKEN"
 
-# Step 2: List categories
+# Step 2: List categories (with pagination)
 curl -s http://localhost:8083/api/categories \
   -H "Authorization: Bearer $TOKEN" | jq '.'
+
+# Optional: Test pagination
+curl -s "http://localhost:8083/api/categories?per_page=5&page=1" \
+  -H "Authorization: Bearer $TOKEN" | jq '.data.pagination'
+
+# Optional: Test sorting
+curl -s "http://localhost:8083/api/categories?sort_by=created_at&sort_direction=desc" \
+  -H "Authorization: Bearer $TOKEN" | jq '.data.categories[0]'
 
 # Step 3: Create category
 CATEGORY=$(curl -s -X POST http://localhost:8083/api/categories \
@@ -96,24 +104,45 @@ curl -s http://localhost:8083/api/categories \
 # Should return: 17 (if you haven't created any user categories yet)
 ```
 
-### 3. Test Filter
+### 3. Test Filter, Pagination & Sorting
 ```bash
-# Income categories (should be 6)
+# Income categories (paginated)
 curl -s "http://localhost:8083/api/categories?type=income" \
-  -H "Authorization: Bearer $TOKEN" | jq '.data.categories | length'
+  -H "Authorization: Bearer $TOKEN" | jq '.data'
 
-# Expense categories (should be 11)
+# Expense categories (paginated)
 curl -s "http://localhost:8083/api/categories?type=expense" \
-  -H "Authorization: Bearer $TOKEN" | jq '.data.categories | length'
+  -H "Authorization: Bearer $TOKEN" | jq '.data'
+
+# Custom pagination - 10 items per page
+curl -s "http://localhost:8083/api/categories?per_page=10&page=1" \
+  -H "Authorization: Bearer $TOKEN" | jq '.data.pagination'
+
+# Sort by name descending (Z-A)
+curl -s "http://localhost:8083/api/categories?sort_by=name&sort_direction=desc" \
+  -H "Authorization: Bearer $TOKEN" | jq '.data.categories[0].name'
+
+# Sort by created date (newest first)
+curl -s "http://localhost:8083/api/categories?sort_by=created_at&sort_direction=desc" \
+  -H "Authorization: Bearer $TOKEN" | jq '.data.categories[0]'
+
+# Combined: Income categories with pagination and sorting
+curl -s "http://localhost:8083/api/categories?type=income&per_page=5&page=1&sort_by=created_at&sort_direction=desc" \
+  -H "Authorization: Bearer $TOKEN" | jq '.data'
 ```
 
 ---
 
 ## 📋 All Category Endpoints Checklist
 
-- [ ] `GET /api/categories` - List all
-- [ ] `GET /api/categories?type=income` - Filter income
-- [ ] `GET /api/categories?type=expense` - Filter expense
+- [ ] `GET /api/categories` - List all (paginated)
+- [ ] `GET /api/categories?type=income` - Filter income (paginated)
+- [ ] `GET /api/categories?type=expense` - Filter expense (paginated)
+- [ ] `GET /api/categories?per_page=20&page=2` - Custom pagination
+- [ ] `GET /api/categories?sort_by=name&sort_direction=desc` - Sort by name (Z-A)
+- [ ] `GET /api/categories?sort_by=type` - Sort by type
+- [ ] `GET /api/categories?sort_by=created_at&sort_direction=desc` - Sort by date (newest)
+- [ ] `GET /api/categories?type=income&per_page=10&sort_by=created_at` - Combined filters
 - [ ] `POST /api/categories` - Create
 - [ ] `GET /api/categories/{id}` - Get by ID
 - [ ] `PUT /api/categories/{id}` - Update
