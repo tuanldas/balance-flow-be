@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    restart: unless-stopped
+    working_dir: /var/www/app
+    volumes:
+      - ./:/var/www/app
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/app
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - app
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-balance_flow}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    external: true
+    name: ${DOCKER_VOLUME_POSTGRES:-balance_flow_postgres_data}

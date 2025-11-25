@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Docker Setup](#docker-setup)
 - [Development Commands](#development-commands)
 - [Architecture & Design Patterns](#architecture--design-patterns)
 - [Repository & Service Pattern Guide](#repository--service-pattern-guide)
@@ -18,15 +19,146 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Laravel 12 backend application using PHP 8.2+ with SQLite as the default database. The project uses Vite for frontend asset building with Tailwind CSS v4.
+This is a Laravel 12 backend application using PHP 8.2+ with PostgreSQL database. The project uses Docker for containerization and Vite for frontend asset building with Tailwind CSS v4.
 
 **Key Technologies:**
 - Laravel 12
-- PHP 8.2+
-- SQLite (default) / MySQL (optional)
+- PHP 8.2-FPM
+- PostgreSQL 16
+- Docker & Docker Compose
+- Nginx
+- Supervisor (process management)
 - Vite + Tailwind CSS v4
 - PHPUnit for testing
 - Laravel Pint for code formatting
+
+**Docker Services:**
+- **app**: PHP 8.2-FPM with Supervisor managing PHP-FPM, Queue Workers, and Scheduler
+- **nginx**: Nginx web server
+- **db**: PostgreSQL 16 database
+
+---
+
+## Docker Setup
+
+### Prerequisites
+
+- Docker & Docker Compose installed
+- Git
+
+### Quick Start
+
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd balance-flow-be
+
+# 2. Setup environment
+cp .env.example .env
+php artisan key:generate  # Or manually set APP_KEY
+
+# 3. Create external Docker resources (one-time setup)
+docker network create balance_flow_network
+docker volume create balance_flow_postgres_data
+
+# For production, also create publish network:
+docker network create npm_proxy
+
+# 4. Copy environment-specific compose file
+cp compose-dev.yml compose.override.yml    # Development
+# OR
+cp compose-prod.yml compose.override.yml   # Production
+
+# 5. Build and start containers
+docker compose build
+docker compose up -d
+
+# 6. Install dependencies (development only, production builds include them)
+docker compose exec app composer install
+docker compose exec app npm install
+
+# 7. Run migrations
+docker compose exec app php artisan migrate
+
+# 8. Access application
+# Development: http://localhost:8080
+# Production: Configure domain in Nginx Proxy Manager
+```
+
+### Docker Environment Variables
+
+Configure in `.env`:
+
+```env
+# Docker Configuration
+DOCKER_VOLUME_POSTGRES=balance_flow_postgres_data
+DOCKER_NETWORK_PUBLISH=npm_proxy
+```
+
+### Docker Commands
+
+```bash
+# Start containers
+docker compose up -d
+
+# Stop containers (keeps data)
+docker compose down
+
+# View logs
+docker compose logs -f
+docker compose logs -f app    # App only
+
+# Execute commands in containers
+docker compose exec app bash
+docker compose exec app php artisan migrate
+docker compose exec app composer install
+
+# Supervisor management
+docker compose exec app supervisorctl status
+docker compose exec app supervisorctl restart laravel-worker:*
+
+# Database access
+docker compose exec db psql -U postgres -d balance_flow
+
+# Rebuild containers
+docker compose build --no-cache
+docker compose up -d
+```
+
+### Docker Environments
+
+#### Development (compose-dev.yml)
+- Exposed ports: 8080 (nginx), 5432 (postgres)
+- Code mounted from host (live reload)
+- Debug enabled
+- Uses `development` build target
+
+#### Production (compose-prod.yml)
+- No exposed ports (managed by Nginx Proxy Manager)
+- Code baked into image
+- Debug disabled
+- Uses `production` build target
+- Connected to `npm_proxy` network
+
+#### Testing (compose-testing.yml)
+- Exposed port: 8081
+- Separate test database (in-memory)
+- Isolated environment
+
+### Dockerfile Multi-Stage Builds
+
+The Dockerfile uses multi-stage builds:
+
+- **base**: Common dependencies (PHP, Supervisor, etc.)
+- **development**: For local development (no assets built)
+- **production-build**: Builds assets with npm
+- **production**: Final optimized image with built assets
+
+Specify target in compose files:
+```yaml
+build:
+  target: development  # or production
+```
 
 ---
 
@@ -88,7 +220,13 @@ php artisan migrate:rollback   # Rollback last batch
 php artisan db:seed           # Run seeders
 ```
 
-Default database is SQLite at `database/database.sqlite`.
+**Note:** When using Docker, run these commands inside the app container:
+```bash
+docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed
+```
+
+Default database is PostgreSQL running in Docker container.
 
 ### Other Useful Commands
 ```bash
@@ -181,40 +319,44 @@ config/                           # Configuration files
 
 ### Database Configuration
 
-Default setup uses SQLite (database/database.sqlite). To switch to MySQL:
+Default setup uses PostgreSQL in Docker. Configuration in `.env`:
 
-1. Update .env:
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=your_database
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_CONNECTION=pgsql
+DB_HOST=db                    # Docker service name
+DB_PORT=5432
+DB_DATABASE=balance_flow
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
 ```
 
-2. Run migrations: `php artisan migrate`
+**Docker Volume:**
+- Database data is stored in external volume: `balance_flow_postgres_data`
+- Data persists even after `docker compose down`
+- To reset database: `docker volume rm balance_flow_postgres_data`
 
-### Laravel Sail (Docker)
-
-The project includes Laravel Sail configuration (compose.yaml) with:
-- MySQL 8.0
-- Redis
-- Meilisearch (search engine)
-- Mailpit (email testing)
-- Selenium (browser testing)
-
-To use Sail:
+**Access PostgreSQL:**
 ```bash
-./vendor/bin/sail up -d        # Start containers
-./vendor/bin/sail artisan migrate  # Run artisan commands in container
-./vendor/bin/sail composer require package  # Install packages
-./vendor/bin/sail down         # Stop containers
+# Via docker compose
+docker compose exec db psql -U postgres -d balance_flow
+
+# Via host (if port exposed in dev)
+psql -h localhost -p 5432 -U postgres -d balance_flow
 ```
 
 ### Queue System
 
-Default queue connection is `database` (stored in database tables). Queue jobs are processed by the queue worker included in `composer dev`, or run manually with:
+Default queue connection is `database` (stored in database tables).
+
+**With Docker:**
+Queue workers are automatically managed by Supervisor in the app container. Check status:
+```bash
+docker compose exec app supervisorctl status laravel-worker:*
+docker compose exec app supervisorctl restart laravel-worker:*
+```
+
+**Without Docker:**
+Run queue worker manually:
 ```bash
 php artisan queue:work
 php artisan queue:listen --tries=1
