@@ -1,0 +1,22 @@
+services:
+  nginx:
+    # Development: Expose port directly
+    ports:
+      - "8080:80"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+
+  db:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-balance_flow}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}

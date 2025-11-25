@@ -1,59 +1,426 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Balance Flow Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 12 backend application with Docker, PostgreSQL, and Supervisor for process management.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Laravel 12** - Latest Laravel framework
+- **PHP 8.2-FPM** - Modern PHP with FPM
+- **PostgreSQL 16** - Robust relational database
+- **Docker & Docker Compose** - Containerized deployment
+- **Nginx** - High-performance web server
+- **Supervisor** - Process management (PHP-FPM, Queue Workers, Scheduler)
+- **Multi-stage Dockerfile** - Optimized builds for dev/prod
+- **Repository & Service Pattern** - Clean architecture
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Quick Start
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Prerequisites
 
-## Learning Laravel
+- Docker & Docker Compose
+- Git
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd balance-flow-be
 
-## Laravel Sponsors
+# 2. Create external Docker resources (one-time setup)
+docker network create balance_flow_network
+docker volume create balance_flow_postgres_data
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 3. Setup environment
+cp .env.example .env
+# Edit .env if needed (APP_KEY, database credentials, etc.)
 
-### Premium Partners
+# 4. Choose environment
+cp compose-dev.yml compose.override.yml    # Development
+# OR
+cp compose-prod.yml compose.override.yml   # Production
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 5. Build and start containers
+docker compose build
+docker compose up -d
 
-## Contributing
+# 6. Install dependencies (development only)
+docker compose exec app composer install
+docker compose exec app npm install
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 7. Run migrations
+docker compose exec app php artisan migrate
 
-## Code of Conduct
+# 8. Access application
+# Development: http://localhost:8080
+# Production: Configure domain in Nginx Proxy Manager
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Project Structure
 
-## Security Vulnerabilities
+```
+.
+├── app/
+│   ├── Http/Controllers/      # HTTP layer
+│   ├── Services/              # Business logic layer
+│   │   └── Contracts/         # Service interfaces
+│   ├── Repositories/          # Data access layer
+│   │   └── Contracts/         # Repository interfaces
+│   └── Models/                # Eloquent models
+├── docker/
+│   ├── nginx/                 # Nginx configuration
+│   ├── php/                   # PHP configuration
+│   └── supervisor/            # Supervisor configuration
+├── compose.yml                # Base Docker Compose
+├── compose-dev.yml            # Development overrides
+├── compose-prod.yml           # Production overrides
+├── Dockerfile                 # Multi-stage build
+└── CLAUDE.md                  # Developer guide
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Docker Services
+
+- **app**: PHP 8.2-FPM with Supervisor
+  - PHP-FPM (web application)
+  - Laravel Queue Workers (2 workers)
+  - Laravel Scheduler (cron jobs)
+- **nginx**: Nginx web server
+- **db**: PostgreSQL 16 database
+
+## Common Commands
+
+### Container Management
+
+```bash
+# Start containers
+docker compose up -d
+
+# Stop containers (keeps data)
+docker compose down
+
+# View logs
+docker compose logs -f
+docker compose logs -f app
+
+# Rebuild containers
+docker compose build --no-cache
+docker compose up -d
+```
+
+### Application Commands
+
+```bash
+# Shell access
+docker compose exec app bash
+
+# Artisan commands
+docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed
+docker compose exec app php artisan tinker
+
+# Composer
+docker compose exec app composer install
+docker compose exec app composer update
+
+# NPM
+docker compose exec app npm install
+docker compose exec app npm run build
+```
+
+### Supervisor (Process Management)
+
+```bash
+# Check status
+docker compose exec app supervisorctl status
+
+# Restart processes
+docker compose exec app supervisorctl restart laravel-worker:*
+docker compose exec app supervisorctl restart php-fpm
+
+# View logs
+docker compose exec app supervisorctl tail -f laravel-worker:laravel-worker_00
+```
+
+### Database
+
+```bash
+# Access PostgreSQL
+docker compose exec db psql -U postgres -d balance_flow
+
+# Backup
+docker compose exec db pg_dump -U postgres balance_flow > backup.sql
+
+# Restore
+docker compose exec -T db psql -U postgres balance_flow < backup.sql
+```
+
+## Environments
+
+### Development
+
+```bash
+cp compose-dev.yml compose.override.yml
+docker compose up -d
+```
+
+- Port 8080 → Nginx
+- Port 5432 → PostgreSQL
+- Code mounted from host (live reload)
+- Debug enabled
+
+**Access:** http://localhost:8080
+
+### Production
+
+```bash
+# Create publish network for Nginx Proxy Manager
+docker network create npm_proxy
+
+cp compose-prod.yml compose.override.yml
+docker compose up -d
+```
+
+- No exposed ports
+- Code baked into image
+- Optimized build
+- Connected to Nginx Proxy Manager
+
+**Configure NPM:**
+1. Add Proxy Host
+2. Forward to: `nginx` (container)
+3. Port: 80
+4. Enable SSL
+
+### Testing
+
+```bash
+cp compose-testing.yml compose.override.yml
+docker compose up -d
+```
+
+- Port 8081
+- Separate test database
+- Isolated environment
+
+## Architecture
+
+### Repository & Service Pattern
+
+```
+Controller → Service Interface → Service Implementation
+                ↓
+         Repository Interface → Repository Implementation
+                ↓
+          Eloquent Model → Database
+```
+
+**Benefits:**
+- Clean separation of concerns
+- Easy to test with mocks
+- Consistent pattern across app
+- Reusable business logic
+
+**Example:**
+
+```php
+// Controller
+class UserController extends Controller
+{
+    public function __construct(
+        protected UserServiceInterface $userService
+    ) {}
+
+    public function index()
+    {
+        return $this->userService->getAll();
+    }
+}
+
+// Service
+class UserService implements UserServiceInterface
+{
+    public function __construct(
+        protected UserRepositoryInterface $repository
+    ) {}
+
+    public function getAll()
+    {
+        return $this->repository->all(['id', 'name', 'email'], ['posts']);
+    }
+}
+
+// Repository
+class UserRepository implements UserRepositoryInterface
+{
+    // Inherits from BaseRepository with common CRUD operations
+}
+```
+
+## Configuration
+
+### Environment Variables (.env)
+
+```env
+# Application
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8080
+
+# Database
+DB_CONNECTION=pgsql
+DB_HOST=db
+DB_PORT=5432
+DB_DATABASE=balance_flow
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+
+# Docker
+DOCKER_VOLUME_POSTGRES=balance_flow_postgres_data
+DOCKER_NETWORK_PUBLISH=npm_proxy
+```
+
+### Docker Networks
+
+- **default** (balance_flow_network): All services communicate here
+- **publish** (npm_proxy): Production only, nginx connects to NPM
+
+### Data Persistence
+
+Database data stored in external volume `balance_flow_postgres_data`:
+- Persists after `docker compose down`
+- Manual deletion required: `docker volume rm balance_flow_postgres_data`
+
+## Development
+
+### Code Style
+
+```bash
+./vendor/bin/pint              # Format code
+./vendor/bin/pint --test       # Check formatting
+```
+
+### Testing
+
+```bash
+docker compose exec app php artisan test
+./vendor/bin/phpunit
+./vendor/bin/phpunit --filter TestName
+```
+
+### Database Migrations
+
+```bash
+docker compose exec app php artisan migrate
+docker compose exec app php artisan migrate:fresh
+docker compose exec app php artisan migrate:rollback
+docker compose exec app php artisan db:seed
+```
+
+## Production Deployment
+
+### 1. Prepare Server
+
+```bash
+# Create Docker resources
+docker network create npm_proxy
+docker network create balance_flow_network
+docker volume create balance_flow_postgres_data
+```
+
+### 2. Deploy Application
+
+```bash
+git clone <repository>
+cd balance-flow-be
+
+# Setup environment
+cp .env.example .env
+# Edit .env: Set APP_ENV=production, APP_DEBUG=false, change passwords
+
+# Deploy
+cp compose-prod.yml compose.override.yml
+docker compose build
+docker compose up -d
+
+# Run migrations
+docker compose exec app php artisan migrate --force
+```
+
+### 3. Configure Nginx Proxy Manager
+
+- Domain: your-domain.com
+- Forward Hostname: `nginx` (container name)
+- Forward Port: 80
+- Enable SSL (Let's Encrypt)
+
+### 4. Optimize
+
+```bash
+docker compose exec app php artisan config:cache
+docker compose exec app php artisan route:cache
+docker compose exec app php artisan view:cache
+```
+
+## Troubleshooting
+
+### 502 Bad Gateway
+
+```bash
+# Check PHP-FPM status
+docker compose exec app supervisorctl status php-fpm
+
+# Restart PHP-FPM
+docker compose exec app supervisorctl restart php-fpm
+```
+
+### Database Connection Failed
+
+```bash
+# Check database running
+docker compose ps db
+
+# Restart database
+docker compose restart db
+```
+
+### Permission Issues
+
+```bash
+docker compose exec app chmod -R 775 storage bootstrap/cache
+docker compose exec app chown -R www-data:www-data storage bootstrap/cache
+```
+
+### Resources Not Found
+
+```bash
+# Create network
+docker network create balance_flow_network
+
+# Create volume
+docker volume create balance_flow_postgres_data
+```
+
+## Documentation
+
+- **[CLAUDE.md](CLAUDE.md)** - Comprehensive developer guide (for Claude Code)
+- **[Laravel Docs](https://laravel.com/docs)** - Official Laravel documentation
+
+## Tech Stack
+
+- **Framework**: Laravel 12
+- **Language**: PHP 8.2
+- **Database**: PostgreSQL 16
+- **Web Server**: Nginx
+- **Process Manager**: Supervisor
+- **Frontend**: Vite + Tailwind CSS v4
+- **Testing**: PHPUnit
+- **Code Style**: Laravel Pint
+- **Containers**: Docker & Docker Compose
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is proprietary software. All rights reserved.
+
+---
+
+**Need help?** Check [CLAUDE.md](CLAUDE.md) for detailed developer guides and Docker documentation.

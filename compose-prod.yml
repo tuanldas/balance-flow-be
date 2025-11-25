@@ -1,0 +1,31 @@
+services:
+  nginx:
+    # Production: nginx is in both default network and publish network (for NPM)
+    networks:
+      - default
+      - publish
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    # app only in default network (implicit)
+
+  db:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/backups:/backups
+    # db only in default network (implicit)
+
+networks:
+  publish:
+    external: true
+    name: ${DOCKER_NETWORK_PUBLISH:-npm_proxy}
