@@ -1,0 +1,44 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Build outputs
+/public/build/
+/public/hot
+
+# Storage and cache
+/storage/*.key
+/storage/app/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/testing/
+/storage/framework/views/
+/storage/logs/
+
+# Database
+/database/database.sqlite
+/database/*.sqlite
+
+# Environment files
+/.env
+/.env.*
+!/.env.example
+
+# IDE and editor files
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compiled assets
+/public/css/
+/public/js/
+/public/mix-manifest.json
+
+# Temporary files
+*.cache
