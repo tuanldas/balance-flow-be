@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - [Docker Setup](#docker-setup)
 - [Development Commands](#development-commands)
 - [Architecture & Design Patterns](#architecture--design-patterns)
+  - [Database Design Best Practices](#database-design-best-practices)
 - [Repository & Service Pattern Guide](#repository--service-pattern-guide)
 - [Creating New Features](#creating-new-features)
 - [Usage Examples](#usage-examples)
@@ -343,6 +344,68 @@ docker compose exec db psql -U postgres -d balance_flow
 # Via host (if port exposed in dev)
 psql -h localhost -p 5432 -U postgres -d balance_flow
 ```
+
+### Database Design Best Practices
+
+#### Primary Keys: Use UUID v7 for Main Entity Tables
+
+**IMPORTANT**: All main entity tables (users, posts, products, orders, etc.) MUST use UUID version 7 as primary keys instead of auto-incrementing integers.
+
+**Why UUID v7?**
+- **Time-ordered**: UUID v7 includes a timestamp component, making them naturally sortable and optimized for database indexing
+- **Distributed systems**: Generate IDs without database coordination or conflicts
+- **Security**: Non-sequential IDs prevent enumeration attacks (e.g., guessing `/users/1`, `/users/2`)
+- **Merging data**: No ID conflicts when merging databases or syncing data across environments
+- **Better than UUID v4**: Unlike random v4, v7 maintains chronological order for better B-tree index performance
+
+**Implementation Pattern:**
+
+1. **Migration**: Use `uuid()` for primary key
+```php
+Schema::create('posts', function (Blueprint $table) {
+    $table->uuid('id')->primary();  // UUID v7 primary key
+    $table->string('title');
+    $table->text('content');
+    $table->foreignUuid('user_id')->constrained(); // Foreign key reference
+    $table->timestamps();
+});
+```
+
+2. **Model**: Add `HasUuids` trait
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    use HasFactory, HasUuids;  // HasUuids enables automatic UUID v7 generation
+
+    protected $fillable = ['title', 'content', 'user_id'];
+}
+```
+
+3. **Foreign Keys**: Use `foreignUuid()` instead of `foreignId()`
+```php
+// ✅ Correct - UUID foreign key
+$table->foreignUuid('user_id')->constrained();
+
+// ❌ Wrong - Integer foreign key
+$table->foreignId('user_id')->constrained();
+```
+
+**When NOT to use UUID:**
+- Pivot tables (use composite keys)
+- Tables with composite primary keys
+- High-volume logging/analytics tables where performance is critical
+- Join tables that reference two foreign keys
+
+**Reference Implementation:**
+See `app/Models/User.php` and `database/migrations/0001_01_01_000000_create_users_table.php` for complete UUID v7 implementation example.
 
 ### Queue System
 
