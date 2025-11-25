@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Git Flow Workflow](#git-flow-workflow)
 - [Docker Setup](#docker-setup)
 - [Development Commands](#development-commands)
 - [Architecture & Design Patterns](#architecture--design-patterns)
@@ -37,6 +38,335 @@ This is a Laravel 12 backend application using PHP 8.2+ with PostgreSQL database
 - **app**: PHP 8.2-FPM with Supervisor managing PHP-FPM, Queue Workers, and Scheduler
 - **nginx**: Nginx web server
 - **db**: PostgreSQL 16 database
+
+---
+
+## Git Flow Workflow
+
+Dự án sử dụng Git Flow với nhánh phát triển tên là `dev` và commit message được viết bằng tiếng Việt.
+
+### Cấu Trúc Nhánh
+
+**Nhánh Chính:**
+- `main` - Code production-ready, luôn ổn định và có thể deploy
+- `dev` - Nhánh phát triển chính, tích hợp các tính năng mới
+
+**Nhánh Tính Năng:**
+- `feature/*` - Phát triển tính năng mới
+  - Ví dụ: `feature/xac-thuc-nguoi-dung`, `feature/quan-ly-bai-viet`
+
+**Nhánh Sửa Lỗi:**
+- `bugfix/*` - Sửa lỗi trong quá trình phát triển (từ `dev`)
+  - Ví dụ: `bugfix/loi-dang-nhap`, `bugfix/validate-form`
+- `hotfix/*` - Sửa lỗi khẩn cấp trên production (từ `main`)
+  - Ví dụ: `hotfix/loi-bao-mat`, `hotfix/loi-thanh-toan`
+
+**Nhánh Phát Hành:**
+- `release/*` - Chuẩn bị cho production
+  - Ví dụ: `release/v1.0.0`, `release/v1.1.0`
+
+### Quy Trình Làm Việc
+
+#### 1. Phát Triển Tính Năng Mới
+
+```bash
+# Cập nhật nhánh dev
+git checkout dev
+git pull origin dev
+
+# Tạo nhánh feature mới
+git checkout -b feature/ten-tinh-nang
+
+# Làm việc và commit
+git add .
+git commit -m "feat: thêm chức năng xác thực JWT"
+
+# Push và tạo Pull Request vào dev
+git push origin feature/ten-tinh-nang
+```
+
+#### 2. Sửa Lỗi
+
+**Bugfix (từ dev):**
+```bash
+git checkout dev
+git pull origin dev
+git checkout -b bugfix/ten-loi
+
+# Sửa lỗi và commit
+git add .
+git commit -m "fix: sửa lỗi validate email"
+
+# Push và tạo Pull Request vào dev
+git push origin bugfix/ten-loi
+```
+
+**Hotfix (từ main - khẩn cấp):**
+```bash
+git checkout main
+git pull origin main
+git checkout -b hotfix/ten-loi-khan-cap
+
+# Sửa lỗi khẩn cấp
+git add .
+git commit -m "hotfix: sửa lỗi bảo mật SQL injection"
+
+# Push và tạo Pull Request vào main VÀ dev
+git push origin hotfix/ten-loi-khan-cap
+```
+
+#### 3. Release
+
+```bash
+# Tạo nhánh release từ dev
+git checkout dev
+git pull origin dev
+git checkout -b release/v1.0.0
+
+# Kiểm tra cuối cùng, sửa lỗi nhỏ nếu có
+git add .
+git commit -m "chore: chuẩn bị release v1.0.0"
+
+# Merge vào main
+git checkout main
+git merge release/v1.0.0
+git tag -a v1.0.0 -m "Phát hành phiên bản 1.0.0"
+git push origin main --tags
+
+# Merge ngược lại vào dev
+git checkout dev
+git merge release/v1.0.0
+git push origin dev
+
+# Xóa nhánh release (tùy chọn)
+git branch -d release/v1.0.0
+git push origin --delete release/v1.0.0
+```
+
+### Quy Ước Commit Message (Tiếng Việt)
+
+Sử dụng format **Conventional Commits** nhưng viết bằng tiếng Việt:
+
+```
+<type>(<scope>): <mô tả ngắn gọn>
+
+<nội dung chi tiết (tùy chọn)>
+
+<footer (tùy chọn)>
+```
+
+#### Types (Loại Commit):
+
+- **feat**: Tính năng mới
+- **fix**: Sửa lỗi
+- **docs**: Cập nhật tài liệu
+- **style**: Format code, không ảnh hưởng logic
+- **refactor**: Tái cấu trúc code
+- **test**: Thêm hoặc sửa tests
+- **chore**: Cập nhật build tools, dependencies
+- **perf**: Cải thiện hiệu suất
+- **ci**: Thay đổi CI/CD configuration
+- **revert**: Hoàn tác commit trước đó
+- **hotfix**: Sửa lỗi khẩn cấp trên production
+
+#### Ví Dụ Commit Message:
+
+```bash
+# Tính năng mới
+git commit -m "feat(auth): thêm chức năng xác thực JWT"
+git commit -m "feat(user): thêm API quản lý người dùng"
+
+# Sửa lỗi
+git commit -m "fix(user): sửa lỗi tạo UUID trong model User"
+git commit -m "fix(auth): sửa lỗi validate email"
+
+# Tài liệu
+git commit -m "docs(readme): cập nhật hướng dẫn cài đặt Docker"
+git commit -m "docs(api): thêm tài liệu API endpoints"
+
+# Refactor
+git commit -m "refactor(service): tái cấu trúc UserService"
+git commit -m "refactor(repository): tối ưu query trong BaseRepository"
+
+# Test
+git commit -m "test(user): thêm unit test cho UserService"
+
+# Chore
+git commit -m "chore(deps): cập nhật Laravel lên v12.1"
+git commit -m "chore(docker): cấu hình multi-stage build"
+
+# Hotfix
+git commit -m "hotfix(security): vá lỗi bảo mật XSS"
+```
+
+#### Commit Message Chi Tiết:
+
+```bash
+git commit -m "feat(post): thêm chức năng đăng bài viết
+
+- Tạo PostRepository và PostService
+- Thêm validation cho dữ liệu bài viết
+- Implement eager loading cho quan hệ author
+- Thêm unit test và feature test
+
+Resolves: #123"
+```
+
+### Branch Protection Rules
+
+Thiết lập bảo vệ cho các nhánh quan trọng trên GitHub/GitLab:
+
+#### Nhánh `main`:
+- ✅ Require pull request reviews (tối thiểu 1 reviewer)
+- ✅ Require status checks to pass (tests, linting)
+- ✅ Require branches to be up to date before merging
+- ✅ Include administrators
+- ✅ Không cho phép force push
+- ✅ Không cho phép xóa nhánh
+
+#### Nhánh `dev`:
+- ✅ Require pull request reviews (tối thiểu 1 reviewer)
+- ✅ Require status checks to pass
+- ✅ Require branches to be up to date before merging
+
+### Workflow Diagram
+
+```
+main (production)
+  │
+  │◄─── hotfix/loi-bao-mat
+  │
+  ├──► release/v1.0.0 ──────┐
+  │                          │
+  │                          ▼
+dev ◄────────────────────── merge
+  │
+  │◄─── feature/xac-thuc ───┤
+  │◄─── feature/bai-viet ───┤
+  │◄─── bugfix/validate ────┤
+  │
+  └─────────────────────────┘
+```
+
+### Quy Tắc Làm Việc
+
+1. **KHÔNG BAO GIỜ commit trực tiếp vào `main` hoặc `dev`**
+   - Luôn tạo nhánh feature/bugfix/hotfix
+
+2. **Luôn pull trước khi tạo nhánh mới**
+   ```bash
+   git checkout dev
+   git pull origin dev
+   git checkout -b feature/ten-tinh-nang
+   ```
+
+3. **Rebase thay vì merge khi cập nhật nhánh**
+   ```bash
+   git checkout feature/ten-tinh-nang
+   git fetch origin
+   git rebase origin/dev
+   ```
+
+4. **Squash commits trước khi merge PR (tùy chọn)**
+   - Giữ lịch sử Git sạch đẹp
+
+5. **Xóa nhánh sau khi merge**
+   ```bash
+   git branch -d feature/ten-tinh-nang
+   git push origin --delete feature/ten-tinh-nang
+   ```
+
+6. **Chạy tests và lint trước khi push**
+   ```bash
+   composer test
+   ./vendor/bin/pint
+   ```
+
+7. **Pull Request phải có:**
+   - Mô tả rõ ràng về thay đổi
+   - Link đến issue/ticket (nếu có)
+   - Screenshots (nếu có thay đổi UI)
+   - Test coverage
+
+### Git Hooks (Khuyến nghị)
+
+#### Pre-commit Hook
+
+Tạo file `.git/hooks/pre-commit`:
+
+```bash
+#!/bin/bash
+
+echo "Đang chạy Laravel Pint..."
+./vendor/bin/pint
+
+echo "Đang chạy tests..."
+./vendor/bin/phpunit
+
+if [ $? -ne 0 ]; then
+    echo "Tests failed! Commit bị hủy."
+    exit 1
+fi
+```
+
+#### Commit-msg Hook
+
+Tạo file `.git/hooks/commit-msg`:
+
+```bash
+#!/bin/bash
+
+commit_msg=$(cat "$1")
+pattern="^(feat|fix|docs|style|refactor|test|chore|perf|ci|revert|hotfix)(\(.+\))?: .{1,}"
+
+if ! echo "$commit_msg" | grep -qE "$pattern"; then
+    echo "Lỗi: Commit message không đúng format!"
+    echo "Format: <type>(<scope>): <mô tả>"
+    echo "Ví dụ: feat(auth): thêm chức năng đăng nhập"
+    exit 1
+fi
+```
+
+Cấp quyền thực thi:
+```bash
+chmod +x .git/hooks/pre-commit
+chmod +x .git/hooks/commit-msg
+```
+
+### Các Lệnh Git Hữu Ích
+
+```bash
+# Xem lịch sử commit đẹp
+git log --oneline --graph --decorate --all
+
+# Xem thay đổi chưa commit
+git diff
+
+# Xem thay đổi đã stage
+git diff --staged
+
+# Hoàn tác commit cuối (giữ thay đổi)
+git reset --soft HEAD~1
+
+# Hoàn tác commit cuối (xóa thay đổi)
+git reset --hard HEAD~1
+
+# Xem danh sách nhánh
+git branch -a
+
+# Xóa nhánh local
+git branch -d ten-nhanh
+
+# Xóa nhánh remote
+git push origin --delete ten-nhanh
+
+# Stash thay đổi tạm thời
+git stash
+git stash pop
+
+# Cherry-pick commit từ nhánh khác
+git cherry-pick <commit-hash>
+```
 
 ---
 
