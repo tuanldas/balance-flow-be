@@ -15,6 +15,11 @@ class ServiceLayerProvider extends ServiceProvider
             \App\Services\Contracts\UserServiceInterface::class,
             \App\Services\UserService::class
         );
+
+        $this->app->bind(
+            \App\Services\Contracts\CategoryServiceInterface::class,
+            \App\Services\CategoryService::class
+        );
     }
 
     /**

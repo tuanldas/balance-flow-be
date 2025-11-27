@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - [Testing Strategy](#testing-strategy)
 - [Best Practices](#best-practices)
 - [Quick Reference](#quick-reference)
+- [Development Roadmap](#development-roadmap)
 
 ---
 
@@ -1729,6 +1730,447 @@ This project uses Laravel Pint for code formatting, which follows Laravel's opin
 ./vendor/bin/pint --test       # Check without fixing
 ./vendor/bin/pint path/to/file # Fix specific file
 ```
+
+---
+
+## Development Roadmap
+
+This section tracks the implementation status of all features based on the system design documents in the `docs/` folder.
+
+### ✅ Completed Features
+
+#### 1. Categories Module (100% Complete)
+**Status:** Fully implemented with tests
+**Files:**
+- Models: `app/Models/Category.php`
+- Repository: `app/Repositories/CategoryRepository.php`
+- Service: `app/Services/CategoryService.php`
+- Controller: `app/Http/Controllers/CategoryController.php`
+- Tests: `tests/Feature/CategoryTest.php`
+
+**Features:**
+- ✅ CRUD operations for categories
+- ✅ Support for parent-child relationships (subcategories)
+- ✅ System vs user-defined categories
+- ✅ Income/expense category types
+- ✅ Pagination for list endpoints
+- ✅ Validation with Vietnamese messages
+- ✅ 16 comprehensive tests (all passing)
+
+**API Endpoints:**
+```
+GET    /api/categories              - List categories (paginated)
+GET    /api/categories?type=income  - Filter by type (paginated)
+POST   /api/categories              - Create category
+GET    /api/categories/{id}         - Get category details
+PUT    /api/categories/{id}         - Update category
+DELETE /api/categories/{id}         - Delete category
+GET    /api/categories/{id}/subcategories - Get subcategories
+```
+
+**Database:**
+- Migration: `2025_11_25_150144_create_categories_table.php`
+- Seeder: `CategorySeeder.php` (6 income + 11 expense categories)
+
+---
+
+### 🔲 TODO: Remaining Features
+
+The following features need to be implemented according to the design documents in `docs/`:
+
+#### 2. Account Types Module
+**Priority:** High
+**Description:** Types of accounts (Cash, Bank, Credit Card, E-Wallet, Investment)
+**Status:** Not started
+
+**Tasks:**
+- [ ] Create `account_types` migration
+- [ ] Create `AccountType` model with UUID v7
+- [ ] Create Repository + Service layer
+- [ ] Create Controller with CRUD APIs
+- [ ] Add validation (Request classes)
+- [ ] Write comprehensive tests
+- [ ] Seed default account types
+
+**API Endpoints to Implement:**
+```
+GET    /api/account-types           - List account types (paginated)
+POST   /api/account-types           - Create account type (admin only?)
+GET    /api/account-types/{id}      - Get account type details
+PUT    /api/account-types/{id}      - Update account type
+DELETE /api/account-types/{id}      - Delete account type
+```
+
+---
+
+#### 3. Accounts Module
+**Priority:** High
+**Description:** User's financial accounts (wallets, bank accounts, etc.)
+**Status:** Not started
+**Dependencies:** Account Types must be completed first
+
+**Tasks:**
+- [ ] Create `accounts` migration with foreign key to `account_types`
+- [ ] Create `Account` model with UUID v7
+- [ ] Create Repository + Service layer
+- [ ] Implement balance calculation logic
+- [ ] Create Controller with CRUD APIs
+- [ ] Add validation for balance constraints
+- [ ] Write comprehensive tests
+- [ ] Handle soft deletes for accounts with transactions
+
+**API Endpoints to Implement:**
+```
+GET    /api/accounts                - List user's accounts (paginated)
+POST   /api/accounts                - Create account
+GET    /api/accounts/{id}           - Get account details
+PUT    /api/accounts/{id}           - Update account
+DELETE /api/accounts/{id}           - Delete/archive account
+GET    /api/accounts/{id}/balance   - Get current balance
+GET    /api/accounts/summary        - Get summary of all accounts
+```
+
+**Business Logic:**
+- Balance can be negative for credit cards
+- Balance is in VND (Vietnamese Dong)
+- Track balance changes through transactions
+
+---
+
+#### 4. Transactions Module
+**Priority:** High
+**Description:** Income and expense transactions
+**Status:** Not started
+**Dependencies:** Accounts and Categories must be completed first
+
+**Tasks:**
+- [ ] Create `transactions` migration
+- [ ] Create `Transaction` model with UUID v7
+- [ ] Create Repository + Service layer
+- [ ] Implement transaction creation with balance updates
+- [ ] Handle transfer between accounts (2 transactions pattern)
+- [ ] Create Controller with CRUD APIs
+- [ ] Add validation and business rules
+- [ ] Write comprehensive tests
+- [ ] Implement filtering (by date range, category, account, type)
+- [ ] Implement search functionality
+
+**API Endpoints to Implement:**
+```
+GET    /api/transactions                    - List transactions (paginated, filtered)
+POST   /api/transactions                    - Create transaction
+POST   /api/transactions/transfer           - Transfer between accounts
+GET    /api/transactions/{id}               - Get transaction details
+PUT    /api/transactions/{id}               - Update transaction
+DELETE /api/transactions/{id}               - Delete transaction
+GET    /api/transactions/summary            - Get summary statistics
+GET    /api/transactions/by-category        - Group by category
+GET    /api/transactions/by-date            - Group by date
+```
+
+**Business Logic:**
+- Amount must be positive
+- Transaction types: income, expense (no transfer type)
+- Transfer = 1 expense + 1 income transaction
+- Update account balance on create/update/delete
+- Support tags, notes, receipt attachments
+- Date-based filtering and grouping
+
+---
+
+#### 5. Recurring Transactions Module
+**Priority:** Medium
+**Description:** Automatic recurring transactions (salary, rent, subscriptions)
+**Status:** Not started
+**Dependencies:** Transactions must be completed first
+
+**Tasks:**
+- [ ] Create `recurring_transactions` migration
+- [ ] Create `RecurringTransaction` model with UUID v7
+- [ ] Create Repository + Service layer
+- [ ] Implement frequency logic (daily, weekly, monthly, yearly)
+- [ ] Create background job for auto-generation
+- [ ] Create Controller with CRUD APIs
+- [ ] Add validation for recurrence rules
+- [ ] Write comprehensive tests
+
+**API Endpoints to Implement:**
+```
+GET    /api/recurring-transactions          - List recurring transactions (paginated)
+POST   /api/recurring-transactions          - Create recurring transaction
+GET    /api/recurring-transactions/{id}     - Get details
+PUT    /api/recurring-transactions/{id}     - Update recurring transaction
+DELETE /api/recurring-transactions/{id}     - Delete recurring transaction
+POST   /api/recurring-transactions/{id}/skip - Skip next occurrence
+POST   /api/recurring-transactions/{id}/generate - Manually generate transaction
+```
+
+**Business Logic:**
+- Frequencies: daily, weekly, monthly, yearly
+- Support custom intervals (e.g., every 2 weeks)
+- Auto-generate transactions on schedule
+- Track last and next generation dates
+
+---
+
+#### 6. Budgets Module
+**Priority:** Medium
+**Description:** Budget planning and tracking
+**Status:** Not started
+**Dependencies:** Categories and Transactions must be completed first
+
+**Tasks:**
+- [ ] Create `budgets` migration
+- [ ] Create `Budget` model with UUID v7
+- [ ] Create Repository + Service layer
+- [ ] Implement budget tracking logic
+- [ ] Create Controller with CRUD APIs
+- [ ] Add budget vs actual comparison
+- [ ] Implement budget alerts
+- [ ] Write comprehensive tests
+
+**API Endpoints to Implement:**
+```
+GET    /api/budgets                         - List budgets (paginated)
+POST   /api/budgets                         - Create budget
+GET    /api/budgets/{id}                    - Get budget details
+PUT    /api/budgets/{id}                    - Update budget
+DELETE /api/budgets/{id}                    - Delete budget
+GET    /api/budgets/{id}/progress           - Get budget progress
+GET    /api/budgets/summary                 - Get all budgets summary
+GET    /api/budgets/alerts                  - Get budget alerts
+```
+
+**Business Logic:**
+- Periods: weekly, monthly, quarterly, yearly
+- Track spending vs budget limit
+- Alert when reaching thresholds (e.g., 80%, 100%)
+- Can be category-specific or overall
+
+---
+
+#### 7. Goals Module
+**Priority:** Medium
+**Description:** Financial goals (savings, debt payment, spending limits)
+**Status:** Not started
+**Dependencies:** Accounts must be completed first
+
+**Tasks:**
+- [ ] Create `goals` migration
+- [ ] Create `Goal` model with UUID v7
+- [ ] Create Repository + Service layer
+- [ ] Implement goal progress tracking
+- [ ] Create Controller with CRUD APIs
+- [ ] Add goal status management
+- [ ] Write comprehensive tests
+
+**API Endpoints to Implement:**
+```
+GET    /api/goals                           - List goals (paginated)
+POST   /api/goals                           - Create goal
+GET    /api/goals/{id}                      - Get goal details
+PUT    /api/goals/{id}                      - Update goal
+DELETE /api/goals/{id}                      - Delete goal
+GET    /api/goals/{id}/progress             - Get goal progress
+POST   /api/goals/{id}/contribute           - Add contribution
+GET    /api/goals/summary                   - Get goals summary
+```
+
+**Business Logic:**
+- Goal types: saving, debt_payment, spending_limit
+- Track progress: current_amount vs target_amount
+- Status: in_progress, completed, cancelled, paused
+- Optional link to specific account or category
+
+---
+
+#### 8. Goal Contributions Module
+**Priority:** Low
+**Description:** Track contributions to financial goals
+**Status:** Not started
+**Dependencies:** Goals must be completed first
+
+**Tasks:**
+- [ ] Create `goal_contributions` migration
+- [ ] Create `GoalContribution` model with UUID v7
+- [ ] Create Repository + Service layer
+- [ ] Link to transactions (optional)
+- [ ] Create Controller with CRUD APIs
+- [ ] Write comprehensive tests
+
+**API Endpoints to Implement:**
+```
+GET    /api/goals/{goalId}/contributions    - List contributions for a goal
+POST   /api/goals/{goalId}/contributions    - Add contribution
+GET    /api/contributions/{id}              - Get contribution details
+PUT    /api/contributions/{id}              - Update contribution
+DELETE /api/contributions/{id}              - Delete contribution
+```
+
+---
+
+#### 9. Notifications Module
+**Priority:** Low
+**Description:** System notifications for users
+**Status:** Not started
+
+**Tasks:**
+- [ ] Create `notifications` migration
+- [ ] Create `Notification` model with UUID v7
+- [ ] Create Repository + Service layer
+- [ ] Implement notification types
+- [ ] Create Controller with APIs
+- [ ] Add mark as read functionality
+- [ ] Write comprehensive tests
+
+**API Endpoints to Implement:**
+```
+GET    /api/notifications                   - List notifications (paginated)
+GET    /api/notifications/unread            - List unread notifications
+PUT    /api/notifications/{id}/read         - Mark as read
+PUT    /api/notifications/read-all          - Mark all as read
+DELETE /api/notifications/{id}              - Delete notification
+```
+
+**Notification Types:**
+- Budget warnings and exceeded alerts
+- Goal achievement notifications
+- Recurring transaction reminders
+- Low account balance alerts
+- Anomaly detection alerts
+
+---
+
+#### 10. Authentication & User Management
+**Priority:** High
+**Description:** User registration, login, profile management
+**Status:** Partially complete (User model exists)
+
+**Tasks:**
+- [ ] Implement registration API
+- [ ] Implement login API with JWT
+- [ ] Implement logout API
+- [ ] Implement password reset
+- [ ] Implement profile management
+- [ ] Add email verification (optional)
+- [ ] Write comprehensive tests
+
+**API Endpoints to Implement:**
+```
+POST   /api/auth/register                   - User registration
+POST   /api/auth/login                      - User login
+POST   /api/auth/logout                     - User logout
+POST   /api/auth/refresh                    - Refresh token
+POST   /api/auth/forgot-password            - Request password reset
+POST   /api/auth/reset-password             - Reset password
+GET    /api/auth/me                         - Get current user
+PUT    /api/auth/profile                    - Update profile
+PUT    /api/auth/password                   - Change password
+```
+
+---
+
+#### 11. Analytics & Reports Module
+**Priority:** Low
+**Description:** Financial reports and analytics
+**Status:** Not started
+**Dependencies:** All transaction-related modules must be completed
+
+**Tasks:**
+- [ ] Implement income vs expense reports
+- [ ] Implement spending by category analysis
+- [ ] Implement monthly/yearly summaries
+- [ ] Implement trends and insights
+- [ ] Create APIs for data visualization
+- [ ] Add export functionality (CSV, PDF)
+- [ ] Write comprehensive tests
+
+**API Endpoints to Implement:**
+```
+GET    /api/reports/summary                 - Overall financial summary
+GET    /api/reports/income-expense          - Income vs expense report
+GET    /api/reports/by-category             - Spending by category
+GET    /api/reports/trends                  - Spending trends
+GET    /api/reports/monthly                 - Monthly summary
+GET    /api/reports/yearly                  - Yearly summary
+POST   /api/reports/export                  - Export report
+```
+
+---
+
+### 📊 Implementation Priority
+
+**Phase 1: Core Functionality (Must Have)**
+1. ✅ Categories (Complete)
+2. 🔲 Account Types
+3. 🔲 Accounts
+4. 🔲 Transactions
+5. 🔲 Authentication & User Management
+
+**Phase 2: Advanced Features (Should Have)**
+6. 🔲 Recurring Transactions
+7. 🔲 Budgets
+8. 🔲 Goals
+
+**Phase 3: Nice to Have**
+9. 🔲 Goal Contributions
+10. 🔲 Notifications
+11. 🔲 Analytics & Reports
+
+---
+
+### 📝 Implementation Guidelines
+
+When implementing each module, follow this checklist:
+
+**Database Layer:**
+- [ ] Create migration with UUID v7 primary keys
+- [ ] Add proper indexes and foreign keys
+- [ ] Add constraints and validations
+- [ ] Create seeder for default data (if applicable)
+
+**Model Layer:**
+- [ ] Add `HasUuids` trait
+- [ ] Define `$fillable` properties
+- [ ] Add `$casts` for data types
+- [ ] Define relationships
+- [ ] Add query scopes
+- [ ] Add business logic methods
+
+**Repository Layer:**
+- [ ] Create Repository Interface
+- [ ] Implement Repository with base CRUD
+- [ ] Add custom query methods
+- [ ] Support column selection
+- [ ] Support eager loading
+- [ ] Support pagination
+
+**Service Layer:**
+- [ ] Create Service Interface
+- [ ] Implement Service with business logic
+- [ ] Add validation rules
+- [ ] Handle transactions
+- [ ] Add error handling
+
+**Controller Layer:**
+- [ ] Create Request validation classes
+- [ ] Implement API endpoints
+- [ ] Add proper HTTP status codes
+- [ ] Return consistent JSON responses
+- [ ] Add query parameter support
+
+**Testing:**
+- [ ] Create Factory for model
+- [ ] Write feature tests for all APIs
+- [ ] Write unit tests for complex logic
+- [ ] Test edge cases and error scenarios
+- [ ] Ensure 100% pass rate
+
+**Documentation:**
+- [ ] Update API documentation
+- [ ] Add code comments
+- [ ] Update CLAUDE.md roadmap
+- [ ] Add usage examples
 
 ---
 

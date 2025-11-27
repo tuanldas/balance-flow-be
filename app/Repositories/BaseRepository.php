@@ -26,7 +26,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $query->get();
     }
 
-    public function find(int $id, array $columns = ['*'], array $relations = []): ?Model
+    public function find(string|int $id, array $columns = ['*'], array $relations = []): ?Model
     {
         $query = $this->model->select($columns);
 
@@ -37,7 +37,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $query->find($id);
     }
 
-    public function findOrFail(int $id, array $columns = ['*'], array $relations = []): Model
+    public function findOrFail(string|int $id, array $columns = ['*'], array $relations = []): Model
     {
         $query = $this->model->select($columns);
 
@@ -53,14 +53,14 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): bool
+    public function update(string|int $id, array $data): bool
     {
         $record = $this->model->findOrFail($id);
 
         return $record->update($data);
     }
 
-    public function delete(int $id): bool
+    public function delete(string|int $id): bool
     {
         $record = $this->model->findOrFail($id);
 

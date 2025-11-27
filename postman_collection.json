@@ -1,0 +1,639 @@
+{
+	"info": {
+		"_postman_id": "balance-flow-api-collection",
+		"name": "Balance Flow API",
+		"description": "Complete API collection for Balance Flow backend application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "List All Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories?per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15",
+									"description": "Number of items per page (default: 15)"
+								},
+								{
+									"key": "type",
+									"value": "income",
+									"description": "Filter by type: income or expense",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all categories (system + user's custom) with pagination.\n\nQuery Parameters:\n- `per_page` (optional): Number of items per page (default: 15)\n- `type` (optional): Filter by category type (income|expense)\n\nResponse includes:\n- success: boolean\n- data: array of categories\n- pagination: current_page, per_page, total, last_page, from, to"
+					},
+					"response": []
+				},
+				{
+					"name": "List Income Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories?type=income&per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "type",
+									"value": "income"
+								},
+								{
+									"key": "per_page",
+									"value": "15"
+								}
+							]
+						},
+						"description": "Get only income categories with pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "List Expense Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories?type=expense&per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "type",
+									"value": "expense"
+								},
+								{
+									"key": "per_page",
+									"value": "15"
+								}
+							]
+						},
+						"description": "Get only expense categories with pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Get details of a specific category by ID.\n\nReturns:\n- success: boolean\n- data: category object with all fields"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.collectionVariables.set('category_id', response.data.id);",
+									"        console.log('Category ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Salary\",\n    \"category_type\": \"income\",\n    \"icon\": \"work\",\n    \"color\": \"#4CAF50\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"]
+						},
+						"description": "Create a new user category.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- parent_id: UUID of parent category\n- icon: string (max 50)\n- color: hex color code (#RRGGBB)\n\nValidation:\n- Name is required\n- Category type must be income or expense\n- Color must be hex format\n- Parent must exist and have same type"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Subcategory",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Bonus\",\n    \"category_type\": \"income\",\n    \"parent_id\": \"{{category_id}}\",\n    \"icon\": \"card_giftcard\",\n    \"color\": \"#8BC34A\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"]
+						},
+						"description": "Create a subcategory under a parent category.\n\nNote: Subcategory must have the same category_type as its parent."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Monthly Salary\",\n    \"icon\": \"payments\",\n    \"color\": \"#2196F3\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Update an existing user category.\n\nNote: \n- Cannot update system categories (is_system = true)\n- Can only update own categories\n- All fields are optional\n- Cannot change user_id or is_system"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category (PATCH)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Category Name\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Partial update of a category (PATCH method)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Delete a user category.\n\nRestrictions:\n- Cannot delete system categories\n- Cannot delete own categories that have subcategories\n- Cannot delete categories with transactions (future feature)\n- Can only delete own categories"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subcategories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}/subcategories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}", "subcategories"]
+						},
+						"description": "Get all subcategories of a parent category.\n\nReturns:\n- success: boolean\n- data: array of subcategories"
+					},
+					"response": []
+				}
+			],
+			"description": "Category management endpoints.\n\nAll endpoints require authentication via Bearer token.\n\nCategories can be:\n- System categories (is_system = true): Created by admin, cannot be modified/deleted\n- User categories (is_system = false): Created by users, can be modified/deleted\n\nCategory types:\n- income: For income transactions\n- expense: For expense transactions"
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register (TODO)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						},
+						"description": "User registration endpoint (Not yet implemented)."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (TODO)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.access_token) {",
+									"        pm.collectionVariables.set('access_token', response.access_token);",
+									"        console.log('Access token saved');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "User login endpoint (Not yet implemented).\n\nOn success, saves access_token to collection variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout (TODO)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout"]
+						},
+						"description": "User logout endpoint (Not yet implemented)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User (TODO)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "me"]
+						},
+						"description": "Get authenticated user details (Not yet implemented)."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints (Not yet implemented).\n\nThese endpoints will be implemented in Phase 1."
+		},
+		{
+			"name": "Account Types (TODO)",
+			"item": [
+				{
+					"name": "List Account Types",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/account-types?per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "account-types"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15"
+								}
+							]
+						},
+						"description": "List all account types (Not yet implemented)."
+					},
+					"response": []
+				}
+			],
+			"description": "Account Types endpoints (Not yet implemented).\n\nPhase 1 - Priority: High"
+		},
+		{
+			"name": "Accounts (TODO)",
+			"item": [
+				{
+					"name": "List Accounts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/accounts?per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "accounts"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15"
+								}
+							]
+						},
+						"description": "List user's accounts (Not yet implemented)."
+					},
+					"response": []
+				}
+			],
+			"description": "Accounts endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Account Types"
+		},
+		{
+			"name": "Transactions (TODO)",
+			"item": [
+				{
+					"name": "List Transactions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/transactions?per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "transactions"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15"
+								}
+							]
+						},
+						"description": "List transactions (Not yet implemented)."
+					},
+					"response": []
+				}
+			],
+			"description": "Transactions endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Accounts, Categories"
+		},
+		{
+			"name": "Budgets (TODO)",
+			"item": [
+				{
+					"name": "List Budgets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/budgets?per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "budgets"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15"
+								}
+							]
+						},
+						"description": "List budgets (Not yet implemented)."
+					},
+					"response": []
+				}
+			],
+			"description": "Budgets endpoints (Not yet implemented).\n\nPhase 2 - Priority: Medium\nDepends on: Categories, Transactions"
+		},
+		{
+			"name": "Goals (TODO)",
+			"item": [
+				{
+					"name": "List Goals",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/goals?per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "goals"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15"
+								}
+							]
+						},
+						"description": "List financial goals (Not yet implemented)."
+					},
+					"response": []
+				}
+			],
+			"description": "Goals endpoints (Not yet implemented).\n\nPhase 2 - Priority: Medium\nDepends on: Accounts"
+		},
+		{
+			"name": "Reports (TODO)",
+			"item": [
+				{
+					"name": "Get Summary Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reports/summary",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reports", "summary"]
+						},
+						"description": "Get financial summary report (Not yet implemented)."
+					},
+					"response": []
+				}
+			],
+			"description": "Reports and Analytics endpoints (Not yet implemented).\n\nPhase 3 - Priority: Low\nDepends on: All transaction modules"
+		}
+	]
+}

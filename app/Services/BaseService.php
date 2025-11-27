@@ -21,7 +21,7 @@ abstract class BaseService implements BaseServiceInterface
         return $this->repository->all();
     }
 
-    public function findById(int $id): ?Model
+    public function findById(string|int $id): ?Model
     {
         return $this->repository->find($id);
     }
@@ -31,12 +31,12 @@ abstract class BaseService implements BaseServiceInterface
         return $this->repository->create($data);
     }
 
-    public function update(int $id, array $data): bool
+    public function update(string|int $id, array $data): bool
     {
         return $this->repository->update($id, $data);
     }
 
-    public function delete(int $id): bool
+    public function delete(string|int $id): bool
     {
         return $this->repository->delete($id);
     }
