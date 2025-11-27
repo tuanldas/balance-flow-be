@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [API Testing with Postman](#api-testing-with-postman)
 - [Git Flow Workflow](#git-flow-workflow)
 - [Docker Setup](#docker-setup)
 - [Development Commands](#development-commands)
@@ -39,6 +40,218 @@ This is a Laravel 12 backend application using PHP 8.2+ with PostgreSQL database
 - **app**: PHP 8.2-FPM with Supervisor managing PHP-FPM, Queue Workers, and Scheduler
 - **nginx**: Nginx web server
 - **db**: PostgreSQL 16 database
+
+---
+
+## API Testing with Postman
+
+A comprehensive Postman collection is available for testing all API endpoints.
+
+### Postman Collection File
+
+**Location:** `postman_collection.json` (root directory)
+
+**What's Included:**
+- All implemented API endpoints with sample requests
+- Authentication setup with Bearer token
+- Environment variables for easy configuration
+- Automatic token and ID management
+- Detailed descriptions and documentation
+- Request/response examples
+- Validation rules and constraints
+
+### Import Instructions
+
+1. **Open Postman**
+   - Download from [postman.com](https://www.postman.com/downloads/) if not installed
+
+2. **Import Collection**
+   ```
+   File → Import → Select postman_collection.json
+   ```
+
+3. **Configure Environment Variables**
+   - `base_url`: Default is `http://localhost:8080` (Docker)
+   - Change to `http://localhost:8000` for local PHP serve
+   - `access_token`: Auto-populated after login
+   - `category_id`: Auto-populated after creating a category
+
+### Collection Structure
+
+#### 1. Categories (✅ Fully Implemented)
+```
+GET    /api/categories              - List all categories (paginated)
+GET    /api/categories?type=income  - Filter by type
+GET    /api/categories?type=expense - Filter by type
+POST   /api/categories              - Create new category
+GET    /api/categories/{id}         - Get category details
+PUT    /api/categories/{id}         - Update category
+PATCH  /api/categories/{id}         - Partial update
+DELETE /api/categories/{id}         - Delete category
+GET    /api/categories/{id}/subcategories - Get subcategories
+```
+
+**Features:**
+- Pagination with `per_page` parameter
+- Filter by category type (income/expense)
+- Support for parent-child relationships
+- Automatic validation
+- Vietnamese error messages
+
+#### 2. Authentication (🔲 TODO)
+```
+POST   /api/auth/register           - User registration
+POST   /api/auth/login              - User login
+POST   /api/auth/logout             - User logout
+GET    /api/auth/me                 - Get current user
+POST   /api/auth/forgot-password    - Password reset request
+POST   /api/auth/reset-password     - Reset password
+```
+
+#### 3. Future Endpoints (🔲 TODO)
+Placeholders included for:
+- Account Types
+- Accounts
+- Transactions
+- Recurring Transactions
+- Budgets
+- Goals
+- Goal Contributions
+- Notifications
+- Reports & Analytics
+
+### Using the Collection
+
+#### Step 1: Authentication (Future)
+When authentication is implemented:
+1. Use "Login" request
+2. Access token will auto-save to `{{access_token}}`
+3. All subsequent requests will use this token
+
+#### Step 2: Testing Categories
+1. **List Categories**: See all system + user categories
+2. **Create Category**: Creates a new category (auto-saves ID)
+3. **Get Details**: View specific category using saved ID
+4. **Update Category**: Modify category name, icon, color
+5. **Delete Category**: Remove user-created categories
+6. **Create Subcategory**: Create child category under parent
+
+#### Step 3: Query Parameters
+Supported parameters:
+- `per_page`: Number of items per page (default: 15)
+- `type`: Filter by income or expense
+
+Example:
+```
+GET /api/categories?type=income&per_page=20
+```
+
+### Automated Scripts
+
+The collection includes JavaScript test scripts for automation:
+
+**Login Request:**
+```javascript
+// Auto-saves access token to collection variable
+if (pm.response.code === 200) {
+    const response = pm.response.json();
+    pm.collectionVariables.set('access_token', response.access_token);
+}
+```
+
+**Create Category Request:**
+```javascript
+// Auto-saves category ID for subsequent requests
+if (pm.response.code === 201) {
+    const response = pm.response.json();
+    pm.collectionVariables.set('category_id', response.data.id);
+}
+```
+
+### Response Format
+
+All API responses follow a consistent format:
+
+**Success Response:**
+```json
+{
+    "success": true,
+    "data": { ... },
+    "pagination": {
+        "current_page": 1,
+        "per_page": 15,
+        "total": 20,
+        "last_page": 2,
+        "from": 1,
+        "to": 15
+    }
+}
+```
+
+**Error Response:**
+```json
+{
+    "success": false,
+    "message": "Error message in Vietnamese"
+}
+```
+
+### Tips for Testing
+
+1. **Start with Categories**: Fully implemented and ready to test
+2. **Create Test Data**: Use "Create Category" to populate test categories
+3. **Test Validation**: Try invalid data to see validation messages
+4. **Test Permissions**: Try updating/deleting system categories (should fail)
+5. **Test Relationships**: Create subcategories under parent categories
+6. **Test Pagination**: Use different `per_page` values
+7. **Test Filtering**: Filter by income/expense types
+
+### Environment Switching
+
+For different environments, update `base_url`:
+
+```
+Development (Docker):  http://localhost:8080
+Development (Local):   http://localhost:8000
+Staging:               https://staging.example.com
+Production:            https://api.example.com
+```
+
+### Testing Workflow Example
+
+```bash
+1. Import postman_collection.json into Postman
+2. Ensure API is running (docker compose up -d)
+3. Test "List All Categories" - should see system categories
+4. Test "Create Category" - creates new user category
+5. Test "Get Category Details" - uses saved category_id
+6. Test "Update Category" - modifies the category
+7. Test "Create Subcategory" - adds child category
+8. Test "Get Subcategories" - lists children
+9. Test "Delete Category" - removes the category
+```
+
+### Common Issues & Solutions
+
+**401 Unauthorized:**
+- Ensure access_token is set in collection variables
+- Check token expiration
+- Re-login to get fresh token
+
+**404 Not Found:**
+- Verify API is running on correct port
+- Check base_url in collection variables
+- Ensure route exists in routes/api.php
+
+**422 Validation Error:**
+- Check request body format
+- Verify required fields are provided
+- Check field types and constraints
+
+**500 Internal Server Error:**
+- Check Laravel logs: `docker compose logs -f app`
+- Verify database connection
+- Check for migration errors
 
 ---
 
@@ -1712,6 +1925,7 @@ class YourModelService extends BaseService implements YourModelServiceInterface
 - **vite.config.js**: Vite build configuration
 - **artisan**: CLI entry point for Laravel commands
 - **bootstrap/providers.php**: Service provider registration
+- **postman_collection.json**: Complete Postman API collection for testing all endpoints
 
 ---
 
@@ -1756,6 +1970,7 @@ This section tracks the implementation status of all features based on the syste
 - ✅ Pagination for list endpoints
 - ✅ Validation with Vietnamese messages
 - ✅ 16 comprehensive tests (all passing)
+- ✅ Complete Postman collection for API testing
 
 **API Endpoints:**
 ```
@@ -1771,6 +1986,11 @@ GET    /api/categories/{id}/subcategories - Get subcategories
 **Database:**
 - Migration: `2025_11_25_150144_create_categories_table.php`
 - Seeder: `CategorySeeder.php` (6 income + 11 expense categories)
+
+**Testing:**
+- Postman Collection: All endpoints available in `postman_collection.json`
+- PHPUnit Tests: 16 tests covering all functionality
+- Manual Testing: Import Postman collection and test all endpoints
 
 ---
 
@@ -2165,12 +2385,14 @@ When implementing each module, follow this checklist:
 - [ ] Write unit tests for complex logic
 - [ ] Test edge cases and error scenarios
 - [ ] Ensure 100% pass rate
+- [ ] Add endpoints to Postman collection
 
 **Documentation:**
 - [ ] Update API documentation
 - [ ] Add code comments
 - [ ] Update CLAUDE.md roadmap
 - [ ] Add usage examples
+- [ ] Update Postman collection with new endpoints
 
 ---
 
