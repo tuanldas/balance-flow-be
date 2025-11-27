@@ -26,7 +26,7 @@ class UserController extends Controller
     {
         $user = $this->userService->findById($id);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
@@ -56,7 +56,7 @@ class UserController extends Controller
 
         $updated = $this->userService->update($id, $validated);
 
-        if (!$updated) {
+        if (! $updated) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
@@ -67,7 +67,7 @@ class UserController extends Controller
     {
         $deleted = $this->userService->delete($id);
 
-        if (!$deleted) {
+        if (! $deleted) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
