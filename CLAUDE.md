@@ -2,8 +2,65 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## ⚠️ IMPORTANT RULES FOR CLAUDE CODE
+
+**CRITICAL - READ FIRST:**
+
+### Git Commit Policy
+
+**🚫 NEVER commit without explicit user approval**
+
+- ❌ DO NOT run `git commit` automatically after completing tasks
+- ❌ DO NOT commit even if tests pass or code works perfectly
+- ❌ DO NOT assume the user wants changes committed
+- ✅ ALWAYS ask "Bạn có muốn tôi commit không?" before committing
+- ✅ WAIT for explicit confirmation: "commit", "yes", "ok", etc.
+- ✅ Show summary of changes and ASK before committing
+
+**Why this rule exists:**
+- User may want to review changes first
+- User may want to modify commit message
+- User may want to add more changes before committing
+- User may want to test manually before committing
+
+**Correct workflow:**
+```
+1. Complete the requested task
+2. Run tests (if applicable)
+3. Show summary of changes
+4. ASK: "Bạn có muốn tôi commit những thay đổi này không?"
+5. WAIT for user confirmation
+6. Only then: git commit
+```
+
+**Example - CORRECT:**
+```
+Assistant: Tôi đã hoàn thành refactoring. Tất cả tests pass (14/14).
+
+Changes:
+- Created app/Adapters/Auth/
+- Updated AuthService.php
+- All tests passing
+
+Bạn có muốn tôi commit những thay đổi này không?
+
+User: commit
+Assistant: [proceeds with git commit]
+```
+
+**Example - WRONG:**
+```
+Assistant: Tôi đã hoàn thành refactoring.
+[automatically runs git commit without asking]  ❌ WRONG
+```
+
+---
+
 ## Table of Contents
 
+- [⚠️ IMPORTANT RULES FOR CLAUDE CODE](#️-important-rules-for-claude-code)
 - [Project Overview](#project-overview)
 - [API Testing with Postman](#api-testing-with-postman)
 - [Git Flow Workflow](#git-flow-workflow)
