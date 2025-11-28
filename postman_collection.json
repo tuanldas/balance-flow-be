@@ -329,8 +329,28 @@
 			"name": "Authentication",
 			"item": [
 				{
-					"name": "Register (TODO)",
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.access_token) {",
+									"        pm.collectionVariables.set('access_token', response.data.access_token);",
+									"        console.log('Access token saved after registration');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -353,12 +373,12 @@
 							"host": ["{{base_url}}"],
 							"path": ["api", "auth", "register"]
 						},
-						"description": "User registration endpoint (Not yet implemented)."
+						"description": "Register a new user account.\n\nRequired fields:\n- name: string (max 255)\n- email: string (valid email, unique)\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- Returns user data and access token\n- Access token is automatically saved to collection variables"
 					},
 					"response": []
 				},
 				{
-					"name": "Login (TODO)",
+					"name": "Login",
 					"event": [
 						{
 							"listen": "test",
@@ -366,9 +386,9 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    const response = pm.response.json();",
-									"    if (response.access_token) {",
-									"        pm.collectionVariables.set('access_token', response.access_token);",
-									"        console.log('Access token saved');",
+									"    if (response.data && response.data.access_token) {",
+									"        pm.collectionVariables.set('access_token', response.data.access_token);",
+									"        console.log('Access token saved after login');",
 									"    }",
 									"}"
 								],
@@ -402,32 +422,12 @@
 							"host": ["{{base_url}}"],
 							"path": ["api", "auth", "login"]
 						},
-						"description": "User login endpoint (Not yet implemented).\n\nOn success, saves access_token to collection variable."
+						"description": "Login with email and password.\n\nRequired fields:\n- email: string (valid email)\n- password: string\n\nOn success:\n- Returns user data and access token\n- Access token is automatically saved to collection variables"
 					},
 					"response": []
 				},
 				{
-					"name": "Logout (TODO)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/auth/logout",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "logout"]
-						},
-						"description": "User logout endpoint (Not yet implemented)."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Current User (TODO)",
+					"name": "Get Current User",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -442,12 +442,174 @@
 							"host": ["{{base_url}}"],
 							"path": ["api", "auth", "me"]
 						},
-						"description": "Get authenticated user details (Not yet implemented)."
+						"description": "Get authenticated user details.\n\nRequires authentication via Bearer token.\n\nReturns:\n- User information (id, name, email, etc.)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe Updated\",\n    \"email\": \"john.updated@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "profile"]
+						},
+						"description": "Update user profile information.\n\nRequires authentication via Bearer token.\n\nOptional fields:\n- name: string (max 255)\n- email: string (valid email, unique)\n\nReturns updated user information."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"newpassword123\",\n    \"new_password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "password"]
+						},
+						"description": "Change user password.\n\nRequires authentication via Bearer token.\n\nRequired fields:\n- current_password: string\n- new_password: string (min 8 characters)\n- new_password_confirmation: string (must match new_password)\n\nOn success:\n- All tokens are revoked (user must login again)\n- Returns success message"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout"]
+						},
+						"description": "Logout from current device.\n\nRequires authentication via Bearer token.\n\nRevokes current access token only.\nUser remains logged in on other devices."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout All Devices",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout-all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout-all"]
+						},
+						"description": "Logout from all devices.\n\nRequires authentication via Bearer token.\n\nRevokes all access tokens.\nUser must login again on all devices."
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/forgot-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "forgot-password"]
+						},
+						"description": "Request password reset link.\n\nRequired fields:\n- email: string (must exist in database)\n\nSends password reset link to user's email."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"reset-token-from-email\",\n    \"email\": \"john@example.com\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/reset-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "reset-password"]
+						},
+						"description": "Reset password using token from email.\n\nRequired fields:\n- token: string (from reset email)\n- email: string\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- All tokens are revoked\n- User must login with new password"
 					},
 					"response": []
 				}
 			],
-			"description": "Authentication endpoints (Not yet implemented).\n\nThese endpoints will be implemented in Phase 1."
+			"description": "Authentication endpoints - ✅ Fully Implemented\n\nPhase 1 - Priority: High\n\nUsing Laravel Sanctum for token-based authentication.\n\nPublic endpoints (no auth required):\n- POST /auth/register\n- POST /auth/login\n- POST /auth/forgot-password\n- POST /auth/reset-password\n\nProtected endpoints (require Bearer token):\n- GET /auth/me\n- PUT /auth/profile\n- PUT /auth/password\n- POST /auth/logout\n- POST /auth/logout-all\n\nAll responses follow standard format:\n{\n  \"success\": true/false,\n  \"message\": \"Message in Vietnamese\",\n  \"data\": {...}\n}"
 		},
 		{
 			"name": "Account Types (TODO)",

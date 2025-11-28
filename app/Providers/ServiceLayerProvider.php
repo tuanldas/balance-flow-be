@@ -20,6 +20,11 @@ class ServiceLayerProvider extends ServiceProvider
             \App\Services\Contracts\CategoryServiceInterface::class,
             \App\Services\CategoryService::class
         );
+
+        $this->app->bind(
+            \App\Services\Contracts\AuthServiceInterface::class,
+            \App\Services\AuthService::class
+        );
     }
 
     /**

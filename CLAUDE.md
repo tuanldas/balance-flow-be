@@ -98,15 +98,32 @@ GET    /api/categories/{id}/subcategories - Get subcategories
 - Automatic validation
 - Vietnamese error messages
 
-#### 2. Authentication (🔲 TODO)
+#### 2. Authentication (✅ Fully Implemented)
 ```
 POST   /api/auth/register           - User registration
 POST   /api/auth/login              - User login
-POST   /api/auth/logout             - User logout
 GET    /api/auth/me                 - Get current user
+PUT    /api/auth/profile            - Update user profile
+PUT    /api/auth/password           - Change password
+POST   /api/auth/logout             - User logout (current device)
+POST   /api/auth/logout-all         - Logout from all devices
 POST   /api/auth/forgot-password    - Password reset request
-POST   /api/auth/reset-password     - Reset password
+POST   /api/auth/reset-password     - Reset password with token
 ```
+
+**Features:**
+- Laravel Sanctum token-based authentication
+- Token naming format: `email_dd/mm/yyyy` (e.g., `user@example.com_28/11/2025`)
+- Auto-save access token after register/login
+- Automatic validation with Vietnamese error messages
+- Password hashing with bcrypt
+- Multi-device logout support
+
+**Public Endpoints (no auth required):**
+- register, login, forgot-password, reset-password
+
+**Protected Endpoints (require Bearer token):**
+- me, profile, password, logout, logout-all
 
 #### 3. Future Endpoints (🔲 TODO)
 Placeholders included for:
@@ -122,11 +139,10 @@ Placeholders included for:
 
 ### Using the Collection
 
-#### Step 1: Authentication (Future)
-When authentication is implemented:
-1. Use "Login" request
-2. Access token will auto-save to `{{access_token}}`
-3. All subsequent requests will use this token
+#### Step 1: Authentication
+1. **Register** or **Login** → Access token auto-saves to `{{access_token}}`
+2. All subsequent requests automatically use this token
+3. Token format: `email_dd/mm/yyyy` for easy tracking
 
 #### Step 2: Testing Categories
 1. **List Categories**: See all system + user categories
@@ -736,6 +752,22 @@ php artisan pail              # Log viewer only
 ```
 
 ### Testing
+
+**Recommended: Using Isolated Test Environment**
+```bash
+./run-tests.sh                          # Run all tests with proper environment
+./run-tests.sh --filter=AuthTest        # Run specific test
+./run-tests.sh --testsuite=Feature      # Run feature tests only
+```
+
+The `run-tests.sh` script automatically:
+1. Stops all running services
+2. Starts isolated testing environment (with `db_test` container)
+3. Runs fresh migrations + seeders
+4. Executes tests
+5. Cleans up and restarts development environment
+
+**Alternative: Direct PHPUnit (requires manual setup)**
 ```bash
 composer test                  # Run all tests
 ./vendor/bin/phpunit          # Direct PHPUnit invocation
@@ -744,7 +776,11 @@ composer test                  # Run all tests
 ./vendor/bin/phpunit tests/Feature      # Run only feature tests
 ```
 
-Tests use an in-memory SQLite database (DB_DATABASE=testing) configured in phpunit.xml.
+**Testing Database:**
+- Uses PostgreSQL `balance_flow_test` database (isolated from development)
+- Test database runs in tmpfs (in-memory) for speed
+- Automatically migrated fresh before each test run
+- Configured in `phpunit.xml` and `compose-testing.yml`
 
 ### Code Quality
 ```bash
@@ -1440,9 +1476,12 @@ public function createUserWithProfile(array $userData, array $profileData): User
 
 - **Unit tests** (tests/Unit/): Test individual classes and methods in isolation
 - **Feature tests** (tests/Feature/): Test HTTP endpoints and application features end-to-end
-- Tests run with separate environment: in-memory SQLite, array cache, sync queues
+- Tests run with isolated PostgreSQL database (`balance_flow_test` in tmpfs)
+- Separate testing environment using `compose-testing.yml`
+- Use `run-tests.sh` script for automated setup, execution, and cleanup
 - Use factories for generating test data
-- Database is automatically reset between tests
+- Database is automatically migrated fresh before each test run
+- Array cache and sync queues for faster execution
 
 ### Testing with Repository & Service Pattern
 
@@ -1921,7 +1960,9 @@ class YourModelService extends BaseService implements YourModelServiceInterface
 - **composer.json**: PHP dependencies and custom scripts
 - **package.json**: Node dependencies and build scripts
 - **.env.example**: Environment variable template
-- **phpunit.xml**: PHPUnit test configuration
+- **phpunit.xml**: PHPUnit test configuration (PostgreSQL testing)
+- **compose-testing.yml**: Docker compose override for testing environment
+- **run-tests.sh**: Automated test runner script with environment management
 - **vite.config.js**: Vite build configuration
 - **artisan**: CLI entry point for Laravel commands
 - **bootstrap/providers.php**: Service provider registration
@@ -1994,11 +2035,66 @@ GET    /api/categories/{id}/subcategories - Get subcategories
 
 ---
 
+#### 2. Authentication Module (100% Complete)
+**Status:** Fully implemented with tests
+**Files:**
+- Models: `app/Models/User.php` (with `HasApiTokens` trait)
+- Service: `app/Services/AuthService.php`
+- Service Interface: `app/Services/Contracts/AuthServiceInterface.php`
+- Controller: `app/Http/Controllers/AuthController.php`
+- Request Classes: `app/Http/Requests/Auth/` (6 validation classes)
+- Tests: `tests/Feature/AuthTest.php`
+- Config: `config/sanctum.php`
+- Migration: `2025_11_28_094341_create_personal_access_tokens_table.php`
+
+**Features:**
+- ✅ Laravel Sanctum token-based authentication
+- ✅ User registration with auto-login
+- ✅ Login with token generation
+- ✅ Token naming: `email_dd/mm/yyyy` format (e.g., `user@example.com_28/11/2025`)
+- ✅ Get current user profile
+- ✅ Update user profile (name, email)
+- ✅ Change password with validation
+- ✅ Logout from current device
+- ✅ Logout from all devices
+- ✅ Password reset request (forgot password)
+- ✅ Password reset with token
+- ✅ Validation with Vietnamese messages
+- ✅ 14 comprehensive tests (all passing)
+- ✅ Complete Postman collection with auto-save token
+
+**API Endpoints:**
+```
+# Public (no auth required)
+POST   /api/auth/register           - User registration
+POST   /api/auth/login              - User login
+POST   /api/auth/forgot-password    - Password reset request
+POST   /api/auth/reset-password     - Reset password with token
+
+# Protected (require Bearer token)
+GET    /api/auth/me                 - Get current user
+PUT    /api/auth/profile            - Update user profile
+PUT    /api/auth/password           - Change password
+POST   /api/auth/logout             - Logout (current device)
+POST   /api/auth/logout-all         - Logout from all devices
+```
+
+**Database:**
+- Migration: `2025_11_28_094341_create_personal_access_tokens_table.php`
+- Uses `uuidMorphs` for tokenable relationship (compatible with UUID v7)
+
+**Testing:**
+- Postman Collection: All endpoints with auto-save token
+- PHPUnit Tests: 14 tests covering all authentication flows
+- Test Database: PostgreSQL (`balance_flow_test` in tmpfs)
+
+---
+
 ### 🔲 TODO: Remaining Features
 
 The following features need to be implemented according to the design documents in `docs/`:
 
-#### 2. Account Types Module
+#### 3. Account Types Module
 **Priority:** High
 **Description:** Types of accounts (Cash, Bank, Credit Card, E-Wallet, Investment)
 **Status:** Not started
@@ -2023,7 +2119,7 @@ DELETE /api/account-types/{id}      - Delete account type
 
 ---
 
-#### 3. Accounts Module
+#### 4. Accounts Module
 **Priority:** High
 **Description:** User's financial accounts (wallets, bank accounts, etc.)
 **Status:** Not started
@@ -2057,7 +2153,7 @@ GET    /api/accounts/summary        - Get summary of all accounts
 
 ---
 
-#### 4. Transactions Module
+#### 5. Transactions Module
 **Priority:** High
 **Description:** Income and expense transactions
 **Status:** Not started
@@ -2098,7 +2194,7 @@ GET    /api/transactions/by-date            - Group by date
 
 ---
 
-#### 5. Recurring Transactions Module
+#### 6. Recurring Transactions Module
 **Priority:** Medium
 **Description:** Automatic recurring transactions (salary, rent, subscriptions)
 **Status:** Not started
@@ -2133,7 +2229,7 @@ POST   /api/recurring-transactions/{id}/generate - Manually generate transaction
 
 ---
 
-#### 6. Budgets Module
+#### 7. Budgets Module
 **Priority:** Medium
 **Description:** Budget planning and tracking
 **Status:** Not started
@@ -2169,7 +2265,7 @@ GET    /api/budgets/alerts                  - Get budget alerts
 
 ---
 
-#### 7. Goals Module
+#### 8. Goals Module
 **Priority:** Medium
 **Description:** Financial goals (savings, debt payment, spending limits)
 **Status:** Not started
@@ -2204,7 +2300,7 @@ GET    /api/goals/summary                   - Get goals summary
 
 ---
 
-#### 8. Goal Contributions Module
+#### 9. Goal Contributions Module
 **Priority:** Low
 **Description:** Track contributions to financial goals
 **Status:** Not started
@@ -2229,7 +2325,7 @@ DELETE /api/contributions/{id}              - Delete contribution
 
 ---
 
-#### 9. Notifications Module
+#### 10. Notifications Module
 **Priority:** Low
 **Description:** System notifications for users
 **Status:** Not started
@@ -2258,35 +2354,6 @@ DELETE /api/notifications/{id}              - Delete notification
 - Recurring transaction reminders
 - Low account balance alerts
 - Anomaly detection alerts
-
----
-
-#### 10. Authentication & User Management
-**Priority:** High
-**Description:** User registration, login, profile management
-**Status:** Partially complete (User model exists)
-
-**Tasks:**
-- [ ] Implement registration API
-- [ ] Implement login API with JWT
-- [ ] Implement logout API
-- [ ] Implement password reset
-- [ ] Implement profile management
-- [ ] Add email verification (optional)
-- [ ] Write comprehensive tests
-
-**API Endpoints to Implement:**
-```
-POST   /api/auth/register                   - User registration
-POST   /api/auth/login                      - User login
-POST   /api/auth/logout                     - User logout
-POST   /api/auth/refresh                    - Refresh token
-POST   /api/auth/forgot-password            - Request password reset
-POST   /api/auth/reset-password             - Reset password
-GET    /api/auth/me                         - Get current user
-PUT    /api/auth/profile                    - Update profile
-PUT    /api/auth/password                   - Change password
-```
 
 ---
 
@@ -2322,10 +2389,10 @@ POST   /api/reports/export                  - Export report
 
 **Phase 1: Core Functionality (Must Have)**
 1. ✅ Categories (Complete)
-2. 🔲 Account Types
-3. 🔲 Accounts
-4. 🔲 Transactions
-5. 🔲 Authentication & User Management
+2. ✅ Authentication & User Management (Complete)
+3. 🔲 Account Types
+4. 🔲 Accounts
+5. 🔲 Transactions
 
 **Phase 2: Advanced Features (Should Have)**
 6. 🔲 Recurring Transactions
