@@ -1138,6 +1138,495 @@ Example domains for future adapters:
 - `app/Adapters/Cache/` - Redis, Memcached
 - `app/Adapters/Queue/` - SQS, RabbitMQ
 
+#### Adapter Layer Best Practices
+
+**IMPORTANT**: Follow these guidelines when implementing new adapters to ensure consistency and maintainability.
+
+##### 1. Interface Design
+
+**✅ DO:**
+- Keep interfaces small and focused (Interface Segregation Principle)
+- Use clear, descriptive method names
+- Return consistent types (avoid mixed return types)
+- Document parameters and return values
+- Use type hints for all parameters and returns
+
+**❌ DON'T:**
+- Put business logic in interface
+- Mix multiple responsibilities in one interface
+- Use generic names like `process()` or `handle()`
+- Return different types based on conditions
+
+**Example - Good Interface:**
+```php
+interface PaymentAdapterInterface
+{
+    /**
+     * Process payment transaction
+     *
+     * @param float $amount Amount in VND
+     * @param string $currency Currency code (default: VND)
+     * @param array $metadata Additional data
+     * @return PaymentResult
+     * @throws PaymentException
+     */
+    public function charge(float $amount, string $currency = 'VND', array $metadata = []): PaymentResult;
+
+    /**
+     * Refund a payment
+     *
+     * @param string $transactionId Original transaction ID
+     * @param float $amount Amount to refund (null = full refund)
+     * @return RefundResult
+     * @throws RefundException
+     */
+    public function refund(string $transactionId, ?float $amount = null): RefundResult;
+
+    /**
+     * Get payment status
+     *
+     * @param string $transactionId Transaction ID
+     * @return PaymentStatus
+     * @throws PaymentException
+     */
+    public function getStatus(string $transactionId): PaymentStatus;
+}
+```
+
+**Example - Bad Interface:**
+```php
+// ❌ BAD: Too generic, unclear return types
+interface PaymentAdapterInterface
+{
+    public function process($data); // What data? What returns?
+    public function get($id); // Get what?
+    public function handle($request); // Handle what?
+}
+```
+
+##### 2. Adapter Implementation
+
+**✅ DO:**
+- Implement ALL interface methods
+- Handle errors gracefully and throw consistent exceptions
+- Use dependency injection for external libraries
+- Log important operations
+- Keep adapter stateless when possible
+- Use configuration from .env or config files
+
+**❌ DON'T:**
+- Hardcode credentials or API keys
+- Put business logic in adapter (that belongs in Service)
+- Catch exceptions without re-throwing or logging
+- Use static methods (breaks testability)
+- Mix multiple provider implementations in one class
+
+**Example - Good Adapter:**
+```php
+namespace App\Adapters\Payment;
+
+use App\Adapters\Payment\Contracts\PaymentAdapterInterface;
+use Illuminate\Support\Facades\Log;
+use Stripe\StripeClient;
+use Stripe\Exception\ApiErrorException;
+
+class StripePaymentAdapter implements PaymentAdapterInterface
+{
+    protected StripeClient $stripe;
+
+    public function __construct()
+    {
+        // Get config from .env via config file
+        $this->stripe = new StripeClient(config('services.stripe.secret'));
+    }
+
+    public function charge(float $amount, string $currency = 'VND', array $metadata = []): PaymentResult
+    {
+        try {
+            $intent = $this->stripe->paymentIntents->create([
+                'amount' => $amount * 100, // Convert to cents
+                'currency' => strtolower($currency),
+                'metadata' => $metadata,
+            ]);
+
+            Log::info('Payment charged', [
+                'transaction_id' => $intent->id,
+                'amount' => $amount,
+                'currency' => $currency,
+            ]);
+
+            return new PaymentResult(
+                transactionId: $intent->id,
+                status: PaymentStatus::from($intent->status),
+                amount: $amount,
+                currency: $currency
+            );
+        } catch (ApiErrorException $e) {
+            Log::error('Stripe payment failed', [
+                'error' => $e->getMessage(),
+                'amount' => $amount,
+            ]);
+
+            throw new PaymentException("Payment failed: {$e->getMessage()}", 0, $e);
+        }
+    }
+
+    // ... other methods
+}
+```
+
+##### 3. Service Integration
+
+**✅ DO:**
+- Inject adapter via interface in Service constructor
+- Let Service handle business logic and validation
+- Use adapter only for external integration
+- Wrap adapter calls in try-catch for error handling
+- Transform adapter responses to domain objects if needed
+
+**❌ DON'T:**
+- Call adapter directly from Controller
+- Put validation logic in adapter
+- Let adapter exceptions bubble up to Controller
+- Mix Service business logic with adapter implementation
+
+**Example - Good Service:**
+```php
+namespace App\Services;
+
+use App\Adapters\Payment\Contracts\PaymentAdapterInterface;
+use App\Models\Order;
+use Illuminate\Support\Facades\DB;
+
+class OrderService
+{
+    public function __construct(
+        protected PaymentAdapterInterface $paymentAdapter
+    ) {}
+
+    public function processPayment(Order $order): bool
+    {
+        // Business logic validation
+        if ($order->isPaid()) {
+            throw new \Exception('Order already paid');
+        }
+
+        if ($order->total <= 0) {
+            throw new \Exception('Invalid order total');
+        }
+
+        // Use adapter for external integration
+        DB::transaction(function () use ($order) {
+            try {
+                $result = $this->paymentAdapter->charge(
+                    amount: $order->total,
+                    currency: 'VND',
+                    metadata: ['order_id' => $order->id]
+                );
+
+                // Business logic: Update order status
+                $order->update([
+                    'payment_status' => 'paid',
+                    'transaction_id' => $result->transactionId,
+                    'paid_at' => now(),
+                ]);
+
+            } catch (PaymentException $e) {
+                // Log and handle gracefully
+                Log::error('Payment processing failed', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                throw new \Exception('Payment failed. Please try again.');
+            }
+        });
+
+        return true;
+    }
+}
+```
+
+##### 4. Configuration Management
+
+**✅ DO:**
+- Store adapter-specific config in `config/services.php`
+- Use environment variables for credentials
+- Support multiple environments (dev, staging, prod)
+- Allow runtime configuration override when needed
+
+**Example - config/services.php:**
+```php
+return [
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET_KEY'),
+        'public' => env('STRIPE_PUBLIC_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
+    'vnpay' => [
+        'merchant_id' => env('VNPAY_MERCHANT_ID'),
+        'hash_secret' => env('VNPAY_HASH_SECRET'),
+        'url' => env('VNPAY_URL', 'https://sandbox.vnpayment.vn'),
+    ],
+];
+```
+
+**Example - .env:**
+```env
+# Stripe (default payment adapter)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLIC_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# VNPay (alternative payment adapter)
+VNPAY_MERCHANT_ID=
+VNPAY_HASH_SECRET=
+VNPAY_URL=
+```
+
+##### 5. Provider Binding
+
+**✅ DO:**
+- Bind interface to concrete implementation in ServiceLayerProvider
+- Use config to determine which adapter to bind
+- Support environment-specific adapters
+- Document how to switch adapters
+
+**Example - ServiceLayerProvider.php:**
+```php
+public function register(): void
+{
+    // Bind payment adapter based on config
+    $this->app->bind(
+        \App\Adapters\Payment\Contracts\PaymentAdapterInterface::class,
+        function ($app) {
+            $provider = config('payment.default', 'stripe');
+
+            return match($provider) {
+                'stripe' => $app->make(\App\Adapters\Payment\StripePaymentAdapter::class),
+                'vnpay' => $app->make(\App\Adapters\Payment\VNPayPaymentAdapter::class),
+                'paypal' => $app->make(\App\Adapters\Payment\PayPalPaymentAdapter::class),
+                default => throw new \Exception("Unknown payment provider: {$provider}"),
+            };
+        }
+    );
+}
+```
+
+**Example - config/payment.php:**
+```php
+return [
+    'default' => env('PAYMENT_PROVIDER', 'stripe'),
+
+    'providers' => [
+        'stripe' => [
+            'enabled' => env('STRIPE_ENABLED', true),
+        ],
+        'vnpay' => [
+            'enabled' => env('VNPAY_ENABLED', false),
+        ],
+    ],
+];
+```
+
+##### 6. Testing Adapters
+
+**✅ DO:**
+- Create fake/mock adapters for testing
+- Test each adapter implementation separately
+- Mock external API calls in tests
+- Test error scenarios
+- Use factories for test data
+
+**Example - FakePaymentAdapter for testing:**
+```php
+namespace App\Adapters\Payment;
+
+use App\Adapters\Payment\Contracts\PaymentAdapterInterface;
+
+class FakePaymentAdapter implements PaymentAdapterInterface
+{
+    protected array $charges = [];
+    protected bool $shouldFail = false;
+
+    public function charge(float $amount, string $currency = 'VND', array $metadata = []): PaymentResult
+    {
+        if ($this->shouldFail) {
+            throw new PaymentException('Fake payment failed');
+        }
+
+        $transactionId = 'fake_' . uniqid();
+        $this->charges[$transactionId] = compact('amount', 'currency', 'metadata');
+
+        return new PaymentResult(
+            transactionId: $transactionId,
+            status: PaymentStatus::SUCCEEDED,
+            amount: $amount,
+            currency: $currency
+        );
+    }
+
+    public function simulateFailure(): void
+    {
+        $this->shouldFail = true;
+    }
+
+    public function getCharges(): array
+    {
+        return $this->charges;
+    }
+}
+```
+
+**Example - Test:**
+```php
+public function test_order_payment_success()
+{
+    // Arrange
+    $fakeAdapter = new FakePaymentAdapter();
+    $this->app->instance(PaymentAdapterInterface::class, $fakeAdapter);
+
+    $order = Order::factory()->create(['total' => 100000]);
+    $service = app(OrderService::class);
+
+    // Act
+    $result = $service->processPayment($order);
+
+    // Assert
+    $this->assertTrue($result);
+    $this->assertEquals('paid', $order->fresh()->payment_status);
+    $this->assertCount(1, $fakeAdapter->getCharges());
+}
+```
+
+##### 7. Error Handling
+
+**✅ DO:**
+- Create custom exception classes for each adapter domain
+- Wrap third-party exceptions in your custom exceptions
+- Log errors with context
+- Provide user-friendly error messages
+- Include original exception for debugging
+
+**Example - Custom Exceptions:**
+```php
+namespace App\Exceptions;
+
+class PaymentException extends \Exception
+{
+    public function __construct(
+        string $message,
+        int $code = 0,
+        ?\Throwable $previous = null,
+        protected ?array $context = null
+    ) {
+        parent::__construct($message, $code, $previous);
+    }
+
+    public function getContext(): ?array
+    {
+        return $this->context;
+    }
+}
+
+class RefundException extends PaymentException {}
+class PaymentProviderException extends PaymentException {}
+```
+
+##### 8. Documentation
+
+**✅ DO:**
+- Document interface methods with PHPDoc
+- Include usage examples in comments
+- Document exceptions that can be thrown
+- Keep CLAUDE.md updated with adapter patterns
+- Add inline comments for complex logic
+
+**Example - Well-documented Interface:**
+```php
+/**
+ * Storage adapter interface for file operations
+ *
+ * Allows switching between different storage providers
+ * (Local, S3, Google Cloud, etc.) without changing business logic
+ *
+ * @example
+ * ```php
+ * $storage->store('uploads/file.jpg', $fileContent);
+ * $url = $storage->getUrl('uploads/file.jpg');
+ * ```
+ */
+interface StorageAdapterInterface
+{
+    /**
+     * Store file content at specified path
+     *
+     * @param string $path Relative path including filename
+     * @param mixed $content File content (string or resource)
+     * @param array $options Provider-specific options
+     * @return bool True if stored successfully
+     * @throws StorageException If storage operation fails
+     */
+    public function store(string $path, mixed $content, array $options = []): bool;
+
+    // ... other methods
+}
+```
+
+##### 9. Common Adapter Patterns
+
+**Payment Adapters:**
+- Interface: `PaymentAdapterInterface`
+- Methods: `charge()`, `refund()`, `getStatus()`, `createCustomer()`
+- Implementations: Stripe, PayPal, VNPay, Momo
+
+**Storage Adapters:**
+- Interface: `StorageAdapterInterface`
+- Methods: `store()`, `get()`, `delete()`, `exists()`, `getUrl()`
+- Implementations: Local, S3, Google Cloud, Azure Blob
+
+**Cache Adapters:**
+- Interface: `CacheAdapterInterface`
+- Methods: `get()`, `set()`, `delete()`, `has()`, `clear()`
+- Implementations: Redis, Memcached, File, Array (testing)
+
+**Notification Adapters:**
+- Interface: `NotificationAdapterInterface`
+- Methods: `send()`, `sendBatch()`, `getStatus()`
+- Implementations: Email, SMS, Push, Slack, Telegram
+
+##### 10. Migration Strategy
+
+When switching from one adapter to another:
+
+1. **Implement new adapter** following interface
+2. **Add configuration** for new provider
+3. **Write tests** for new adapter
+4. **Deploy side-by-side** (both adapters available)
+5. **Feature flag** to gradually switch users
+6. **Monitor and validate** new adapter performance
+7. **Deprecate old adapter** after migration complete
+
+**Example - Gradual Migration:**
+```php
+// ServiceLayerProvider.php
+public function register(): void
+{
+    $this->app->bind(
+        PaymentAdapterInterface::class,
+        function ($app) {
+            // Gradual migration: 10% users use new provider
+            if (rand(1, 100) <= 10) {
+                return $app->make(VNPayPaymentAdapter::class);
+            }
+
+            return $app->make(StripePaymentAdapter::class);
+        }
+    );
+}
+```
+
 ---
 
 ## Repository & Service Pattern Guide
