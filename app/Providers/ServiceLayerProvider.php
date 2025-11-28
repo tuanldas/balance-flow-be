@@ -21,6 +21,13 @@ class ServiceLayerProvider extends ServiceProvider
             \App\Services\CategoryService::class
         );
 
+        // Bind Auth Adapter (default: Sanctum)
+        // To switch to different auth provider (e.g., JWT), change this binding
+        $this->app->bind(
+            \App\Adapters\Auth\Contracts\AuthAdapterInterface::class,
+            \App\Adapters\Auth\SanctumAuthAdapter::class
+        );
+
         $this->app->bind(
             \App\Services\Contracts\AuthServiceInterface::class,
             \App\Services\AuthService::class

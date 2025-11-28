@@ -5,34 +5,14 @@ services:
       - "8081:80"
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: development
-    environment:
-      - APP_ENV=testing
-      - APP_DEBUG=true
-      - DB_CONNECTION=pgsql
-      - DB_HOST=db_test
-      - DB_DATABASE=balance_flow_test
-      - CACHE_DRIVER=array
-      - QUEUE_CONNECTION=sync
-      - SESSION_DRIVER=array
-    depends_on:
-      - db_test
+    env_file:
+      - .env.testing
 
-  db_test:
-    image: postgres:16-alpine
-    restart: unless-stopped
+  db:
     environment:
       POSTGRES_DB: balance_flow_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    volumes: !reset []
     tmpfs:
       - /var/lib/postgresql/data
-    networks:
-      - balance-flow-network
-
-  db:
-    profiles:
-      - donotstart

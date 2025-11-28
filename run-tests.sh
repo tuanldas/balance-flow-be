@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Script to run tests with proper testing environment
-# Uses compose-testing.yml for isolated testing database
+# Uses .env.testing and compose-testing.yml for isolated testing environment
+# - .env.testing: Testing-specific environment variables
+# - compose-testing.yml: Docker override for test database (tmpfs)
 
 set -e
 

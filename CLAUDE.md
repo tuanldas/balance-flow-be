@@ -874,12 +874,17 @@ app/
 │   │   └── UserRepositoryInterface.php
 │   ├── BaseRepository.php        # Abstract base with CRUD operations
 │   └── UserRepository.php        # Specific repository implementation
+├── Adapters/                      # Infrastructure layer (external integrations)
+│   └── Auth/                     # Authentication adapters
+│       ├── Contracts/
+│       │   └── AuthAdapterInterface.php
+│       └── SanctumAuthAdapter.php
 ├── Models/                        # Eloquent ORM models
 │   └── User.php
 ├── Providers/                     # Service providers
 │   ├── AppServiceProvider.php
 │   ├── RepositoryServiceProvider.php  # Repository bindings
-│   └── ServiceLayerProvider.php       # Service bindings
+│   └── ServiceLayerProvider.php       # Service & Adapter bindings
 routes/
 ├── web.php                       # Web routes
 └── console.php                   # Console commands
@@ -1012,6 +1017,126 @@ Vite is configured to compile:
 - **resources/js/app.js** → JavaScript
 
 Built assets are stored in `public/build/` and referenced in Blade templates using `@vite()` directive.
+
+### Adapter Pattern for External Integrations
+
+The project uses **Adapter Pattern** to decouple business logic from external service implementations. This allows easy switching between different providers (e.g., Sanctum ↔ JWT, Stripe ↔ PayPal) without changing business logic.
+
+#### Architecture
+
+```
+Service (Business Logic)
+      ↓
+AdapterInterface (Contract)
+      ↓
+┌─────────────┬──────────────┬──────────────┐
+│             │              │              │
+Adapter A     Adapter B      Adapter C      Custom
+(Default)     (Alternative)  (Alternative)  (Your own)
+```
+
+#### Current Adapters
+
+**Authentication Adapters** (`app/Adapters/Auth/`):
+- `SanctumAuthAdapter` - Laravel Sanctum (default)
+- Token-based authentication with multi-device support
+
+#### Folder Structure
+
+```
+app/
+├── Adapters/                      # Infrastructure layer (external integrations)
+│   └── Auth/                      # Authentication adapters
+│       ├── Contracts/
+│       │   └── AuthAdapterInterface.php
+│       └── SanctumAuthAdapter.php
+├── Services/                      # Business logic layer
+│   └── AuthService.php            # Uses AuthAdapterInterface
+```
+
+#### Benefits
+
+1. **Separation of Concerns**: Business logic separate from implementation details
+2. **Easy to Switch**: Change provider by updating one line in ServiceLayerProvider
+3. **Testability**: Easy to mock adapters in tests
+4. **Open/Closed Principle**: Extend with new adapters without modifying services
+5. **Dependency Inversion**: Services depend on abstractions, not concrete classes
+
+#### Example: Auth Adapter
+
+**Interface** (`app/Adapters/Auth/Contracts/AuthAdapterInterface.php`):
+```php
+interface AuthAdapterInterface
+{
+    public function generateToken(User $user, string $tokenName): string;
+    public function revokeCurrentToken(User $user): bool;
+    public function revokeAllTokens(User $user): bool;
+    public function verifyCredentials(array $credentials): bool;
+    public function getCurrentUser(): ?User;
+}
+```
+
+**Implementation** (`app/Adapters/Auth/SanctumAuthAdapter.php`):
+```php
+class SanctumAuthAdapter implements AuthAdapterInterface
+{
+    public function generateToken(User $user, string $tokenName): string
+    {
+        return $user->createToken($tokenName)->plainTextToken;
+    }
+    // ... other methods
+}
+```
+
+**Usage in Service** (`app/Services/AuthService.php`):
+```php
+class AuthService implements AuthServiceInterface
+{
+    public function __construct(
+        protected AuthAdapterInterface $authAdapter
+    ) {}
+
+    public function login(array $credentials): array
+    {
+        if (!$this->authAdapter->verifyCredentials($credentials)) {
+            throw new AuthenticationException('Invalid credentials');
+        }
+
+        $user = $this->authAdapter->getCurrentUser();
+        $token = $this->authAdapter->generateToken($user, $tokenName);
+
+        return ['user' => $user, 'token' => $token];
+    }
+}
+```
+
+**Binding** (`app/Providers/ServiceLayerProvider.php`):
+```php
+// Default: Sanctum
+$this->app->bind(
+    \App\Adapters\Auth\Contracts\AuthAdapterInterface::class,
+    \App\Adapters\Auth\SanctumAuthAdapter::class
+);
+
+// To switch to JWT: Just change one line
+// $this->app->bind(
+//     \App\Adapters\Auth\Contracts\AuthAdapterInterface::class,
+//     \App\Adapters\Auth\JwtAuthAdapter::class
+// );
+```
+
+#### Creating New Adapters
+
+1. **Create Interface** in `app/Adapters/{Domain}/Contracts/`
+2. **Implement Adapter** in `app/Adapters/{Domain}/`
+3. **Bind in ServiceLayerProvider**
+4. **Inject in Service** via constructor
+
+Example domains for future adapters:
+- `app/Adapters/Payment/` - Stripe, PayPal, VNPay
+- `app/Adapters/Storage/` - S3, Google Cloud, Local
+- `app/Adapters/Cache/` - Redis, Memcached
+- `app/Adapters/Queue/` - SQS, RabbitMQ
 
 ---
 

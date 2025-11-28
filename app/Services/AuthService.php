@@ -2,16 +2,32 @@
 
 namespace App\Services;
 
+use App\Adapters\Auth\Contracts\AuthAdapterInterface;
 use App\Models\User;
 use App\Services\Contracts\AuthServiceInterface;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthService implements AuthServiceInterface
 {
+    /**
+     * Authentication adapter
+     *
+     * @var AuthAdapterInterface
+     */
+    protected AuthAdapterInterface $authAdapter;
+
+    /**
+     * Constructor
+     *
+     * @param AuthAdapterInterface $authAdapter
+     */
+    public function __construct(AuthAdapterInterface $authAdapter)
+    {
+        $this->authAdapter = $authAdapter;
+    }
     /**
      * Generate token name with email and current datetime
      *
@@ -39,9 +55,9 @@ class AuthService implements AuthServiceInterface
             'password' => Hash::make($data['password']),
         ]);
 
-        // Generate token with dynamic name
+        // Generate token with dynamic name using adapter
         $tokenName = $this->generateTokenName($user->email);
-        $token = $user->createToken($tokenName)->plainTextToken;
+        $token = $this->authAdapter->generateToken($user, $tokenName);
 
         return [
             'user' => $user,
@@ -58,16 +74,16 @@ class AuthService implements AuthServiceInterface
      */
     public function login(array $credentials): array
     {
-        // Attempt to authenticate user
-        if (!Auth::attempt($credentials)) {
+        // Attempt to authenticate user using adapter
+        if (!$this->authAdapter->verifyCredentials($credentials)) {
             throw new AuthenticationException('Email hoặc mật khẩu không chính xác.');
         }
 
-        $user = Auth::user();
+        $user = $this->authAdapter->getCurrentUser();
 
-        // Generate token with dynamic name
+        // Generate token with dynamic name using adapter
         $tokenName = $this->generateTokenName($user->email);
-        $token = $user->createToken($tokenName)->plainTextToken;
+        $token = $this->authAdapter->generateToken($user, $tokenName);
 
         return [
             'user' => $user,
@@ -83,10 +99,8 @@ class AuthService implements AuthServiceInterface
      */
     public function logout(User $user): bool
     {
-        // Revoke current access token
-        $user->currentAccessToken()->delete();
-
-        return true;
+        // Revoke current access token using adapter
+        return $this->authAdapter->revokeCurrentToken($user);
     }
 
     /**
@@ -97,10 +111,8 @@ class AuthService implements AuthServiceInterface
      */
     public function logoutAll(User $user): bool
     {
-        // Revoke all tokens
-        $user->tokens()->delete();
-
-        return true;
+        // Revoke all tokens using adapter
+        return $this->authAdapter->revokeAllTokens($user);
     }
 
     /**
@@ -110,7 +122,7 @@ class AuthService implements AuthServiceInterface
      */
     public function getCurrentUser(): ?User
     {
-        return Auth::user();
+        return $this->authAdapter->getCurrentUser();
     }
 
     /**
@@ -154,8 +166,8 @@ class AuthService implements AuthServiceInterface
             'password' => Hash::make($newPassword),
         ]);
 
-        // Revoke all tokens (force re-login)
-        $user->tokens()->delete();
+        // Revoke all tokens (force re-login) using adapter
+        $this->authAdapter->revokeAllTokens($user);
 
         return true;
     }
@@ -194,8 +206,8 @@ class AuthService implements AuthServiceInterface
                     'password' => Hash::make($password),
                 ]);
 
-                // Revoke all tokens
-                $user->tokens()->delete();
+                // Revoke all tokens using adapter
+                $this->authAdapter->revokeAllTokens($user);
             }
         );
 
