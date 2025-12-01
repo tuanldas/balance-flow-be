@@ -2,7 +2,7 @@ services:
   nginx:
     # Development: Expose port directly
     ports:
-      - "8080:80"
+      - "${DOCKER_PORT_NGINX_DEV:-8080}:80"
 
   app:
     build:
@@ -15,7 +15,7 @@ services:
 
   db:
     ports:
-      - "5432:5432"
+      - "${DOCKER_PORT_POSTGRES_DEV:-5432}:5432"
     environment:
       POSTGRES_DB: ${DB_DATABASE:-balance_flow}
       POSTGRES_USER: ${DB_USERNAME:-postgres}

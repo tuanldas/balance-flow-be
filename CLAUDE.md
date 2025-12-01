@@ -711,7 +711,21 @@ Configure in `.env`:
 # Docker Configuration
 DOCKER_VOLUME_POSTGRES=balance_flow_postgres_data
 DOCKER_NETWORK_PUBLISH=npm_proxy
+
+# Docker Ports (Development only)
+DOCKER_PORT_NGINX_DEV=8080          # Nginx port for development environment
+DOCKER_PORT_POSTGRES_DEV=5432       # PostgreSQL port for development
 ```
+
+**Port Configuration:**
+- **Development**: Access API at `http://localhost:${DOCKER_PORT_NGINX_DEV}` (default: 8080)
+  - PostgreSQL exposed at `localhost:${DOCKER_PORT_POSTGRES_DEV}` (default: 5432)
+  - Ports are configurable via environment variables
+- **Testing**: No exposed ports (internal network only)
+  - Testing environment managed by `run-tests.sh` script
+  - Uses isolated test database in tmpfs (in-memory)
+  - Runs on internal Docker network without port exposure
+- **Production**: No exposed ports (managed by Nginx Proxy Manager via `npm_proxy` network)
 
 ### Docker Commands
 

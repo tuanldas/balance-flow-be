@@ -1,9 +1,4 @@
 services:
-  nginx:
-    # Testing: Use different port to avoid conflicts
-    ports:
-      - "8081:80"
-
   app:
     env_file:
       - .env.testing
