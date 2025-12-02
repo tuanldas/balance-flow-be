@@ -27,6 +27,11 @@
 			"type": "string"
 		},
 		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
 			"key": "category_id",
 			"value": "",
 			"type": "string"
@@ -341,6 +346,10 @@
 									"        pm.collectionVariables.set('access_token', response.data.access_token);",
 									"        console.log('Access token saved after registration');",
 									"    }",
+									"    if (response.data && response.data.user && response.data.user.id) {",
+									"        pm.collectionVariables.set('user_id', response.data.user.id);",
+									"        console.log('User ID saved for verification: ' + response.data.user.id);",
+									"    }",
 									"}"
 								],
 								"type": "text/javascript"
@@ -607,9 +616,78 @@
 						"description": "Reset password using token from email.\n\nRequired fields:\n- token: string (from reset email)\n- email: string\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- All tokens are revoked\n- User must login with new password"
 					},
 					"response": []
+				},
+				{
+					"name": "Verify Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.user && response.data.user.id) {",
+									"        pm.collectionVariables.set('user_id', response.data.user.id);",
+									"        console.log('User ID saved for verification');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{user_id}}\",\n    \"hash\": \"verification-hash-from-email\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify-email",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "verify-email"]
+						},
+						"description": "Verify email address using link from email.\n\nRequired fields:\n- id: string (user UUID from email link)\n- hash: string (SHA1 hash from email link)\n\nEmail verification link format:\n/api/auth/verify-email?id={user_id}&hash={hash}\n\nOn success:\n- Sets email_verified_at timestamp\n- Returns success message\n\nNote: In development, email is logged to storage/logs/laravel.log"
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Verification Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/resend-verification-email",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "resend-verification-email"]
+						},
+						"description": "Resend email verification notification.\n\nRequires authentication via Bearer token.\n\nSends new verification email to user's email address.\n\nReturns error if email is already verified.\n\nNote: In development, email is logged to storage/logs/laravel.log"
+					},
+					"response": []
 				}
 			],
-			"description": "Authentication endpoints - ✅ Fully Implemented\n\nPhase 1 - Priority: High\n\nUsing Laravel Sanctum for token-based authentication.\n\nPublic endpoints (no auth required):\n- POST /auth/register\n- POST /auth/login\n- POST /auth/forgot-password\n- POST /auth/reset-password\n\nProtected endpoints (require Bearer token):\n- GET /auth/me\n- PUT /auth/profile\n- PUT /auth/password\n- POST /auth/logout\n- POST /auth/logout-all\n\nAll responses follow standard format:\n{\n  \"success\": true/false,\n  \"message\": \"Message in Vietnamese\",\n  \"data\": {...}\n}"
+			"description": "Authentication endpoints - ✅ Fully Implemented\n\nPhase 1 - Priority: High\n\nUsing Laravel Sanctum for token-based authentication.\n\nPublic endpoints (no auth required):\n- POST /auth/register\n- POST /auth/login\n- POST /auth/forgot-password\n- POST /auth/reset-password\n- POST /auth/verify-email\n\nProtected endpoints (require Bearer token):\n- GET /auth/me\n- PUT /auth/profile\n- PUT /auth/password\n- POST /auth/logout\n- POST /auth/logout-all\n- POST /auth/resend-verification-email\n\nEmail Verification Flow:\n1. User registers → Receives verification email\n2. User clicks link in email → Calls /verify-email with id + hash\n3. If email not received → Calls /resend-verification-email\n\nAll responses follow standard format:\n{\n  \"success\": true/false,\n  \"message\": \"Message in Vietnamese\",\n  \"data\": {...}\n}"
 		},
 		{
 			"name": "Account Types (TODO)",

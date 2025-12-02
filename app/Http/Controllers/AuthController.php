@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Http\Requests\Auth\VerifyEmailRequest;
 use App\Services\Contracts\AuthServiceInterface;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
@@ -21,9 +22,6 @@ class AuthController extends Controller
 
     /**
      * Register a new user
-     *
-     * @param RegisterRequest $request
-     * @return JsonResponse
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -32,7 +30,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đăng ký tài khoản thành công.',
+                'message' => 'Đăng ký tài khoản thành công. Vui lòng kiểm tra email để xác thực tài khoản.',
                 'data' => [
                     'user' => $result['user'],
                     'access_token' => $result['token'],
@@ -50,9 +48,6 @@ class AuthController extends Controller
 
     /**
      * Login user
-     *
-     * @param LoginRequest $request
-     * @return JsonResponse
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -84,15 +79,13 @@ class AuthController extends Controller
 
     /**
      * Logout user (revoke current token)
-     *
-     * @return JsonResponse
      */
     public function logout(): JsonResponse
     {
         try {
             $user = $this->authService->getCurrentUser();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không tìm thấy người dùng.',
@@ -116,15 +109,13 @@ class AuthController extends Controller
 
     /**
      * Logout user from all devices
-     *
-     * @return JsonResponse
      */
     public function logoutAll(): JsonResponse
     {
         try {
             $user = $this->authService->getCurrentUser();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không tìm thấy người dùng.',
@@ -148,15 +139,13 @@ class AuthController extends Controller
 
     /**
      * Get current authenticated user
-     *
-     * @return JsonResponse
      */
     public function me(): JsonResponse
     {
         try {
             $user = $this->authService->getCurrentUser();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không tìm thấy người dùng.',
@@ -178,16 +167,13 @@ class AuthController extends Controller
 
     /**
      * Update user profile
-     *
-     * @param UpdateProfileRequest $request
-     * @return JsonResponse
      */
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
         try {
             $user = $this->authService->getCurrentUser();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không tìm thấy người dùng.',
@@ -212,16 +198,13 @@ class AuthController extends Controller
 
     /**
      * Change user password
-     *
-     * @param ChangePasswordRequest $request
-     * @return JsonResponse
      */
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
         try {
             $user = $this->authService->getCurrentUser();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không tìm thấy người dùng.',
@@ -255,9 +238,6 @@ class AuthController extends Controller
 
     /**
      * Send password reset link
-     *
-     * @param ForgotPasswordRequest $request
-     * @return JsonResponse
      */
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
@@ -286,9 +266,6 @@ class AuthController extends Controller
 
     /**
      * Reset password using token
-     *
-     * @param ResetPasswordRequest $request
-     * @return JsonResponse
      */
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
@@ -309,6 +286,72 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Đặt lại mật khẩu thất bại.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Verify email address
+     */
+    public function verifyEmail(VerifyEmailRequest $request): JsonResponse
+    {
+        try {
+            $this->authService->verifyEmail(
+                $request->validated()['id'],
+                $request->validated()['hash']
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Email đã được xác thực thành công.',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Xác thực email thất bại.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Xác thực email thất bại.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Resend email verification notification
+     */
+    public function resendVerificationEmail(): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy người dùng.',
+                ], 401);
+            }
+
+            $this->authService->resendVerificationEmail($user);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Email xác thực đã được gửi lại.',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gửi email xác thực thất bại.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gửi email xác thực thất bại.',
                 'error' => $e->getMessage(),
             ], 500);
         }
