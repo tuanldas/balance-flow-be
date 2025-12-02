@@ -16,8 +16,6 @@ class SanctumAuthAdapter implements AuthAdapterInterface
     /**
      * Generate authentication token for user
      *
-     * @param User $user
-     * @param string $tokenName
      * @return string Plain text token
      */
     public function generateToken(User $user, string $tokenName): string
@@ -27,9 +25,6 @@ class SanctumAuthAdapter implements AuthAdapterInterface
 
     /**
      * Revoke current access token
-     *
-     * @param User $user
-     * @return bool
      */
     public function revokeCurrentToken(User $user): bool
     {
@@ -40,9 +35,6 @@ class SanctumAuthAdapter implements AuthAdapterInterface
 
     /**
      * Revoke all user tokens
-     *
-     * @param User $user
-     * @return bool
      */
     public function revokeAllTokens(User $user): bool
     {
@@ -54,8 +46,7 @@ class SanctumAuthAdapter implements AuthAdapterInterface
     /**
      * Verify user credentials
      *
-     * @param array $credentials ['email' => string, 'password' => string]
-     * @return bool
+     * @param  array  $credentials  ['email' => string, 'password' => string]
      */
     public function verifyCredentials(array $credentials): bool
     {
@@ -64,8 +55,6 @@ class SanctumAuthAdapter implements AuthAdapterInterface
 
     /**
      * Get currently authenticated user
-     *
-     * @return User|null
      */
     public function getCurrentUser(): ?User
     {
