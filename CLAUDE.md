@@ -2737,6 +2737,8 @@ GET    /api/categories/{id}/subcategories - Get subcategories
 - ✅ User registration with auto-login
 - ✅ Login with token generation
 - ✅ Token naming: `email_dd/mm/yyyy` format (e.g., `user@example.com_28/11/2025`)
+- ✅ Email verification with frontend URL integration
+- ✅ Resend email verification
 - ✅ Get current user profile
 - ✅ Update user profile (name, email)
 - ✅ Change password with validation
@@ -2745,7 +2747,7 @@ GET    /api/categories/{id}/subcategories - Get subcategories
 - ✅ Password reset request (forgot password)
 - ✅ Password reset with token
 - ✅ Validation with Vietnamese messages
-- ✅ 14 comprehensive tests (all passing)
+- ✅ 32 comprehensive tests (all passing)
 - ✅ Complete Postman collection with auto-save token
 
 **API Endpoints:**
@@ -2753,6 +2755,7 @@ GET    /api/categories/{id}/subcategories - Get subcategories
 # Public (no auth required)
 POST   /api/auth/register           - User registration
 POST   /api/auth/login              - User login
+POST   /api/auth/verify-email       - Verify email address
 POST   /api/auth/forgot-password    - Password reset request
 POST   /api/auth/reset-password     - Reset password with token
 
@@ -2762,16 +2765,49 @@ PUT    /api/auth/profile            - Update user profile
 PUT    /api/auth/password           - Change password
 POST   /api/auth/logout             - Logout (current device)
 POST   /api/auth/logout-all         - Logout from all devices
+POST   /api/auth/resend-verification-email - Resend verification email
 ```
 
 **Database:**
 - Migration: `2025_11_28_094341_create_personal_access_tokens_table.php`
 - Uses `uuidMorphs` for tokenable relationship (compatible with UUID v7)
 
+**Email Verification Configuration:**
+
+The authentication system includes email verification that integrates with the frontend application.
+
+**Environment Configuration:**
+```env
+# .env file
+FRONTEND_URL=http://localhost:3000  # Development
+# FRONTEND_URL=https://yourdomain.com  # Production
+```
+
+**Email Verification Flow:**
+1. User registers → Backend sends verification email
+2. Email contains frontend URL: `{FRONTEND_URL}/verify-email?id={user_id}&hash={verification_hash}`
+3. User clicks link → Frontend extracts `id` and `hash` from URL
+4. Frontend calls API: `POST /api/auth/verify-email` with `{ id, hash }`
+5. Backend validates and returns result
+6. Frontend redirects to `/signin` on success
+
+**Custom Notification:**
+- Custom notification class: `app/Notifications/VerifyEmailNotification.php`
+- Overrides Laravel's default to send frontend URLs instead of backend API URLs
+- Automatically generates SHA1 hash for verification
+- Email content in Vietnamese
+
+**Files:**
+- `app/Notifications/VerifyEmailNotification.php` - Custom verification email
+- `app/Models/User.php` - Implements `MustVerifyEmail`, overrides `sendEmailVerificationNotification()`
+- `config/app.php` - Added `frontend_url` configuration
+- `.env.example` - Includes `FRONTEND_URL` variable
+
 **Testing:**
 - Postman Collection: All endpoints with auto-save token
-- PHPUnit Tests: 14 tests covering all authentication flows
+- PHPUnit Tests: 32 tests covering all authentication flows including email verification
 - Test Database: PostgreSQL (`balance_flow_test` in tmpfs)
+- Email logs to `storage/logs/laravel.log` in development (`MAIL_MAILER=log`)
 
 ---
 
