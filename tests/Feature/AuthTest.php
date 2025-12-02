@@ -30,21 +30,21 @@ class AuthTest extends TestCase
                 'success',
                 'message',
                 'data' => [
-                    'user' => ['id', 'name', 'email'],
-                    'access_token',
-                    'token_type',
+                    'user' => ['id', 'name', 'email', 'email_verified_at'],
                 ],
             ])
             ->assertJson([
                 'success' => true,
-                'data' => [
-                    'token_type' => 'Bearer',
-                ],
-            ]);
+            ])
+            ->assertJsonMissing(['access_token', 'token_type']);
 
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
         ]);
+
+        // Verify email_verified_at is NULL
+        $user = \App\Models\User::where('email', 'test@example.com')->first();
+        $this->assertNull($user->email_verified_at);
     }
 
     /**
@@ -81,13 +81,14 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test user can login successfully
+     * Test user can login successfully (with verified email)
      */
     public function test_user_can_login(): void
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
         ]);
 
         $response = $this->postJson('/api/auth/login', [
@@ -114,6 +115,28 @@ class AuthTest extends TestCase
     }
 
     /**
+     * Test login fails when email not verified
+     */
+    public function test_login_fails_when_email_not_verified(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('password123'),
+            'email_verified_at' => null,
+        ]);
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'success' => false,
+            ]);
+    }
+
+    /**
      * Test login fails with invalid credentials
      */
     public function test_login_with_invalid_credentials_fails(): void
@@ -121,6 +144,7 @@ class AuthTest extends TestCase
         $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
         ]);
 
         $response = $this->postJson('/api/auth/login', [

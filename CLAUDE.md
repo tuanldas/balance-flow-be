@@ -2783,13 +2783,54 @@ FRONTEND_URL=http://localhost:3000  # Development
 # FRONTEND_URL=https://yourdomain.com  # Production
 ```
 
-**Email Verification Flow:**
-1. User registers → Backend sends verification email
-2. Email contains frontend URL: `{FRONTEND_URL}/verify-email?id={user_id}&hash={verification_hash}`
+**Email Verification Flow (REQUIRED):**
+
+⚠️ **IMPORTANT:** Users MUST verify their email before they can login and use the application.
+
+1. User registers → Backend creates account **WITHOUT token** (no immediate access)
+2. Backend sends verification email with frontend URL: `{FRONTEND_URL}/verify-email?id={user_id}&hash={verification_hash}`
 3. User clicks link → Frontend extracts `id` and `hash` from URL
 4. Frontend calls API: `POST /api/auth/verify-email` with `{ id, hash }`
-5. Backend validates and returns result
-6. Frontend redirects to `/signin` on success
+5. Backend validates and marks email as verified
+6. User must **LOGIN** to receive access token
+7. Login will fail with 401 if email is not verified
+
+**Registration Response (NO TOKEN):**
+```json
+{
+  "success": true,
+  "message": "Đăng ký tài khoản thành công. Vui lòng kiểm tra email để xác thực tài khoản trước khi đăng nhập.",
+  "data": {
+    "user": {
+      "id": "019ade5d-4232-7180-a31c-274fec90aab3",
+      "name": "Test User",
+      "email": "test@example.com",
+      "email_verified_at": null
+    }
+  }
+}
+```
+
+**Login Before Verification (FAILS):**
+```json
+{
+  "success": false,
+  "message": "Vui lòng xác thực email trước khi đăng nhập. Kiểm tra hộp thư của bạn."
+}
+```
+
+**Login After Verification (SUCCESS):**
+```json
+{
+  "success": true,
+  "message": "Đăng nhập thành công.",
+  "data": {
+    "user": { ... },
+    "access_token": "...",
+    "token_type": "Bearer"
+  }
+}
+```
 
 **Custom Notification:**
 - Custom notification class: `app/Notifications/VerifyEmailNotification.php`
@@ -2804,10 +2845,11 @@ FRONTEND_URL=http://localhost:3000  # Development
 - `.env.example` - Includes `FRONTEND_URL` variable
 
 **Testing:**
-- Postman Collection: All endpoints with auto-save token
-- PHPUnit Tests: 32 tests covering all authentication flows including email verification
+- Postman Collection: All endpoints (register no longer returns token)
+- PHPUnit Tests: 33 tests covering all authentication flows including email verification requirement
 - Test Database: PostgreSQL (`balance_flow_test` in tmpfs)
 - Email logs to `storage/logs/laravel.log` in development (`MAIL_MAILER=log`)
+- New test: `test_login_fails_when_email_not_verified` - Ensures unverified users cannot login
 
 ---
 

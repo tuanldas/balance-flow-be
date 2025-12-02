@@ -26,15 +26,18 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         try {
-            $result = $this->authService->register($request->validated());
+            $user = $this->authService->register($request->validated());
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đăng ký tài khoản thành công. Vui lòng kiểm tra email để xác thực tài khoản.',
+                'message' => 'Đăng ký tài khoản thành công. Vui lòng kiểm tra email để xác thực tài khoản trước khi đăng nhập.',
                 'data' => [
-                    'user' => $result['user'],
-                    'access_token' => $result['token'],
-                    'token_type' => 'Bearer',
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'email_verified_at' => $user->email_verified_at,
+                    ],
                 ],
             ], 201);
         } catch (\Exception $e) {

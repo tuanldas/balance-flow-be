@@ -8,10 +8,8 @@ interface AuthServiceInterface
 {
     /**
      * Register a new user
-     *
-     * @return array ['user' => User, 'token' => string]
      */
-    public function register(array $data): array;
+    public function register(array $data): User;
 
     /**
      * Login user and generate token

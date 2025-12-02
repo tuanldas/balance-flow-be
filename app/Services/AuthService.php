@@ -37,10 +37,8 @@ class AuthService implements AuthServiceInterface
 
     /**
      * Register a new user
-     *
-     * @return array ['user' => User, 'token' => string]
      */
-    public function register(array $data): array
+    public function register(array $data): User
     {
         // Create user with hashed password
         $user = User::create([
@@ -52,14 +50,8 @@ class AuthService implements AuthServiceInterface
         // Send email verification notification
         $user->sendEmailVerificationNotification();
 
-        // Generate token with dynamic name using adapter
-        $tokenName = $this->generateTokenName($user->email);
-        $token = $this->authAdapter->generateToken($user, $tokenName);
-
-        return [
-            'user' => $user,
-            'token' => $token,
-        ];
+        // Do NOT generate token - user must verify email first
+        return $user;
     }
 
     /**
@@ -77,6 +69,11 @@ class AuthService implements AuthServiceInterface
         }
 
         $user = $this->authAdapter->getCurrentUser();
+
+        // Check if email is verified
+        if (! $user->hasVerifiedEmail()) {
+            throw new AuthenticationException('Vui lòng xác thực email trước khi đăng nhập. Kiểm tra hộp thư của bạn.');
+        }
 
         // Generate token with dynamic name using adapter
         $tokenName = $this->generateTokenName($user->email);
