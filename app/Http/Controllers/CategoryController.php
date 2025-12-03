@@ -64,7 +64,7 @@ class CategoryController extends Controller
             if (! $category) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Danh mục không tồn tại',
+                    'message' => __('categories.not_found'),
                 ], 404);
             }
 
@@ -93,7 +93,7 @@ class CategoryController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $category,
-                'message' => 'Tạo danh mục thành công',
+                'message' => __('categories.created_success'),
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -116,7 +116,7 @@ class CategoryController extends Controller
             if (! $success) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cập nhật danh mục thất bại',
+                    'message' => __('categories.update_failed'),
                 ], 500);
             }
 
@@ -125,7 +125,7 @@ class CategoryController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $category,
-                'message' => 'Cập nhật danh mục thành công',
+                'message' => __('categories.updated_success'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -148,13 +148,13 @@ class CategoryController extends Controller
             if (! $success) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Xóa danh mục thất bại',
+                    'message' => __('categories.delete_failed'),
                 ], 500);
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Xóa danh mục thành công',
+                'message' => __('categories.deleted_success'),
             ]);
         } catch (\Exception $e) {
             return response()->json([

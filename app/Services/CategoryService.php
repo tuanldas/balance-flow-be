@@ -105,17 +105,17 @@ class CategoryService extends BaseService implements CategoryServiceInterface
             $parent = $this->categoryRepository->find($data['parent_id']);
 
             if (! $parent) {
-                throw new \Exception('Parent category not found');
+                throw new \Exception(__('categories.parent_not_found'));
             }
 
             // Ensure parent has same category_type
             if ($parent->category_type !== $data['category_type']) {
-                throw new \Exception('Subcategory must have same type as parent category');
+                throw new \Exception(__('categories.parent_type_mismatch'));
             }
 
             // Ensure parent is accessible by user (system or user's own)
             if (! $parent->is_system && $parent->user_id !== $userId) {
-                throw new \Exception('Parent category not accessible');
+                throw new \Exception(__('categories.parent_not_accessible'));
             }
         }
 
@@ -133,17 +133,17 @@ class CategoryService extends BaseService implements CategoryServiceInterface
         $category = $this->categoryRepository->find($id);
 
         if (! $category) {
-            throw new \Exception('Category not found');
+            throw new \Exception(__('categories.not_found'));
         }
 
         // Can't update system categories
         if ($category->is_system) {
-            throw new \Exception('Cannot update system category');
+            throw new \Exception(__('categories.cannot_update_system'));
         }
 
         // Can only update own categories
         if ($category->user_id !== $userId) {
-            throw new \Exception('Unauthorized');
+            throw new \Exception(__('categories.unauthorized'));
         }
 
         // If changing parent_id, validate it
@@ -151,17 +151,17 @@ class CategoryService extends BaseService implements CategoryServiceInterface
             $parent = $this->categoryRepository->find($data['parent_id']);
 
             if (! $parent) {
-                throw new \Exception('Parent category not found');
+                throw new \Exception(__('categories.parent_not_found'));
             }
 
             // Can't set self as parent
             if ($parent->id === $category->id) {
-                throw new \Exception('Cannot set category as its own parent');
+                throw new \Exception(__('categories.cannot_set_self_as_parent'));
             }
 
             // Ensure parent has same category_type
             if ($parent->category_type !== $category->category_type) {
-                throw new \Exception('Parent category must have same type');
+                throw new \Exception(__('categories.parent_type_mismatch'));
             }
         }
 
@@ -179,22 +179,22 @@ class CategoryService extends BaseService implements CategoryServiceInterface
         $category = $this->categoryRepository->find($id);
 
         if (! $category) {
-            throw new \Exception('Category not found');
+            throw new \Exception(__('categories.not_found'));
         }
 
         // Can't delete system categories
         if ($category->is_system) {
-            throw new \Exception('Cannot delete system category');
+            throw new \Exception(__('categories.cannot_delete_system'));
         }
 
         // Can only delete own categories
         if ($category->user_id !== $userId) {
-            throw new \Exception('Unauthorized');
+            throw new \Exception(__('categories.unauthorized'));
         }
 
         // Check if can delete
         if (! $this->categoryRepository->canDelete($id)) {
-            throw new \Exception('Cannot delete category with subcategories or transactions');
+            throw new \Exception(__('categories.cannot_delete_has_transactions'));
         }
 
         return $this->categoryRepository->delete($id);

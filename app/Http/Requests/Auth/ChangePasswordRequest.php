@@ -26,21 +26,4 @@ class ChangePasswordRequest extends FormRequest
             'new_password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
-
-    /**
-     * Get custom error messages for validator.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'current_password.required' => 'Mật khẩu hiện tại không được để trống.',
-            'current_password.string' => 'Mật khẩu hiện tại phải là chuỗi ký tự.',
-            'new_password.required' => 'Mật khẩu mới không được để trống.',
-            'new_password.string' => 'Mật khẩu mới phải là chuỗi ký tự.',
-            'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
-            'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
-        ];
-    }
 }

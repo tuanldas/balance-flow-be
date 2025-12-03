@@ -35,6 +35,12 @@
 			"key": "category_id",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "locale",
+			"value": "vi",
+			"type": "string",
+			"description": "Language preference (vi for Vietnamese, en for English)"
 		}
 	],
 	"item": [
@@ -50,12 +56,23 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/categories?per_page=15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							],
 							"query": [
 								{
 									"key": "per_page",
@@ -83,12 +100,23 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/categories?type=income&per_page=15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							],
 							"query": [
 								{
 									"key": "type",
@@ -113,12 +141,23 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/categories?type=expense&per_page=15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							],
 							"query": [
 								{
 									"key": "type",
@@ -143,12 +182,24 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories", "{{category_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"{{category_id}}"
+							]
 						},
 						"description": "Get details of a specific category by ID.\n\nReturns:\n- success: boolean\n- data: category object with all fields"
 					},
@@ -185,6 +236,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -193,8 +250,13 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/categories",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
 						},
 						"description": "Create a new user category.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- parent_id: UUID of parent category\n- icon: string (max 50)\n- color: hex color code (#RRGGBB)\n\nValidation:\n- Name is required\n- Category type must be income or expense\n- Color must be hex format\n- Parent must exist and have same type"
 					},
@@ -214,6 +276,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -222,8 +290,13 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/categories",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
 						},
 						"description": "Create a subcategory under a parent category.\n\nNote: Subcategory must have the same category_type as its parent."
 					},
@@ -243,6 +316,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -251,8 +330,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories", "{{category_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"{{category_id}}"
+							]
 						},
 						"description": "Update an existing user category.\n\nNote: \n- Cannot update system categories (is_system = true)\n- Can only update own categories\n- All fields are optional\n- Cannot change user_id or is_system"
 					},
@@ -272,6 +357,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -280,8 +371,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories", "{{category_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"{{category_id}}"
+							]
 						},
 						"description": "Partial update of a category (PATCH method)."
 					},
@@ -296,12 +393,24 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories", "{{category_id}}"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"{{category_id}}"
+							]
 						},
 						"description": "Delete a user category.\n\nRestrictions:\n- Cannot delete system categories\n- Cannot delete own categories that have subcategories\n- Cannot delete categories with transactions (future feature)\n- Can only delete own categories"
 					},
@@ -316,12 +425,25 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/categories/{{category_id}}/subcategories",
-							"host": ["{{base_url}}"],
-							"path": ["api", "categories", "{{category_id}}", "subcategories"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"{{category_id}}",
+								"subcategories"
+							]
 						},
 						"description": "Get all subcategories of a parent category.\n\nReturns:\n- success: boolean\n- data: array of subcategories"
 					},
@@ -371,6 +493,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -379,8 +507,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "register"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
 						},
 						"description": "Register a new user account.\n\nRequired fields:\n- name: string (max 255)\n- email: string (valid email, unique)\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- Returns user data and access token\n- Access token is automatically saved to collection variables"
 					},
@@ -420,6 +554,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -428,8 +568,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "login"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
 						},
 						"description": "Login with email and password.\n\nRequired fields:\n- email: string (valid email)\n- password: string\n\nOn success:\n- Returns user data and access token\n- Access token is automatically saved to collection variables"
 					},
@@ -444,12 +590,24 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/auth/me",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "me"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
 						},
 						"description": "Get authenticated user details.\n\nRequires authentication via Bearer token.\n\nReturns:\n- User information (id, name, email, etc.)"
 					},
@@ -469,6 +627,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -477,8 +641,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/profile",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "profile"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile"
+							]
 						},
 						"description": "Update user profile information.\n\nRequires authentication via Bearer token.\n\nOptional fields:\n- name: string (max 255)\n- email: string (valid email, unique)\n\nReturns updated user information."
 					},
@@ -498,6 +668,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -506,8 +682,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/password",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "password"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"password"
+							]
 						},
 						"description": "Change user password.\n\nRequires authentication via Bearer token.\n\nRequired fields:\n- current_password: string\n- new_password: string (min 8 characters)\n- new_password_confirmation: string (must match new_password)\n\nOn success:\n- All tokens are revoked (user must login again)\n- Returns success message"
 					},
@@ -522,12 +704,24 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/auth/logout",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "logout"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
 						},
 						"description": "Logout from current device.\n\nRequires authentication via Bearer token.\n\nRevokes current access token only.\nUser remains logged in on other devices."
 					},
@@ -542,12 +736,24 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/auth/logout-all",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "logout-all"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout-all"
+							]
 						},
 						"description": "Logout from all devices.\n\nRequires authentication via Bearer token.\n\nRevokes all access tokens.\nUser must login again on all devices."
 					},
@@ -570,6 +776,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -578,8 +790,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/forgot-password",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "forgot-password"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"forgot-password"
+							]
 						},
 						"description": "Request password reset link.\n\nRequired fields:\n- email: string (must exist in database)\n\nSends password reset link to user's email."
 					},
@@ -602,6 +820,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -610,8 +834,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/reset-password",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "reset-password"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"reset-password"
+							]
 						},
 						"description": "Reset password using token from email.\n\nRequired fields:\n- token: string (from reset email)\n- email: string\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- All tokens are revoked\n- User must login with new password"
 					},
@@ -651,6 +881,12 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"body": {
@@ -659,8 +895,14 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/verify-email",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "verify-email"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-email"
+							]
 						},
 						"description": "Verify email address using link from email.\n\nRequired fields:\n- id: string (user UUID from email link)\n- hash: string (SHA1 hash from email link)\n\nEmail verification link format:\n/api/auth/verify-email?id={user_id}&hash={hash}\n\nOn success:\n- Sets email_verified_at timestamp\n- Returns success message\n\nNote: In development, email is logged to storage/logs/laravel.log"
 					},
@@ -675,12 +917,24 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/auth/resend-verification-email",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "resend-verification-email"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"resend-verification-email"
+							]
 						},
 						"description": "Resend email verification notification.\n\nRequires authentication via Bearer token.\n\nSends new verification email to user's email address.\n\nReturns error if email is already verified.\n\nNote: In development, email is logged to storage/logs/laravel.log"
 					},
@@ -701,12 +955,23 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/account-types?per_page=15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "account-types"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"account-types"
+							],
 							"query": [
 								{
 									"key": "per_page",
@@ -733,12 +998,23 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/accounts?per_page=15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "accounts"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"accounts"
+							],
 							"query": [
 								{
 									"key": "per_page",
@@ -765,12 +1041,23 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/transactions?per_page=15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "transactions"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions"
+							],
 							"query": [
 								{
 									"key": "per_page",
@@ -797,12 +1084,23 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/budgets?per_page=15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "budgets"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"budgets"
+							],
 							"query": [
 								{
 									"key": "per_page",
@@ -829,12 +1127,23 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/goals?per_page=15",
-							"host": ["{{base_url}}"],
-							"path": ["api", "goals"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"goals"
+							],
 							"query": [
 								{
 									"key": "per_page",
@@ -861,12 +1170,24 @@
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
 							}
 						],
 						"url": {
 							"raw": "{{base_url}}/api/reports/summary",
-							"host": ["{{base_url}}"],
-							"path": ["api", "reports", "summary"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"summary"
+							]
 						},
 						"description": "Get financial summary report (Not yet implemented)."
 					},

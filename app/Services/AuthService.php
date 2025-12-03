@@ -65,14 +65,14 @@ class AuthService implements AuthServiceInterface
     {
         // Attempt to authenticate user using adapter
         if (! $this->authAdapter->verifyCredentials($credentials)) {
-            throw new AuthenticationException('Email hoặc mật khẩu không chính xác.');
+            throw new AuthenticationException(__('auth.invalid_credentials'));
         }
 
         $user = $this->authAdapter->getCurrentUser();
 
         // Check if email is verified
         if (! $user->hasVerifiedEmail()) {
-            throw new AuthenticationException('Vui lòng xác thực email trước khi đăng nhập. Kiểm tra hộp thư của bạn.');
+            throw new AuthenticationException(__('auth.email_not_verified'));
         }
 
         // Generate token with dynamic name using adapter

@@ -26,20 +26,4 @@ class LoginRequest extends FormRequest
             'password' => ['required', 'string'],
         ];
     }
-
-    /**
-     * Get custom error messages for validator.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'email.required' => 'Email không được để trống.',
-            'email.string' => 'Email phải là chuỗi ký tự.',
-            'email.email' => 'Email không đúng định dạng.',
-            'password.required' => 'Mật khẩu không được để trống.',
-            'password.string' => 'Mật khẩu phải là chuỗi ký tự.',
-        ];
-    }
 }

@@ -29,20 +29,4 @@ class StoreCategoryRequest extends FormRequest
             'color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ];
     }
-
-    /**
-     * Get custom messages for validator errors.
-     */
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'Tên danh mục là bắt buộc',
-            'name.max' => 'Tên danh mục không được vượt quá 255 ký tự',
-            'category_type.required' => 'Loại danh mục là bắt buộc',
-            'category_type.in' => 'Loại danh mục phải là income hoặc expense',
-            'parent_id.uuid' => 'ID danh mục cha không hợp lệ',
-            'parent_id.exists' => 'Danh mục cha không tồn tại',
-            'color.regex' => 'Mã màu phải có định dạng #RRGGBB',
-        ];
-    }
 }

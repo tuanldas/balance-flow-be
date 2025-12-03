@@ -26,20 +26,4 @@ class VerifyEmailRequest extends FormRequest
             'hash' => 'required|string',
         ];
     }
-
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'id.required' => 'ID người dùng là bắt buộc.',
-            'id.string' => 'ID người dùng phải là chuỗi ký tự.',
-            'id.exists' => 'Người dùng không tồn tại.',
-            'hash.required' => 'Mã xác thực là bắt buộc.',
-            'hash.string' => 'Mã xác thực phải là chuỗi ký tự.',
-        ];
-    }
 }

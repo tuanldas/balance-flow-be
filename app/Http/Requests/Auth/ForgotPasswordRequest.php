@@ -25,19 +25,4 @@ class ForgotPasswordRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'exists:users,email'],
         ];
     }
-
-    /**
-     * Get custom error messages for validator.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'email.required' => 'Email không được để trống.',
-            'email.string' => 'Email phải là chuỗi ký tự.',
-            'email.email' => 'Email không đúng định dạng.',
-            'email.exists' => 'Email không tồn tại trong hệ thống.',
-        ];
-    }
 }

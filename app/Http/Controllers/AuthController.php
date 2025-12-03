@@ -30,7 +30,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đăng ký tài khoản thành công. Vui lòng kiểm tra email để xác thực tài khoản trước khi đăng nhập.',
+                'message' => __('auth.register_success'),
                 'data' => [
                     'user' => [
                         'id' => $user->id,
@@ -43,7 +43,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đăng ký tài khoản thất bại.',
+                'message' => __('auth.register_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -59,7 +59,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đăng nhập thành công.',
+                'message' => __('auth.login_success'),
                 'data' => [
                     'user' => $result['user'],
                     'access_token' => $result['token'],
@@ -74,7 +74,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đăng nhập thất bại.',
+                'message' => __('auth.login_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -91,7 +91,7 @@ class AuthController extends Controller
             if (! $user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không tìm thấy người dùng.',
+                    'message' => __('auth.user_not_found'),
                 ], 401);
             }
 
@@ -99,12 +99,12 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đăng xuất thành công.',
+                'message' => __('auth.logout_success'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đăng xuất thất bại.',
+                'message' => __('auth.login_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -121,7 +121,7 @@ class AuthController extends Controller
             if (! $user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không tìm thấy người dùng.',
+                    'message' => __('auth.user_not_found'),
                 ], 401);
             }
 
@@ -129,12 +129,12 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đã đăng xuất khỏi tất cả thiết bị.',
+                'message' => __('auth.logout_all_success'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đăng xuất thất bại.',
+                'message' => __('auth.login_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -151,7 +151,7 @@ class AuthController extends Controller
             if (! $user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không tìm thấy người dùng.',
+                    'message' => __('auth.user_not_found'),
                 ], 401);
             }
 
@@ -162,7 +162,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể lấy thông tin người dùng.',
+                'message' => __('common.server_error'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -179,7 +179,7 @@ class AuthController extends Controller
             if (! $user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không tìm thấy người dùng.',
+                    'message' => __('auth.user_not_found'),
                 ], 401);
             }
 
@@ -187,13 +187,13 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Cập nhật thông tin thành công.',
+                'message' => __('auth.profile_updated'),
                 'data' => $updatedUser,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cập nhật thông tin thất bại.',
+                'message' => __('auth.profile_update_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -210,7 +210,7 @@ class AuthController extends Controller
             if (! $user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không tìm thấy người dùng.',
+                    'message' => __('auth.user_not_found'),
                 ], 401);
             }
 
@@ -222,18 +222,18 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.',
+                'message' => __('auth.password_changed'),
             ]);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đổi mật khẩu thất bại.',
+                'message' => __('auth.password_change_failed'),
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đổi mật khẩu thất bại.',
+                'message' => __('auth.password_change_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -250,18 +250,18 @@ class AuthController extends Controller
             if ($result) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Link đặt lại mật khẩu đã được gửi đến email của bạn.',
+                    'message' => __('auth.password_reset_link_sent'),
                 ]);
             }
 
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể gửi link đặt lại mật khẩu.',
+                'message' => __('auth.password_reset_link_failed'),
             ], 500);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể gửi link đặt lại mật khẩu.',
+                'message' => __('auth.password_reset_link_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -277,18 +277,18 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.',
+                'message' => __('auth.password_reset_success'),
             ]);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đặt lại mật khẩu thất bại.',
+                'message' => __('auth.password_reset_failed'),
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đặt lại mật khẩu thất bại.',
+                'message' => __('auth.password_reset_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -307,18 +307,18 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Email đã được xác thực thành công.',
+                'message' => __('auth.email_verified_success'),
             ]);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Xác thực email thất bại.',
+                'message' => __('auth.email_verification_failed'),
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Xác thực email thất bại.',
+                'message' => __('auth.email_verification_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -335,7 +335,7 @@ class AuthController extends Controller
             if (! $user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không tìm thấy người dùng.',
+                    'message' => __('auth.user_not_found'),
                 ], 401);
             }
 
@@ -343,18 +343,18 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Email xác thực đã được gửi lại.',
+                'message' => __('auth.verification_email_sent'),
             ]);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gửi email xác thực thất bại.',
+                'message' => __('auth.verification_email_failed'),
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gửi email xác thực thất bại.',
+                'message' => __('auth.verification_email_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }

@@ -27,25 +27,4 @@ class ResetPasswordRequest extends FormRequest
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
-
-    /**
-     * Get custom error messages for validator.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'token.required' => 'Mã xác thực không được để trống.',
-            'token.string' => 'Mã xác thực phải là chuỗi ký tự.',
-            'email.required' => 'Email không được để trống.',
-            'email.string' => 'Email phải là chuỗi ký tự.',
-            'email.email' => 'Email không đúng định dạng.',
-            'email.exists' => 'Email không tồn tại trong hệ thống.',
-            'password.required' => 'Mật khẩu không được để trống.',
-            'password.string' => 'Mật khẩu phải là chuỗi ký tự.',
-            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
-            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
-        ];
-    }
 }

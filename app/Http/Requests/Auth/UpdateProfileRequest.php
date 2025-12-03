@@ -33,21 +33,4 @@ class UpdateProfileRequest extends FormRequest
             ],
         ];
     }
-
-    /**
-     * Get custom error messages for validator.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'name.string' => 'Tên phải là chuỗi ký tự.',
-            'name.max' => 'Tên không được vượt quá 255 ký tự.',
-            'email.string' => 'Email phải là chuỗi ký tự.',
-            'email.email' => 'Email không đúng định dạng.',
-            'email.max' => 'Email không được vượt quá 255 ký tự.',
-            'email.unique' => 'Email đã được sử dụng.',
-        ];
-    }
 }

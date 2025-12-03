@@ -28,17 +28,4 @@ class UpdateCategoryRequest extends FormRequest
             'color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ];
     }
-
-    /**
-     * Get custom messages for validator errors.
-     */
-    public function messages(): array
-    {
-        return [
-            'name.max' => 'Tên danh mục không được vượt quá 255 ký tự',
-            'parent_id.uuid' => 'ID danh mục cha không hợp lệ',
-            'parent_id.exists' => 'Danh mục cha không tồn tại',
-            'color.regex' => 'Mã màu phải có định dạng #RRGGBB',
-        ];
-    }
 }

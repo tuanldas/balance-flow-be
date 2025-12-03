@@ -17,6 +17,11 @@ class CategoryTest extends TestCase
 
         // Seed system categories
         $this->artisan('db:seed', ['--class' => 'CategorySeeder']);
+
+        // Set default headers for all requests in this test
+        $this->withHeaders([
+            'Accept-Language' => 'vi',
+        ]);
     }
 
     /**
@@ -137,7 +142,7 @@ class CategoryTest extends TestCase
         $response->assertStatus(201)
             ->assertJson([
                 'success' => true,
-                'message' => 'Tạo danh mục thành công',
+                'message' => 'Tạo danh mục thành công.',
             ]);
 
         $this->assertDatabaseHas('categories', [
@@ -242,7 +247,7 @@ class CategoryTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'Cập nhật danh mục thành công',
+                'message' => 'Cập nhật danh mục thành công.',
             ]);
 
         $this->assertDatabaseHas('categories', [
@@ -280,7 +285,7 @@ class CategoryTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'Xóa danh mục thành công',
+                'message' => 'Xóa danh mục thành công.',
             ]);
 
         $this->assertDatabaseMissing('categories', [

@@ -63,6 +63,7 @@ Assistant: Tôi đã hoàn thành refactoring.
 - [⚠️ IMPORTANT RULES FOR CLAUDE CODE](#️-important-rules-for-claude-code)
 - [Project Overview](#project-overview)
 - [API Testing with Postman](#api-testing-with-postman)
+- [Multi-Language Support (Localization)](#multi-language-support-localization)
 - [Git Flow Workflow](#git-flow-workflow)
 - [Docker Setup](#docker-setup)
 - [Development Commands](#development-commands)
@@ -325,6 +326,332 @@ Production:            https://api.example.com
 - Check Laravel logs: `docker compose logs -f app`
 - Verify database connection
 - Check for migration errors
+
+---
+
+## Multi-Language Support (Localization)
+
+The API fully supports multiple languages for all response messages, validation errors, and success notifications.
+
+### Supported Languages
+
+- **Vietnamese (vi)** - Tiếng Việt (default)
+- **English (en)** - Tiếng Anh
+
+### How It Works
+
+The API uses the `Accept-Language` HTTP header to determine which language to use for response messages.
+
+**Request Header:**
+```
+Accept-Language: vi
+```
+or
+```
+Accept-Language: en
+```
+
+**Default Behavior:**
+- If no `Accept-Language` header is provided, Vietnamese (vi) is used by default
+- If an unsupported language is requested, it falls back to Vietnamese
+
+### Using with Postman
+
+#### Method 1: Using Postman Environments (Recommended)
+
+We've created two pre-configured environments for easy switching between languages.
+
+**Step 1: Import Environments**
+
+Import both environment files into Postman:
+- `postman_environment_vietnamese.json` - Vietnamese environment
+- `postman_environment_english.json` - English environment
+
+**Step 2: Select Environment**
+
+In Postman, select the environment you want to use from the environment dropdown (top right corner):
+- **"Balance Flow - Vietnamese"** - All responses in Vietnamese
+- **"Balance Flow - English"** - All responses in English
+
+**Step 3: Make Requests**
+
+All requests will automatically use the selected language. The `Accept-Language` header is automatically added with the correct locale value (`vi` or `en`).
+
+#### Method 2: Using Collection Variable
+
+The collection includes a `locale` variable that you can change manually.
+
+**In Postman:**
+1. Open the collection settings
+2. Go to "Variables" tab
+3. Find the `locale` variable
+4. Change its value:
+   - `vi` for Vietnamese
+   - `en` for English
+
+All requests will use the `{{locale}}` variable in the `Accept-Language` header.
+
+#### Method 3: Override Per Request
+
+You can override the language for a specific request:
+
+1. Open the request
+2. Go to "Headers" tab
+3. Change the `Accept-Language` value to `vi` or `en`
+
+### Response Examples
+
+#### Vietnamese Response (Accept-Language: vi)
+
+**Request:**
+```http
+POST /api/categories
+Accept-Language: vi
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Ăn uống",
+  "category_type": "expense",
+  "icon": "restaurant",
+  "color": "#FF5722"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "019ae327-97e4-71ee-8865-de46934da46d",
+    "name": "Ăn uống",
+    "category_type": "expense",
+    "icon": "restaurant",
+    "color": "#FF5722",
+    "is_system": false,
+    "created_at": "2025-12-03T07:40:14.000000Z",
+    "updated_at": "2025-12-03T07:40:14.000000Z"
+  },
+  "message": "Tạo danh mục thành công."
+}
+```
+
+#### English Response (Accept-Language: en)
+
+**Request:**
+```http
+POST /api/categories
+Accept-Language: en
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Food & Drink",
+  "category_type": "expense",
+  "icon": "restaurant",
+  "color": "#FF5722"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "019ae327-97e4-71ee-8865-de46934da46d",
+    "name": "Food & Drink",
+    "category_type": "expense",
+    "icon": "restaurant",
+    "color": "#FF5722",
+    "is_system": false,
+    "created_at": "2025-12-03T07:40:14.000000Z",
+    "updated_at": "2025-12-03T07:40:14.000000Z"
+  },
+  "message": "Category created successfully."
+}
+```
+
+#### Validation Error Examples
+
+**Vietnamese (vi):**
+```json
+{
+  "success": false,
+  "message": "Dữ liệu không hợp lệ",
+  "errors": {
+    "name": ["Trường tên là bắt buộc."],
+    "category_type": ["Loại danh mục không hợp lệ. Chỉ chấp nhận: income, expense."]
+  }
+}
+```
+
+**English (en):**
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "name": ["The name field is required."],
+    "category_type": ["Invalid category type. Only accepts: income, expense."]
+  }
+}
+```
+
+### Developer Guide
+
+#### Backend Implementation
+
+**1. Language Files**
+
+Located in `lang/` directory:
+```
+lang/
+├── en/                    # English translations
+│   ├── auth.php
+│   ├── categories.php
+│   ├── common.php
+│   └── validation.php
+└── vi/                    # Vietnamese translations
+    ├── auth.php
+    ├── categories.php
+    ├── common.php
+    └── validation.php
+```
+
+**2. Middleware**
+
+The `SetLocale` middleware (`app/Http/Middleware/SetLocale.php`) automatically detects and sets the locale based on the `Accept-Language` header.
+
+**3. Usage in Code**
+
+Use Laravel's translation helpers:
+
+```php
+// Get translated message
+__('categories.created_success')  // Returns: "Tạo danh mục thành công." (vi)
+                                  // or "Category created successfully." (en)
+
+// In controllers
+return response()->json([
+    'success' => true,
+    'message' => __('categories.created_success'),
+    'data' => $category
+], 201);
+
+// Validation messages are automatically translated
+```
+
+**4. Adding New Translations**
+
+To add a new message:
+
+1. **Add to Vietnamese file** (`lang/vi/your_module.php`):
+```php
+return [
+    'your_key' => 'Thông báo bằng tiếng Việt.',
+];
+```
+
+2. **Add to English file** (`lang/en/your_module.php`):
+```php
+return [
+    'your_key' => 'Message in English.',
+];
+```
+
+3. **Use in code**:
+```php
+__('your_module.your_key')
+```
+
+#### Testing with Different Languages
+
+In your tests, add the `Accept-Language` header:
+
+```php
+// Test with Vietnamese
+$this->withHeaders(['Accept-Language' => 'vi'])
+     ->postJson('/api/categories', $data)
+     ->assertJson([
+         'message' => 'Tạo danh mục thành công.'
+     ]);
+
+// Test with English
+$this->withHeaders(['Accept-Language' => 'en'])
+     ->postJson('/api/categories', $data)
+     ->assertJson([
+         'message' => 'Category created successfully.'
+     ]);
+```
+
+Or set default language for all tests in a class:
+
+```php
+protected function setUp(): void
+{
+    parent::setUp();
+
+    $this->withHeaders([
+        'Accept-Language' => 'vi',
+    ]);
+}
+```
+
+### Configuration
+
+**Default Locale**
+
+Set in `config/app.php` or `.env`:
+
+```env
+APP_LOCALE=vi
+APP_FALLBACK_LOCALE=en
+```
+
+**Supported Locales**
+
+Defined in `config/app.php`:
+
+```php
+'supported_locales' => ['en', 'vi'],
+```
+
+To add a new language:
+1. Create language files in `lang/{locale}/`
+2. Add locale to `supported_locales` array
+3. Update Postman environments
+
+### Common Issues
+
+**Issue: API returns wrong language**
+- **Solution:** Make sure the `Accept-Language` header is being sent with the request.
+
+**Issue: Postman not using environment locale**
+- **Solution:**
+  1. Ensure you have selected the correct environment (top right dropdown)
+  2. Check that the `locale` variable has the correct value in your environment
+  3. Verify the request has the `Accept-Language: {{locale}}` header
+
+**Issue: New translations not showing**
+- **Solution:** Clear Laravel's cache:
+  ```bash
+  php artisan config:clear
+  php artisan cache:clear
+  ```
+  Or with Docker:
+  ```bash
+  docker compose exec app php artisan config:clear
+  docker compose exec app php artisan cache:clear
+  ```
+
+### Summary
+
+- ✅ **Backend**: Fully supports Vietnamese and English via `Accept-Language` header
+- ✅ **Postman Collection**: All requests include `Accept-Language: {{locale}}` header
+- ✅ **Environments**: Pre-configured Vietnamese and English environments
+- ✅ **Tests**: Updated to work with localization
+- ✅ **Middleware**: Automatically detects and sets locale
+- ✅ **Extensible**: Easy to add more languages
 
 ---
 
