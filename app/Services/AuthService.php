@@ -171,7 +171,6 @@ class AuthService implements AuthServiceInterface
             [
                 'email' => $data['email'],
                 'password' => $data['password'],
-                'password_confirmation' => $data['password_confirmation'],
                 'token' => $data['token'],
             ],
             function (User $user, string $password) {
