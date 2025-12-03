@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "balance-flow-api-collection",
 		"name": "Balance Flow API",
-		"description": "Complete API collection for Balance Flow backend application",
+		"description": "Complete API collection for Balance Flow backend application\n\n## Language Support\n\nThis collection supports both Vietnamese (vi) and English (en) responses.\n\nTo change the language:\n1. Go to **Variables** tab in this collection\n2. Change the `locale` variable value:\n   - `vi` for Vietnamese (default)\n   - `en` for English\n\nAll API requests will automatically use your selected language via the `Accept-Language` header.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"auth": {

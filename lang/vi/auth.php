@@ -51,6 +51,11 @@ return [
     'password_reset_success' => 'Đặt lại mật khẩu thành công.',
     'password_reset_failed' => 'Đặt lại mật khẩu thất bại.',
     'invalid_reset_token' => 'Mã xác thực đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.',
+    'reset_password_subject' => 'Đặt Lại Mật Khẩu',
+    'reset_password_line1' => 'Bạn nhận được email này vì chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.',
+    'reset_password_line2' => 'Link đặt lại mật khẩu này sẽ hết hạn sau :count phút.',
+    'reset_password_line3' => 'Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.',
+    'reset_password_action' => 'Đặt Lại Mật Khẩu',
 
     // User
     'user_not_found' => 'Không tìm thấy người dùng.',

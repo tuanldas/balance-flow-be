@@ -51,6 +51,11 @@ return [
     'password_reset_success' => 'Password reset successfully.',
     'password_reset_failed' => 'Failed to reset password.',
     'invalid_reset_token' => 'Invalid or expired password reset token.',
+    'reset_password_subject' => 'Reset Password',
+    'reset_password_line1' => 'You are receiving this email because we received a password reset request for your account.',
+    'reset_password_line2' => 'This password reset link will expire in :count minutes.',
+    'reset_password_line3' => 'If you did not request a password reset, no further action is required.',
+    'reset_password_action' => 'Reset Password',
 
     // User
     'user_not_found' => 'User not found.',
