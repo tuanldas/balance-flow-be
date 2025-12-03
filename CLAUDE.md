@@ -19,6 +19,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ WAIT for explicit confirmation: "commit", "yes", "ok", etc.
 - ✅ Show summary of changes and ASK before committing
 
+**🚫 NEVER add Claude Code attribution to commit messages**
+
+- ❌ DO NOT add "🤖 Generated with [Claude Code](https://claude.com/claude-code)" to commits
+- ❌ DO NOT add "Co-Authored-By: Claude <noreply@anthropic.com>" to commits
+- ✅ Keep commit messages clean and professional
+- ✅ Follow the project's commit message format only (see below)
+
 **Correct workflow:**
 ```
 1. Complete the requested task
@@ -26,7 +33,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. Show summary of changes
 4. ASK: "Bạn có muốn tôi commit những thay đổi này không?"
 5. WAIT for user confirmation
-6. Only then: git commit
+6. Only then: git commit (WITHOUT Claude Code attribution)
 ```
 
 ---
