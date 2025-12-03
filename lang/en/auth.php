@@ -27,6 +27,10 @@ return [
     'email_already_verified' => 'Email has already been verified.',
     'verification_email_sent' => 'Verification email has been resent. Please check your inbox.',
     'verification_email_failed' => 'Failed to send verification email.',
+    'verify_email_subject' => 'Verify Email Address',
+    'verify_email_line1' => 'Please click the button below to verify your email address.',
+    'verify_email_line2' => 'If you did not create an account, no further action is required.',
+    'verify_email_action' => 'Verify Email Address',
 
     // Logout
     'logout_success' => 'Logout successful.',

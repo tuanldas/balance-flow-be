@@ -27,6 +27,10 @@ return [
     'email_already_verified' => 'Email đã được xác thực trước đó.',
     'verification_email_sent' => 'Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư của bạn.',
     'verification_email_failed' => 'Gửi email xác thực thất bại.',
+    'verify_email_subject' => 'Xác Thực Địa Chỉ Email',
+    'verify_email_line1' => 'Vui lòng nhấp vào nút bên dưới để xác thực địa chỉ email của bạn.',
+    'verify_email_line2' => 'Nếu bạn không tạo tài khoản, vui lòng bỏ qua email này.',
+    'verify_email_action' => 'Xác Thực Email',
 
     // Logout
     'logout_success' => 'Đăng xuất thành công.',

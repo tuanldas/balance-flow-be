@@ -16,11 +16,12 @@ class VerifyEmailNotification extends VerifyEmail
         $verificationUrl = $this->verificationUrl($notifiable);
 
         return (new MailMessage)
-            ->subject('Xác Thực Địa Chỉ Email')
-            ->greeting('Xin chào!')
-            ->line('Vui lòng nhấp vào nút bên dưới để xác thực địa chỉ email của bạn.')
-            ->action('Xác Thực Email', $verificationUrl)
-            ->line('Nếu bạn không tạo tài khoản, vui lòng bỏ qua email này.');
+            ->subject(__('auth.verify_email_subject'))
+            ->greeting(__('Hello!'))
+            ->line(__('auth.verify_email_line1'))
+            ->action(__('auth.verify_email_action'), $verificationUrl)
+            ->line(__('auth.verify_email_line2'))
+            ->salutation(__('Regards') . ",\n" . config('app.name'));
     }
 
     /**
