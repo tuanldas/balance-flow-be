@@ -33,6 +33,6 @@ class ResetPasswordNotification extends ResetPassword
         $frontendUrl = config('app.frontend_url');
 
         // Build frontend reset password URL with token and email
-        return "{$frontendUrl}/reset-password?token={$this->token}&email={$notifiable->getEmailForPasswordReset()}";
+        return "{$frontendUrl}/reset-password-confirm?token={$this->token}&email={$notifiable->getEmailForPasswordReset()}";
     }
 }
