@@ -31,8 +31,6 @@ class Category extends Model
     // Note: withCount is handled in Repository to avoid issues with self-referencing relationships
     // protected $withCount = ['subcategories'];
 
-    protected $appends = ['children'];
-
     protected $hidden = ['subcategories'];
 
     /**
@@ -103,5 +101,21 @@ class Category extends Model
         }
 
         return [];
+    }
+
+    /**
+     * Convert the model instance to an array.
+     * Only include 'children' for parent categories (parent_id is null)
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+
+        // Only add 'children' if this is a parent category
+        if ($this->parent_id === null) {
+            $array['children'] = $this->children;
+        }
+
+        return $array;
     }
 }
