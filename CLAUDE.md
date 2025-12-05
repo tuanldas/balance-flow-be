@@ -15,8 +15,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ❌ DO NOT run `git commit` automatically after completing tasks
 - ❌ DO NOT commit even if tests pass or code works perfectly
 - ❌ DO NOT assume the user wants changes committed
+- ❌ DO NOT commit when user says "ok", "done", "good", "perfect", etc. - these are NOT commit commands
+- ✅ ONLY commit when user EXPLICITLY says: "commit", "git commit", "commit this", "commit changes"
 - ✅ ALWAYS ask "Bạn có muốn tôi commit không?" before committing
-- ✅ WAIT for explicit confirmation: "commit", "yes", "ok", etc.
+- ✅ WAIT for explicit confirmation with the word "commit"
 - ✅ Show summary of changes and ASK before committing
 
 **🚫 NEVER add Claude Code attribution to commit messages**
@@ -32,9 +34,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 2. Run tests (if applicable)
 3. Show summary of changes
 4. ASK: "Bạn có muốn tôi commit những thay đổi này không?"
-5. WAIT for user confirmation
+5. WAIT for user confirmation with the word "commit"
 6. Only then: git commit (WITHOUT Claude Code attribution)
 ```
+
+**IMPORTANT:** "commit" is the ONLY command that allows committing. Words like "ok", "yes", "good", "done", "perfect" mean the user is satisfied with the work, but DO NOT mean they want to commit.
 
 ---
 
