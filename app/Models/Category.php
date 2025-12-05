@@ -28,7 +28,8 @@ class Category extends Model
         'updated_at' => 'datetime',
     ];
 
-    protected $withCount = ['subcategories'];
+    // Note: withCount is handled in Repository to avoid issues with self-referencing relationships
+    // protected $withCount = ['subcategories'];
 
     protected $appends = ['children'];
 
@@ -93,6 +94,12 @@ class Category extends Model
      */
     public function getChildrenAttribute()
     {
-        return $this->subcategories;
+        // Only return subcategories if the relationship is loaded
+        // to avoid N+1 queries and potential infinite loops
+        if ($this->relationLoaded('subcategories')) {
+            return $this->getRelation('subcategories');
+        }
+
+        return [];
     }
 }

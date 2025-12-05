@@ -22,7 +22,8 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
     ): Collection {
         $query = $this->model->select($columns)
             ->where('is_system', true)
-            ->whereNull('parent_id'); // Only get parent categories
+            ->whereNull('parent_id') // Only get parent categories
+            ->withCount('subcategories');
 
         if (! empty($relations)) {
             $query->with($relations);
@@ -42,7 +43,8 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
         $query = $this->model->select($columns)
             ->where('user_id', $userId)
             ->where('is_system', false)
-            ->whereNull('parent_id'); // Only get parent categories
+            ->whereNull('parent_id') // Only get parent categories
+            ->withCount('subcategories');
 
         if (! empty($relations)) {
             $query->with($relations);
@@ -62,7 +64,8 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
     ): Collection {
         $query = $this->model->select($columns)
             ->where('category_type', $type)
-            ->whereNull('parent_id'); // Only get parent categories
+            ->whereNull('parent_id') // Only get parent categories
+            ->withCount('subcategories');
 
         if ($userId) {
             $query->where(function ($q) use ($userId) {
@@ -91,6 +94,7 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
     ): mixed {
         $query = $this->model->select($columns)
             ->whereNull('parent_id') // Only get parent categories
+            ->withCount('subcategories')
             ->where(function ($q) use ($userId) {
                 $q->where('is_system', true)
                     ->orWhere('user_id', $userId);
@@ -116,6 +120,7 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
         $query = $this->model->select($columns)
             ->where('category_type', $type)
             ->whereNull('parent_id') // Only get parent categories
+            ->withCount('subcategories')
             ->where(function ($q) use ($userId) {
                 $q->where('is_system', true)
                     ->orWhere('user_id', $userId);
