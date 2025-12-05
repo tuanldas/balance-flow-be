@@ -87,7 +87,7 @@
 								}
 							]
 						},
-						"description": "Get all categories (system + user's custom) with pagination.\n\nQuery Parameters:\n- `per_page` (optional): Number of items per page (default: 15)\n- `type` (optional): Filter by category type (income|expense)\n\nResponse includes:\n- success: boolean\n- data: array of categories\n- pagination: current_page, per_page, total, last_page, from, to"
+						"description": "Get all categories (system + user's custom) with pagination.\n\nQuery Parameters:\n- `per_page` (optional): Number of items per page (default: 15)\n- `type` (optional): Filter by category type (income|expense)\n\nResponse includes:\n- success: boolean\n- data: array of categories with:\n  - subcategories_count: number of child categories\n  - children: array of subcategories (max 2 levels: parent & child)\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: Categories support 2-level hierarchy (parent with children). Only parent categories (parent_id = null) include the 'children' array."
 					},
 					"response": []
 				},
@@ -258,7 +258,7 @@
 								"categories"
 							]
 						},
-						"description": "Create a new user category.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- parent_id: UUID of parent category\n- icon: string (max 50)\n- color: hex color code (#RRGGBB)\n\nValidation:\n- Name is required\n- Category type must be income or expense\n- Color must be hex format\n- Parent must exist and have same type"
+						"description": "Create a new user category.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- parent_id: UUID of parent category (to create subcategory)\n- icon: string (max 50)\n- color: hex color code (#RRGGBB)\n\nValidation:\n- Name is required\n- Category type must be income or expense\n- Color must be hex format\n- Parent must exist and have same type\n- Parent cannot already have a parent (max 2 levels)\n- Categories with children cannot be converted to subcategories"
 					},
 					"response": []
 				},
@@ -298,7 +298,7 @@
 								"categories"
 							]
 						},
-						"description": "Create a subcategory under a parent category.\n\nNote: Subcategory must have the same category_type as its parent."
+						"description": "Create a subcategory under a parent category.\n\nRequired:\n- parent_id: UUID of parent category (must be a parent, not another subcategory)\n- category_type: must match parent's type\n\nValidation:\n- Parent category cannot already have a parent (prevents 3+ levels)\n- Subcategory type must match parent type\n- Subcategories cannot have their own children"
 					},
 					"response": []
 				},
@@ -450,7 +450,7 @@
 					"response": []
 				}
 			],
-			"description": "Category management endpoints.\n\nAll endpoints require authentication via Bearer token.\n\nCategories can be:\n- System categories (is_system = true): Created by admin, cannot be modified/deleted\n- User categories (is_system = false): Created by users, can be modified/deleted\n\nCategory types:\n- income: For income transactions\n- expense: For expense transactions"
+			"description": "Category management endpoints.\n\nAll endpoints require authentication via Bearer token.\n\nCategories can be:\n- System categories (is_system = true): Created by admin, cannot be modified/deleted\n- User categories (is_system = false): Created by users, can be modified/deleted\n\nCategory types:\n- income: For income transactions\n- expense: For expense transactions\n\nCategory hierarchy:\n- Maximum 2 levels: parent and child (subcategories)\n- Parent categories (parent_id = null) can have multiple children\n- Subcategories (parent_id != null) cannot have children\n- Parent categories include 'children' array and 'subcategories_count' in response\n- Attempting to create 3+ levels will result in validation error"
 		},
 		{
 			"name": "Authentication",
