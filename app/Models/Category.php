@@ -33,6 +33,8 @@ class Category extends Model
 
     protected $appends = ['children'];
 
+    protected $hidden = ['subcategories'];
+
     /**
      * Relationship: Category belongs to User
      */
