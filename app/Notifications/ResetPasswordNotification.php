@@ -21,7 +21,7 @@ class ResetPasswordNotification extends ResetPassword
             ->action(__('auth.reset_password_action'), $resetUrl)
             ->line(__('auth.reset_password_line2', ['count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')]))
             ->line(__('auth.reset_password_line3'))
-            ->salutation(__('Regards') . ",\n" . config('app.name'));
+            ->salutation(__('Regards').",\n".config('app.name'));
     }
 
     /**

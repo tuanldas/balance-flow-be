@@ -108,6 +108,11 @@ class CategoryService extends BaseService implements CategoryServiceInterface
                 throw new \Exception(__('categories.parent_not_found'));
             }
 
+            // Prevent 3-level nesting: parent cannot have a parent
+            if ($parent->parent_id !== null) {
+                throw new \Exception(__('categories.max_depth_exceeded'));
+            }
+
             // Ensure parent has same category_type
             if ($parent->category_type !== $data['category_type']) {
                 throw new \Exception(__('categories.parent_type_mismatch'));
@@ -157,6 +162,16 @@ class CategoryService extends BaseService implements CategoryServiceInterface
             // Can't set self as parent
             if ($parent->id === $category->id) {
                 throw new \Exception(__('categories.cannot_set_self_as_parent'));
+            }
+
+            // Prevent 3-level nesting: parent cannot have a parent
+            if ($parent->parent_id !== null) {
+                throw new \Exception(__('categories.max_depth_exceeded'));
+            }
+
+            // Can't set a category that has children as a subcategory
+            if ($category->subcategories()->exists()) {
+                throw new \Exception(__('categories.cannot_make_parent_subcategory'));
             }
 
             // Ensure parent has same category_type

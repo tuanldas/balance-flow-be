@@ -21,7 +21,7 @@ class VerifyEmailNotification extends VerifyEmail
             ->line(__('auth.verify_email_line1'))
             ->action(__('auth.verify_email_action'), $verificationUrl)
             ->line(__('auth.verify_email_line2'))
-            ->salutation(__('Regards') . ",\n" . config('app.name'));
+            ->salutation(__('Regards').",\n".config('app.name'));
     }
 
     /**

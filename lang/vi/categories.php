@@ -39,6 +39,8 @@ return [
     'parent_not_accessible' => 'Bạn không có quyền truy cập danh mục cha.',
     'cannot_set_self_as_parent' => 'Không thể đặt danh mục làm cha của chính nó.',
     'cannot_delete_has_transactions' => 'Không thể xóa danh mục có giao dịch hoặc danh mục con.',
+    'max_depth_exceeded' => 'Danh mục chỉ có thể có tối đa 2 cấp (cha và con).',
+    'cannot_make_parent_subcategory' => 'Không thể chuyển danh mục có danh mục con thành danh mục con.',
 
     // Authorization
     'unauthorized' => 'Bạn không có quyền thực hiện thao tác này.',

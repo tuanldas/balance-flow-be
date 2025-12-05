@@ -28,6 +28,10 @@ class Category extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected $withCount = ['subcategories'];
+
+    protected $appends = ['children'];
+
     /**
      * Relationship: Category belongs to User
      */
@@ -82,5 +86,13 @@ class Category extends Model
     public function scopeParents($query)
     {
         return $query->whereNull('parent_id');
+    }
+
+    /**
+     * Accessor: Get children (alias for subcategories)
+     */
+    public function getChildrenAttribute()
+    {
+        return $this->subcategories;
     }
 }

@@ -39,6 +39,8 @@ return [
     'parent_not_accessible' => 'You do not have access to the parent category.',
     'cannot_set_self_as_parent' => 'Cannot set category as its own parent.',
     'cannot_delete_has_transactions' => 'Cannot delete category that has transactions or subcategories.',
+    'max_depth_exceeded' => 'Categories can only have a maximum of 2 levels (parent and child).',
+    'cannot_make_parent_subcategory' => 'Cannot convert a category with subcategories into a subcategory.',
 
     // Authorization
     'unauthorized' => 'You are not authorized to perform this action.',
