@@ -90,6 +90,24 @@ class Category extends Model
     }
 
     /**
+     * Accessor: Get icon attribute with full URL
+     */
+    public function getIconAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        // If icon is already a full URL, return as is
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        // Generate full URL from storage path
+        return url($value);
+    }
+
+    /**
      * Accessor: Get children (alias for subcategories)
      */
     public function getChildrenAttribute()

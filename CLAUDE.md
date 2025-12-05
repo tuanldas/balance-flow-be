@@ -70,6 +70,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Code formatting fixes
 - Configuration file updates
 
+### Database Migration & Seeding Policy
+
+**🚫 NEVER run `migrate:fresh` or `migrate:refresh` without user approval**
+
+- ❌ DO NOT run `php artisan migrate:fresh` - this DELETES all data
+- ❌ DO NOT run `php artisan migrate:fresh --seed` - this DELETES all data including user test accounts
+- ❌ DO NOT run `php artisan migrate:refresh` - this also DELETES all data
+- ✅ ONLY use `php artisan migrate` - this preserves existing data
+- ✅ ONLY run seeders individually when needed: `php artisan db:seed --class=CategorySeeder`
+- ✅ ALWAYS ask user before running any command that could delete data
+
+**Correct workflow for database changes:**
+```bash
+# ✅ Safe - Only runs new migrations, preserves existing data
+php artisan migrate
+
+# ✅ Safe - Only seeds specific table if needed
+php artisan db:seed --class=CategorySeeder
+
+# ❌ DANGEROUS - Deletes all data (ask user first!)
+php artisan migrate:fresh --seed
+```
+
+**Why this matters:**
+- Users may have test accounts registered in the database
+- Development data should be preserved between code changes
+- Only reset database when explicitly requested by user
+
 ---
 
 ## Project Overview
