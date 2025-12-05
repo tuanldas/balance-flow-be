@@ -40,6 +40,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **IMPORTANT:** "commit" is the ONLY command that allows committing. Words like "ok", "yes", "good", "done", "perfect" mean the user is satisfied with the work, but DO NOT mean they want to commit.
 
+### Git Branch Policy
+
+**🚫 ALWAYS create a new branch for new features or bug fixes**
+
+- ❌ DO NOT work directly on `dev` branch for new features
+- ❌ DO NOT work directly on `dev` branch for bug fixes
+- ❌ DO NOT work directly on `main` branch (except hotfixes)
+- ✅ ALWAYS create `feature/*` branch for new features
+- ✅ ALWAYS create `bugfix/*` branch for bug fixes
+- ✅ ALWAYS create `hotfix/*` branch for emergency fixes from main
+- ✅ Ask before creating branch: "Tôi sẽ tạo branch feature/[tên] để làm việc, bạn đồng ý không?"
+
+**Workflow when starting new work:**
+```
+1. User requests new feature or bug fix
+2. Check current branch: git branch --show-current
+3. ASK: "Tôi sẽ tạo branch [feature/bugfix]/[tên] để làm việc này, bạn đồng ý không?"
+4. WAIT for confirmation
+5. Create and checkout new branch from dev
+6. Implement the feature/fix
+7. Commit to the new branch
+8. Ask if user wants to merge back to dev
+```
+
+**Exceptions (when you CAN work on dev directly):**
+- Documentation updates (README, CLAUDE.md, etc.)
+- Minor refactoring that doesn't add features
+- Code formatting fixes
+- Configuration file updates
+
 ---
 
 ## Project Overview
@@ -126,12 +156,13 @@ Accept-Language: vi
 
 | Branch | Purpose | Example |
 |--------|---------|---------|
-| `main` | Production-ready code | - |
-| `dev` | Main development branch | - |
+| `main` | Production-ready code (production releases) | - |
+| `dev` | Main development branch (next release development) | - |
 | `feature/*` | New features | `feature/xac-thuc` |
-| `bugfix/*` | Bug fixes from dev | `bugfix/validate` |
+| `release/*` | Prepare for production release | `release/v1.0.0` |
 | `hotfix/*` | Emergency fixes from main | `hotfix/loi-bao-mat` |
-| `release/*` | Prepare for production | `release/v1.0.0` |
+| `support/*` | Support/maintenance branches | `support/v1.x` |
+| `bugfix/*` | Bug fixes from dev | `bugfix/validate` |
 
 ### Commit Message Format
 
@@ -153,14 +184,145 @@ test(user): thêm unit test cho UserService
 ### Workflow Diagram
 
 ```
-main (production)
+main (production releases)
   │◄─── hotfix/*
+  │◄─── support/*
   ├──► release/* ──────┐
   │                     ▼
-dev ◄────────────────merge
+dev (next release) ◄──merge
   │◄─── feature/*
   │◄─── bugfix/*
 ```
+
+### Git Flow Usage Guide
+
+**IMPORTANT:** Claude Code should understand and follow this Git Flow workflow when working on tasks.
+
+#### 1. Starting a New Feature
+
+```bash
+# Create feature branch from dev
+git checkout dev
+git pull origin dev
+git checkout -b feature/ten-tinh-nang
+
+# Work on feature, commit changes
+git add .
+git commit -m "feat(scope): mô tả thay đổi"
+
+# Push to remote
+git push -u origin feature/ten-tinh-nang
+```
+
+#### 2. Bug Fixes (from dev)
+
+```bash
+# Create bugfix branch from dev
+git checkout dev
+git pull origin dev
+git checkout -b bugfix/ten-loi
+
+# Fix bug, commit
+git add .
+git commit -m "fix(scope): sửa lỗi xyz"
+
+# Push to remote
+git push -u origin bugfix/ten-loi
+```
+
+#### 3. Hotfix (Emergency fixes from main)
+
+```bash
+# Create hotfix branch from main
+git checkout main
+git pull origin main
+git checkout -b hotfix/loi-khan-cap
+
+# Fix critical bug, commit
+git add .
+git commit -m "hotfix(scope): sửa lỗi bảo mật abc"
+
+# Push to remote
+git push -u origin hotfix/loi-khan-cap
+
+# Merge back to both main AND dev
+git checkout main
+git merge hotfix/loi-khan-cap
+git push origin main
+
+git checkout dev
+git merge hotfix/loi-khan-cap
+git push origin dev
+```
+
+#### 4. Release Preparation
+
+```bash
+# Create release branch from dev
+git checkout dev
+git pull origin dev
+git checkout -b release/v1.0.0
+
+# Prepare release (version bump, changelog, etc.)
+git commit -m "chore(release): bump version to v1.0.0"
+
+# Merge to main and tag
+git checkout main
+git merge release/v1.0.0
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin main --tags
+
+# Merge back to dev
+git checkout dev
+git merge release/v1.0.0
+git push origin dev
+```
+
+#### 5. Support Branches (Long-term maintenance)
+
+```bash
+# Create support branch from a specific release tag
+git checkout v1.2.0
+git checkout -b support/v1.x
+
+# Apply fixes to support branch
+git commit -m "fix(support): sửa lỗi cho phiên bản 1.x"
+
+# Push support branch
+git push -u origin support/v1.x
+
+# Create hotfix from support branch if needed
+git checkout -b hotfix/v1.2.1 support/v1.x
+# ... make fixes ...
+git checkout support/v1.x
+git merge hotfix/v1.2.1
+git tag -a v1.2.1 -m "Hotfix version 1.2.1"
+git push origin support/v1.x --tags
+```
+
+**Support branches are used for:**
+- Maintaining old versions while developing new features on dev
+- Providing bug fixes for production versions that are still in use
+- Supporting multiple major versions simultaneously
+
+#### 6. Claude Code Workflow
+
+**When working on tasks:**
+1. Always check current branch: `git branch --show-current`
+2. For new features: work on `feature/*` branch or create one if needed
+3. For bug fixes: work on `bugfix/*` branch or create one if needed
+4. For emergency fixes: work on `hotfix/*` branch from main
+5. For version maintenance: work on `support/*` branch if maintaining old versions
+6. For documentation/refactoring: can commit directly to `dev` if minor
+7. **NEVER** commit directly to `main` unless it's a hotfix or release merge
+8. **ALWAYS** ask before creating new branches: "Bạn có muốn tôi tạo branch mới không?"
+
+**Branch naming conventions:**
+- `feature/ten-tinh-nang` - new features
+- `bugfix/ten-loi` - bug fixes
+- `hotfix/ten-loi-khan-cap` - emergency production fixes
+- `release/v1.0.0` - release preparation
+- `support/v1.x` - long-term maintenance for version 1.x
 
 ---
 
