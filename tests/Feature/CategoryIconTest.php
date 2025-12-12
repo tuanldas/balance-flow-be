@@ -51,7 +51,7 @@ class CategoryIconTest extends TestCase
 
         // Check that default icons are returned
         $iconNames = array_column($data, 'name');
-        $this->assertContains('salary', $iconNames);
+        $this->assertContains('wallet', $iconNames);
         $this->assertContains('food', $iconNames);
     }
 
@@ -74,8 +74,7 @@ class CategoryIconTest extends TestCase
         $data = [
             'name' => 'My Category',
             'category_type' => 'income',
-            'icon' => 'salary.svg',
-            'color' => '#4CAF50',
+            'icon' => 'wallet.png',
         ];
 
         $response = $this->actingAs($user)->postJson('/api/categories', $data);
@@ -88,10 +87,10 @@ class CategoryIconTest extends TestCase
         // Check that icon was copied to user storage
         $category = Category::where('user_id', $user->id)->where('name', 'My Category')->first();
         $this->assertNotNull($category);
-        $this->assertStringContains("users/{$user->id}/category-icons/salary.svg", $category->getRawOriginal('icon'));
+        $this->assertStringContains("users/{$user->id}/category-icons/wallet.png", $category->getRawOriginal('icon'));
 
         // Check file exists in storage
-        Storage::disk('public')->assertExists("users/{$user->id}/category-icons/salary.svg");
+        Storage::disk('public')->assertExists("users/{$user->id}/category-icons/wallet.png");
     }
 
     /**
@@ -106,7 +105,6 @@ class CategoryIconTest extends TestCase
         $response = $this->actingAs($user)->post('/api/categories', [
             'name' => 'My Category',
             'category_type' => 'expense',
-            'color' => '#F44336',
             'icon_file' => $file,
         ]);
 
@@ -230,8 +228,7 @@ class CategoryIconTest extends TestCase
         $response = $this->actingAs($user)->post('/api/categories', [
             'name' => 'My Category',
             'category_type' => 'expense',
-            'color' => '#F44336',
-            'icon' => 'salary.svg', // This should be ignored
+            'icon' => 'wallet.png', // This should be ignored
             'icon_file' => $file,
         ]);
 
@@ -239,7 +236,7 @@ class CategoryIconTest extends TestCase
 
         // Check that uploaded icon was used, not default icon
         $category = Category::where('user_id', $user->id)->where('name', 'My Category')->first();
-        $this->assertStringNotContains('salary.svg', $category->getRawOriginal('icon'));
+        $this->assertStringNotContains('wallet.png', $category->getRawOriginal('icon'));
         $this->assertStringContains('.png', $category->getRawOriginal('icon'));
     }
 

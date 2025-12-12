@@ -26,7 +26,6 @@ class UpdateCategoryRequest extends FormRequest
             'parent_id' => 'nullable|uuid|exists:categories,id',
             'icon' => 'nullable|string|max:255',
             'icon_file' => 'nullable|file|mimes:svg,png,jpg,jpeg|max:512',
-            'color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ];
     }
 

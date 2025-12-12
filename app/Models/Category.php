@@ -18,7 +18,6 @@ class Category extends Model
         'category_type',
         'parent_id',
         'icon',
-        'color',
         'is_system',
     ];
 

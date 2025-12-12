@@ -28,12 +28,12 @@ class CategorySeeder extends Seeder
         $this->copyIconsToStorage();
         // Income categories
         $incomeCategories = [
-            ['name' => 'Lương', 'icon' => 'salary.svg', 'color' => '#4CAF50'],
-            ['name' => 'Thưởng', 'icon' => 'bonus.svg', 'color' => '#8BC34A'],
-            ['name' => 'Đầu tư', 'icon' => 'investment.svg', 'color' => '#009688'],
-            ['name' => 'Kinh doanh', 'icon' => 'freelance.svg', 'color' => '#00BCD4'],
-            ['name' => 'Tiết kiệm', 'icon' => 'savings.svg', 'color' => '#2E7D32'],
-            ['name' => 'Thu nhập khác', 'icon' => 'other-income.svg', 'color' => '#03A9F4'],
+            ['name' => 'Lương', 'icon' => 'wallet.png'],
+            ['name' => 'Thưởng', 'icon' => 'interest.png'],
+            ['name' => 'Đầu tư', 'icon' => 'finance.png'],
+            ['name' => 'Kinh doanh', 'icon' => 'work.png'],
+            ['name' => 'Tiết kiệm', 'icon' => 'wallet.png'],
+            ['name' => 'Thu nhập khác', 'icon' => 'other.png'],
         ];
 
         foreach ($incomeCategories as $category) {
@@ -43,7 +43,6 @@ class CategorySeeder extends Seeder
                 'category_type' => 'income',
                 'parent_id' => null,
                 'icon' => 'storage/category-icons/'.$category['icon'],
-                'color' => $category['color'],
                 'is_system' => true,
             ]);
         }
@@ -53,7 +52,6 @@ class CategorySeeder extends Seeder
             [
                 'name' => 'Ăn uống',
                 'icon' => 'food.svg',
-                'color' => '#FF5722',
                 'subcategories' => [
                     ['name' => 'Ăn sáng', 'icon' => 'food.svg'],
                     ['name' => 'Ăn trưa', 'icon' => 'food.svg'],
@@ -61,16 +59,16 @@ class CategorySeeder extends Seeder
                     ['name' => 'Cà phê', 'icon' => 'food.svg'],
                 ],
             ],
-            ['name' => 'Mua sắm', 'icon' => 'shopping.svg', 'color' => '#E91E63'],
-            ['name' => 'Đi lại', 'icon' => 'transportation.svg', 'color' => '#9C27B0'],
-            ['name' => 'Nhà cửa', 'icon' => 'housing.svg', 'color' => '#673AB7'],
-            ['name' => 'Y tế', 'icon' => 'healthcare.svg', 'color' => '#3F51B5'],
-            ['name' => 'Giáo dục', 'icon' => 'education.svg', 'color' => '#2196F3'],
-            ['name' => 'Giải trí', 'icon' => 'entertainment.svg', 'color' => '#00BCD4'],
-            ['name' => 'Hóa đơn', 'icon' => 'utilities.svg', 'color' => '#009688'],
-            ['name' => 'Bảo hiểm', 'icon' => 'insurance.svg', 'color' => '#4CAF50'],
-            ['name' => 'Quà tặng', 'icon' => 'gift.svg', 'color' => '#E040FB'],
-            ['name' => 'Chi phí khác', 'icon' => 'other-expense.svg', 'color' => '#FFC107'],
+            ['name' => 'Mua sắm', 'icon' => 'shopping.png'],
+            ['name' => 'Đi lại', 'icon' => 'transport.png'],
+            ['name' => 'Nhà cửa', 'icon' => 'home.png'],
+            ['name' => 'Y tế', 'icon' => 'heal.png'],
+            ['name' => 'Giáo dục', 'icon' => 'education.png'],
+            ['name' => 'Giải trí', 'icon' => 'movie.png'],
+            ['name' => 'Hóa đơn', 'icon' => 'bill.png'],
+            ['name' => 'Bảo hiểm', 'icon' => 'insurance.png'],
+            ['name' => 'Quà tặng', 'icon' => 'gift.png'],
+            ['name' => 'Chi phí khác', 'icon' => 'other.png'],
         ];
 
         foreach ($expenseCategories as $category) {
@@ -80,7 +78,6 @@ class CategorySeeder extends Seeder
                 'category_type' => 'expense',
                 'parent_id' => null,
                 'icon' => 'storage/category-icons/'.$category['icon'],
-                'color' => $category['color'],
                 'is_system' => true,
             ]);
 
@@ -93,7 +90,6 @@ class CategorySeeder extends Seeder
                         'category_type' => 'expense',
                         'parent_id' => $parent->id,
                         'icon' => 'storage/category-icons/'.$subcategory['icon'],
-                        'color' => $category['color'],
                         'is_system' => true,
                     ]);
                 }
