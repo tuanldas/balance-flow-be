@@ -25,8 +25,17 @@ class StoreCategoryRequest extends FormRequest
             'name' => 'required|string|max:255',
             'category_type' => 'required|in:income,expense',
             'parent_id' => 'nullable|uuid|exists:categories,id',
-            'icon' => 'nullable|string|max:50',
+            'icon' => 'nullable|string|max:255',
+            'icon_file' => 'nullable|file|mimes:svg,png,jpg,jpeg|max:512',
             'color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'icon_file.mimes' => __('categories.icon_invalid_type'),
+            'icon_file.max' => __('categories.icon_too_large'),
         ];
     }
 }

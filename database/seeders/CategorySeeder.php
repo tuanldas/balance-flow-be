@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class CategorySeeder extends Seeder
 {
@@ -42,7 +42,7 @@ class CategorySeeder extends Seeder
                 'name' => $category['name'],
                 'category_type' => 'income',
                 'parent_id' => null,
-                'icon' => 'storage/category-icons/' . $category['icon'],
+                'icon' => 'storage/category-icons/'.$category['icon'],
                 'color' => $category['color'],
                 'is_system' => true,
             ]);
@@ -79,7 +79,7 @@ class CategorySeeder extends Seeder
                 'name' => $category['name'],
                 'category_type' => 'expense',
                 'parent_id' => null,
-                'icon' => 'storage/category-icons/' . $category['icon'],
+                'icon' => 'storage/category-icons/'.$category['icon'],
                 'color' => $category['color'],
                 'is_system' => true,
             ]);
@@ -92,7 +92,7 @@ class CategorySeeder extends Seeder
                         'name' => $subcategory['name'],
                         'category_type' => 'expense',
                         'parent_id' => $parent->id,
-                        'icon' => 'storage/category-icons/' . $subcategory['icon'],
+                        'icon' => 'storage/category-icons/'.$subcategory['icon'],
                         'color' => $category['color'],
                         'is_system' => true,
                     ]);
@@ -112,7 +112,7 @@ class CategorySeeder extends Seeder
         foreach ($icons as $icon) {
             $filename = $icon->getFilename();
             $content = File::get($icon->getPathname());
-            Storage::disk('public')->put('category-icons/' . $filename, $content);
+            Storage::disk('public')->put('category-icons/'.$filename, $content);
         }
     }
 }

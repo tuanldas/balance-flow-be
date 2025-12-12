@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CategoryIconController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,6 +31,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/password', [AuthController::class, 'changePassword']);
         Route::post('/resend-verification-email', [AuthController::class, 'resendVerificationEmail']);
     });
+
+    // Category Icons Routes
+    Route::get('/category-icons', [CategoryIconController::class, 'index']);
 
     // Categories Routes
     Route::prefix('categories')->group(function () {

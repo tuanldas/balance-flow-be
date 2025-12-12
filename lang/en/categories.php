@@ -48,4 +48,10 @@ return [
     // Validation
     'invalid_type' => 'Invalid category type. Only accepts: income, expense.',
     'invalid_color' => 'Invalid color code.',
+
+    // Icon
+    'icon_not_found' => 'Icon not found.',
+    'icon_invalid_type' => 'Invalid icon file. Only accepts: SVG, PNG, JPG.',
+    'icon_too_large' => 'Icon file too large. Maximum size: 512KB.',
+    'icon_upload_failed' => 'Failed to upload icon.',
 ];
