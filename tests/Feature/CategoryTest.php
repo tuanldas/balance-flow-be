@@ -41,7 +41,7 @@ class CategoryTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'data' => [
-                    '*' => ['id', 'name', 'category_type', 'icon', 'color', 'is_system'],
+                    '*' => ['id', 'name', 'category_type', 'icon', 'is_system'],
                 ],
                 'pagination' => [
                     'current_page',
@@ -134,7 +134,6 @@ class CategoryTest extends TestCase
             'name' => 'My Custom Category',
             'category_type' => 'expense',
             'icon' => 'pets',
-            'color' => '#9C27B0',
         ];
 
         $response = $this->actingAs($user)->postJson('/api/categories', $data);
@@ -217,14 +216,6 @@ class CategoryTest extends TestCase
         $response = $this->actingAs($user)->postJson('/api/categories', [
             'name' => 'Test',
             'category_type' => 'invalid',
-        ]);
-        $response->assertStatus(422);
-
-        // Invalid color format
-        $response = $this->actingAs($user)->postJson('/api/categories', [
-            'name' => 'Test',
-            'category_type' => 'income',
-            'color' => 'invalid-color',
         ]);
         $response->assertStatus(422);
     }

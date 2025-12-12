@@ -1,1192 +1,1177 @@
 {
-	"info": {
-		"_postman_id": "balance-flow-api-collection",
-		"name": "Balance Flow API",
-		"description": "Complete API collection for Balance Flow backend application\n\n## Language Support\n\nThis collection supports both Vietnamese (vi) and English (en) responses.\n\nTo change the language:\n1. Go to **Variables** tab in this collection\n2. Change the `locale` variable value:\n   - `vi` for Vietnamese (default)\n   - `en` for English\n\nAll API requests will automatically use your selected language via the `Accept-Language` header.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{access_token}}",
-				"type": "string"
-			}
-		]
-	},
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8080",
-			"type": "string"
-		},
-		{
-			"key": "access_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "category_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "locale",
-			"value": "vi",
-			"type": "string",
-			"description": "Language preference (vi for Vietnamese, en for English)"
-		}
-	],
-	"item": [
-		{
-			"name": "Category Icons",
-			"item": [
-				{
-					"name": "List Default Icons",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/category-icons",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"category-icons"
-							]
-						},
-						"description": "Get list of default category icons.\n\nReturns:\n- success: boolean\n- data: array of icons with:\n  - name: icon name (without extension)\n  - filename: full filename\n  - url: full URL to icon file\n\nAvailable icons:\n- Income: salary, bonus, investment, freelance, savings, other-income\n- Expense: food, shopping, transportation, housing, healthcare, education, entertainment, utilities, insurance, gift, other-expense"
-					},
-					"response": []
-				}
-			],
-			"description": "Category Icons endpoints.\n\nProvides list of default icons that can be used when creating categories.\n\nAll endpoints require authentication via Bearer token."
-		},
-		{
-			"name": "Categories",
-			"item": [
-				{
-					"name": "List Categories",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/categories?per_page=15",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories"
-							],
-							"query": [
-								{
-									"key": "per_page",
-									"value": "15",
-									"description": "Number of items per page (default: 15)"
-								},
-								{
-									"key": "type",
-									"value": "income",
-									"description": "Filter by type: income or expense (enable to filter)",
-									"disabled": true
-								}
-							]
-						},
-						"description": "Get categories (system + user's custom) with pagination.\n\nQuery Parameters:\n- `per_page` (optional): Number of items per page (default: 15)\n- `type` (optional): Filter by category type (income|expense)\n\nExamples:\n- All categories: /api/categories\n- Income only: /api/categories?type=income\n- Expense only: /api/categories?type=expense\n\nResponse includes:\n- success: boolean\n- data: array of categories with:\n  - subcategories_count: number of child categories\n  - children: array of subcategories (max 2 levels: parent & child)\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: Categories support 2-level hierarchy (parent with children). Only parent categories (parent_id = null) include the 'children' array."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Category Details",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories",
-								"{{category_id}}"
-							]
-						},
-						"description": "Get details of a specific category by ID.\n\nReturns:\n- success: boolean\n- data: category object with all fields"
-					},
-					"response": []
-				},
-				{
-					"name": "Create Category",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    if (response.data && response.data.id) {",
-									"        pm.collectionVariables.set('category_id', response.data.id);",
-									"        console.log('Category ID saved:', response.data.id);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "Salary",
-									"type": "text"
-								},
-								{
-									"key": "category_type",
-									"value": "income",
-									"type": "text"
-								},
-								{
-									"key": "icon",
-									"value": "salary.svg",
-									"type": "text",
-									"description": "Default icon name (e.g., salary.svg, food.svg)"
-								},
-								{
-									"key": "color",
-									"value": "#4CAF50",
-									"type": "text"
-								},
-								{
-									"key": "icon_file",
-									"type": "file",
-									"src": "",
-									"description": "Custom icon file (SVG, PNG, JPG - max 512KB). Takes priority over 'icon' field.",
-									"disabled": true
-								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/api/categories",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories"
-							]
-						},
-						"description": "Create a new user category.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- parent_id: UUID of parent category (to create subcategory)\n- icon: string (default icon name, e.g., 'salary.svg')\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code (#RRGGBB)\n\nIcon options:\n1. Use 'icon' field with default icon name (e.g., 'salary.svg')\n2. Upload custom icon via 'icon_file' field\n3. icon_file takes priority over icon if both provided\n\nValidation:\n- Name is required\n- Category type must be income or expense\n- Color must be hex format\n- Parent must exist and have same type\n- Parent cannot already have a parent (max 2 levels)"
-					},
-					"response": []
-				},
-				{
-					"name": "Create Subcategory",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "Bonus",
-									"type": "text"
-								},
-								{
-									"key": "category_type",
-									"value": "income",
-									"type": "text"
-								},
-								{
-									"key": "parent_id",
-									"value": "{{category_id}}",
-									"type": "text"
-								},
-								{
-									"key": "icon",
-									"value": "bonus.svg",
-									"type": "text",
-									"description": "Default icon name"
-								},
-								{
-									"key": "color",
-									"value": "#8BC34A",
-									"type": "text"
-								},
-								{
-									"key": "icon_file",
-									"type": "file",
-									"src": "",
-									"description": "Custom icon file (SVG, PNG, JPG - max 512KB)",
-									"disabled": true
-								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/api/categories",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories"
-							]
-						},
-						"description": "Create a subcategory under a parent category.\n\nRequired:\n- name: string (max 255)\n- category_type: must match parent's type\n- parent_id: UUID of parent category (must be a parent, not another subcategory)\n\nOptional:\n- icon: string (default icon name)\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code\n\nValidation:\n- Parent category cannot already have a parent (prevents 3+ levels)\n- Subcategory type must match parent type\n- Subcategories cannot have their own children"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Category",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "_method",
-									"value": "PUT",
-									"type": "text",
-									"description": "Method override for file upload support"
-								},
-								{
-									"key": "name",
-									"value": "Monthly Salary",
-									"type": "text"
-								},
-								{
-									"key": "icon",
-									"value": "salary.svg",
-									"type": "text",
-									"description": "Default icon name"
-								},
-								{
-									"key": "color",
-									"value": "#2196F3",
-									"type": "text"
-								},
-								{
-									"key": "icon_file",
-									"type": "file",
-									"src": "",
-									"description": "Custom icon file (SVG, PNG, JPG - max 512KB). Takes priority over 'icon' field.",
-									"disabled": true
-								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories",
-								"{{category_id}}"
-							]
-						},
-						"description": "Update an existing user category.\n\nUse form-data with _method=PUT to support file upload.\n\nOptional fields:\n- name: string (max 255)\n- icon: string (default icon name)\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code (#RRGGBB)\n\nNote:\n- Cannot update system categories (is_system = true)\n- Can only update own categories\n- icon_file takes priority over icon if both provided\n- Old icon file is deleted when new icon is uploaded\n- Cannot change user_id or is_system"
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Category",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories",
-								"{{category_id}}"
-							]
-						},
-						"description": "Delete a user category.\n\nRestrictions:\n- Cannot delete system categories\n- Cannot delete own categories that have subcategories\n- Cannot delete categories with transactions (future feature)\n- Can only delete own categories"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Subcategories",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/categories/{{category_id}}/subcategories",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories",
-								"{{category_id}}",
-								"subcategories"
-							]
-						},
-						"description": "Get all subcategories of a parent category.\n\nReturns:\n- success: boolean\n- data: array of subcategories"
-					},
-					"response": []
-				}
-			],
-			"description": "Category management endpoints.\n\nAll endpoints require authentication via Bearer token.\n\nCategories can be:\n- System categories (is_system = true): Created by admin, cannot be modified/deleted\n- User categories (is_system = false): Created by users, can be modified/deleted\n\nCategory types:\n- income: For income transactions\n- expense: For expense transactions\n\nCategory hierarchy:\n- Maximum 2 levels: parent and child (subcategories)\n- Parent categories (parent_id = null) can have multiple children\n- Subcategories (parent_id != null) cannot have children\n- Parent categories include 'children' array and 'subcategories_count' in response\n- Attempting to create 3+ levels will result in validation error"
-		},
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Register",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    if (response.data && response.data.access_token) {",
-									"        pm.collectionVariables.set('access_token', response.data.access_token);",
-									"        console.log('Access token saved after registration');",
-									"    }",
-									"    if (response.data && response.data.user && response.data.user.id) {",
-									"        pm.collectionVariables.set('user_id', response.data.user.id);",
-									"        console.log('User ID saved for verification: ' + response.data.user.id);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/register",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"register"
-							]
-						},
-						"description": "Register a new user account.\n\nRequired fields:\n- name: string (max 255)\n- email: string (valid email, unique)\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- Returns user data and access token\n- Access token is automatically saved to collection variables"
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.data && response.data.access_token) {",
-									"        pm.collectionVariables.set('access_token', response.data.access_token);",
-									"        console.log('Access token saved after login');",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"login"
-							]
-						},
-						"description": "Login with email and password.\n\nRequired fields:\n- email: string (valid email)\n- password: string\n\nOn success:\n- Returns user data and access token\n- Access token is automatically saved to collection variables"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Current User",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/auth/me",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"me"
-							]
-						},
-						"description": "Get authenticated user details.\n\nRequires authentication via Bearer token.\n\nReturns:\n- User information (id, name, email, etc.)"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Profile",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"John Doe Updated\",\n    \"email\": \"john.updated@example.com\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/profile",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"profile"
-							]
-						},
-						"description": "Update user profile information.\n\nRequires authentication via Bearer token.\n\nOptional fields:\n- name: string (max 255)\n- email: string (valid email, unique)\n\nReturns updated user information."
-					},
-					"response": []
-				},
-				{
-					"name": "Change Password",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"newpassword123\",\n    \"new_password_confirmation\": \"newpassword123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/password",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"password"
-							]
-						},
-						"description": "Change user password.\n\nRequires authentication via Bearer token.\n\nRequired fields:\n- current_password: string\n- new_password: string (min 8 characters)\n- new_password_confirmation: string (must match new_password)\n\nOn success:\n- All tokens are revoked (user must login again)\n- Returns success message"
-					},
-					"response": []
-				},
-				{
-					"name": "Logout",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/auth/logout",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"logout"
-							]
-						},
-						"description": "Logout from current device.\n\nRequires authentication via Bearer token.\n\nRevokes current access token only.\nUser remains logged in on other devices."
-					},
-					"response": []
-				},
-				{
-					"name": "Logout All Devices",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/auth/logout-all",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"logout-all"
-							]
-						},
-						"description": "Logout from all devices.\n\nRequires authentication via Bearer token.\n\nRevokes all access tokens.\nUser must login again on all devices."
-					},
-					"response": []
-				},
-				{
-					"name": "Forgot Password",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/forgot-password",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"forgot-password"
-							]
-						},
-						"description": "Request password reset link.\n\nRequired fields:\n- email: string (must exist in database)\n\nSends password reset link to user's email."
-					},
-					"response": []
-				},
-				{
-					"name": "Reset Password",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"reset-token-from-email\",\n    \"email\": \"john@example.com\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/reset-password",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"reset-password"
-							]
-						},
-						"description": "Reset password using token from email.\n\nRequired fields:\n- token: string (from reset email)\n- email: string\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- All tokens are revoked\n- User must login with new password"
-					},
-					"response": []
-				},
-				{
-					"name": "Verify Email",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.data && response.data.user && response.data.user.id) {",
-									"        pm.collectionVariables.set('user_id', response.data.user.id);",
-									"        console.log('User ID saved for verification');",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": \"{{user_id}}\",\n    \"hash\": \"verification-hash-from-email\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/verify-email",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"verify-email"
-							]
-						},
-						"description": "Verify email address using link from email.\n\nRequired fields:\n- id: string (user UUID from email link)\n- hash: string (SHA1 hash from email link)\n\nEmail verification link format:\n/api/auth/verify-email?id={user_id}&hash={hash}\n\nOn success:\n- Sets email_verified_at timestamp\n- Returns success message\n\nNote: In development, email is logged to storage/logs/laravel.log"
-					},
-					"response": []
-				},
-				{
-					"name": "Resend Verification Email",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/auth/resend-verification-email",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"resend-verification-email"
-							]
-						},
-						"description": "Resend email verification notification.\n\nRequires authentication via Bearer token.\n\nSends new verification email to user's email address.\n\nReturns error if email is already verified.\n\nNote: In development, email is logged to storage/logs/laravel.log"
-					},
-					"response": []
-				}
-			],
-			"description": "Authentication endpoints - ✅ Fully Implemented\n\nPhase 1 - Priority: High\n\nUsing Laravel Sanctum for token-based authentication.\n\nPublic endpoints (no auth required):\n- POST /auth/register\n- POST /auth/login\n- POST /auth/forgot-password\n- POST /auth/reset-password\n- POST /auth/verify-email\n\nProtected endpoints (require Bearer token):\n- GET /auth/me\n- PUT /auth/profile\n- PUT /auth/password\n- POST /auth/logout\n- POST /auth/logout-all\n- POST /auth/resend-verification-email\n\nEmail Verification Flow:\n1. User registers → Receives verification email\n2. User clicks link in email → Calls /verify-email with id + hash\n3. If email not received → Calls /resend-verification-email\n\nAll responses follow standard format:\n{\n  \"success\": true/false,\n  \"message\": \"Message in Vietnamese\",\n  \"data\": {...}\n}"
-		},
-		{
-			"name": "Account Types (TODO)",
-			"item": [
-				{
-					"name": "List Account Types",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/account-types?per_page=15",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"account-types"
-							],
-							"query": [
-								{
-									"key": "per_page",
-									"value": "15"
-								}
-							]
-						},
-						"description": "List all account types (Not yet implemented)."
-					},
-					"response": []
-				}
-			],
-			"description": "Account Types endpoints (Not yet implemented).\n\nPhase 1 - Priority: High"
-		},
-		{
-			"name": "Accounts (TODO)",
-			"item": [
-				{
-					"name": "List Accounts",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/accounts?per_page=15",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"accounts"
-							],
-							"query": [
-								{
-									"key": "per_page",
-									"value": "15"
-								}
-							]
-						},
-						"description": "List user's accounts (Not yet implemented)."
-					},
-					"response": []
-				}
-			],
-			"description": "Accounts endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Account Types"
-		},
-		{
-			"name": "Transactions (TODO)",
-			"item": [
-				{
-					"name": "List Transactions",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/transactions?per_page=15",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"transactions"
-							],
-							"query": [
-								{
-									"key": "per_page",
-									"value": "15"
-								}
-							]
-						},
-						"description": "List transactions (Not yet implemented)."
-					},
-					"response": []
-				}
-			],
-			"description": "Transactions endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Accounts, Categories"
-		},
-		{
-			"name": "Budgets (TODO)",
-			"item": [
-				{
-					"name": "List Budgets",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/budgets?per_page=15",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"budgets"
-							],
-							"query": [
-								{
-									"key": "per_page",
-									"value": "15"
-								}
-							]
-						},
-						"description": "List budgets (Not yet implemented)."
-					},
-					"response": []
-				}
-			],
-			"description": "Budgets endpoints (Not yet implemented).\n\nPhase 2 - Priority: Medium\nDepends on: Categories, Transactions"
-		},
-		{
-			"name": "Goals (TODO)",
-			"item": [
-				{
-					"name": "List Goals",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/goals?per_page=15",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"goals"
-							],
-							"query": [
-								{
-									"key": "per_page",
-									"value": "15"
-								}
-							]
-						},
-						"description": "List financial goals (Not yet implemented)."
-					},
-					"response": []
-				}
-			],
-			"description": "Goals endpoints (Not yet implemented).\n\nPhase 2 - Priority: Medium\nDepends on: Accounts"
-		},
-		{
-			"name": "Reports (TODO)",
-			"item": [
-				{
-					"name": "Get Summary Report",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/reports/summary",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"reports",
-								"summary"
-							]
-						},
-						"description": "Get financial summary report (Not yet implemented)."
-					},
-					"response": []
-				}
-			],
-			"description": "Reports and Analytics endpoints (Not yet implemented).\n\nPhase 3 - Priority: Low\nDepends on: All transaction modules"
-		}
-	]
+    "info": {
+        "_postman_id": "balance-flow-api-collection",
+        "name": "Balance Flow API",
+        "description": "Complete API collection for Balance Flow backend application\n\n## Language Support\n\nThis collection supports both Vietnamese (vi) and English (en) responses.\n\nTo change the language:\n1. Go to **Variables** tab in this collection\n2. Change the `locale` variable value:\n   - `vi` for Vietnamese (default)\n   - `en` for English\n\nAll API requests will automatically use your selected language via the `Accept-Language` header.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{access_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "category_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "locale",
+            "value": "vi",
+            "type": "string",
+            "description": "Language preference (vi for Vietnamese, en for English)"
+        }
+    ],
+    "item": [
+        {
+            "name": "Category Icons",
+            "item": [
+                {
+                    "name": "List Default Icons",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/category-icons",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "category-icons"
+                            ]
+                        },
+                        "description": "Get list of default category icons.\n\nReturns:\n- success: boolean\n- data: array of icons with:\n  - name: icon name (without extension)\n  - filename: full filename\n  - url: full URL to icon file\n\nAvailable icons:\n- Income: salary, bonus, investment, freelance, savings, other-income\n- Expense: food, shopping, transportation, housing, healthcare, education, entertainment, utilities, insurance, gift, other-expense"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Category Icons endpoints.\n\nProvides list of default icons that can be used when creating categories.\n\nAll endpoints require authentication via Bearer token."
+        },
+        {
+            "name": "Categories",
+            "item": [
+                {
+                    "name": "List Categories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/categories?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15",
+                                    "description": "Number of items per page (default: 15)"
+                                },
+                                {
+                                    "key": "type",
+                                    "value": "income",
+                                    "description": "Filter by type: income or expense (enable to filter)",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get categories (system + user's custom) with pagination.\n\nQuery Parameters:\n- `per_page` (optional): Number of items per page (default: 15)\n- `type` (optional): Filter by category type (income|expense)\n\nExamples:\n- All categories: /api/categories\n- Income only: /api/categories?type=income\n- Expense only: /api/categories?type=expense\n\nResponse includes:\n- success: boolean\n- data: array of categories with:\n  - subcategories_count: number of child categories\n  - children: array of subcategories (max 2 levels: parent & child)\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: Categories support 2-level hierarchy (parent with children). Only parent categories (parent_id = null) include the 'children' array."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Category Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/categories/{{category_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories",
+                                "{{category_id}}"
+                            ]
+                        },
+                        "description": "Get details of a specific category by ID.\n\nReturns:\n- success: boolean\n- data: category object with all fields"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Category",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.id) {",
+                                    "        pm.collectionVariables.set('category_id', response.data.id);",
+                                    "        console.log('Category ID saved:', response.data.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Salary",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "category_type",
+                                    "value": "income",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "icon",
+                                    "value": "salary.svg",
+                                    "type": "text",
+                                    "description": "Default icon name (e.g., salary.svg, food.svg)"
+                                },
+                                {
+                                    "key": "icon_file",
+                                    "type": "file",
+                                    "src": "",
+                                    "description": "Custom icon file (SVG, PNG, JPG - max 512KB). Takes priority over 'icon' field.",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/categories",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories"
+                            ]
+                        },
+                        "description": "Create a new user category.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- parent_id: UUID of parent category (to create subcategory)\n- icon: string (default icon name, e.g., 'salary.svg')\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n\nIcon options:\n1. Use 'icon' field with default icon name (e.g., 'salary.svg')\n2. Upload custom icon via 'icon_file' field\n3. icon_file takes priority over icon if both provided\n\nValidation:\n- Name is required\n- Category type must be income or expense\n- Parent must exist and have same type\n- Parent cannot already have a parent (max 2 levels)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Subcategory",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Bonus",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "category_type",
+                                    "value": "income",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "parent_id",
+                                    "value": "{{category_id}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "icon",
+                                    "value": "bonus.svg",
+                                    "type": "text",
+                                    "description": "Default icon name"
+                                },
+                                {
+                                    "key": "icon_file",
+                                    "type": "file",
+                                    "src": "",
+                                    "description": "Custom icon file (SVG, PNG, JPG - max 512KB)",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/categories",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories"
+                            ]
+                        },
+                        "description": "Create a subcategory under a parent category.\n\nRequired:\n- name: string (max 255)\n- category_type: must match parent's type\n- parent_id: UUID of parent category (must be a parent, not another subcategory)\n\nOptional:\n- icon: string (default icon name)\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n\nValidation:\n- Parent category cannot already have a parent (prevents 3+ levels)\n- Subcategory type must match parent type\n- Subcategories cannot have their own children"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Category",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "_method",
+                                    "value": "PUT",
+                                    "type": "text",
+                                    "description": "Method override for file upload support"
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "Monthly Salary",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "icon",
+                                    "value": "salary.svg",
+                                    "type": "text",
+                                    "description": "Default icon name"
+                                },
+                                {
+                                    "key": "icon_file",
+                                    "type": "file",
+                                    "src": "",
+                                    "description": "Custom icon file (SVG, PNG, JPG - max 512KB). Takes priority over 'icon' field.",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/categories/{{category_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories",
+                                "{{category_id}}"
+                            ]
+                        },
+                        "description": "Update an existing user category.\n\nUse form-data with _method=PUT to support file upload.\n\nOptional fields:\n- name: string (max 255)\n- icon: string (default icon name)\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n\nNote:\n- Cannot update system categories (is_system = true)\n- Can only update own categories\n- icon_file takes priority over icon if both provided\n- Old icon file is deleted when new icon is uploaded\n- Cannot change user_id or is_system"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Category",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/categories/{{category_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories",
+                                "{{category_id}}"
+                            ]
+                        },
+                        "description": "Delete a user category.\n\nRestrictions:\n- Cannot delete system categories\n- Cannot delete own categories that have subcategories\n- Cannot delete categories with transactions (future feature)\n- Can only delete own categories"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Subcategories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/categories/{{category_id}}/subcategories",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories",
+                                "{{category_id}}",
+                                "subcategories"
+                            ]
+                        },
+                        "description": "Get all subcategories of a parent category.\n\nReturns:\n- success: boolean\n- data: array of subcategories"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Category management endpoints.\n\nAll endpoints require authentication via Bearer token.\n\nCategories can be:\n- System categories (is_system = true): Created by admin, cannot be modified/deleted\n- User categories (is_system = false): Created by users, can be modified/deleted\n\nCategory types:\n- income: For income transactions\n- expense: For expense transactions\n\nCategory hierarchy:\n- Maximum 2 levels: parent and child (subcategories)\n- Parent categories (parent_id = null) can have multiple children\n- Subcategories (parent_id != null) cannot have children\n- Parent categories include 'children' array and 'subcategories_count' in response\n- Attempting to create 3+ levels will result in validation error"
+        },
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.access_token) {",
+                                    "        pm.collectionVariables.set('access_token', response.data.access_token);",
+                                    "        console.log('Access token saved after registration');",
+                                    "    }",
+                                    "    if (response.data && response.data.user && response.data.user.id) {",
+                                    "        pm.collectionVariables.set('user_id', response.data.user.id);",
+                                    "        console.log('User ID saved for verification: ' + response.data.user.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user account.\n\nRequired fields:\n- name: string (max 255)\n- email: string (valid email, unique)\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- Returns user data and access token\n- Access token is automatically saved to collection variables"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.access_token) {",
+                                    "        pm.collectionVariables.set('access_token', response.data.access_token);",
+                                    "        console.log('Access token saved after login');",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login with email and password.\n\nRequired fields:\n- email: string (valid email)\n- password: string\n\nOn success:\n- Returns user data and access token\n- Access token is automatically saved to collection variables"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Current User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Get authenticated user details.\n\nRequires authentication via Bearer token.\n\nReturns:\n- User information (id, name, email, etc.)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"John Doe Updated\",\n    \"email\": \"john.updated@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "profile"
+                            ]
+                        },
+                        "description": "Update user profile information.\n\nRequires authentication via Bearer token.\n\nOptional fields:\n- name: string (max 255)\n- email: string (valid email, unique)\n\nReturns updated user information."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"newpassword123\",\n    \"new_password_confirmation\": \"newpassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "password"
+                            ]
+                        },
+                        "description": "Change user password.\n\nRequires authentication via Bearer token.\n\nRequired fields:\n- current_password: string\n- new_password: string (min 8 characters)\n- new_password_confirmation: string (must match new_password)\n\nOn success:\n- All tokens are revoked (user must login again)\n- Returns success message"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout from current device.\n\nRequires authentication via Bearer token.\n\nRevokes current access token only.\nUser remains logged in on other devices."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout All Devices",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/logout-all",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout-all"
+                            ]
+                        },
+                        "description": "Logout from all devices.\n\nRequires authentication via Bearer token.\n\nRevokes all access tokens.\nUser must login again on all devices."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Forgot Password",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"john@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/forgot-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "forgot-password"
+                            ]
+                        },
+                        "description": "Request password reset link.\n\nRequired fields:\n- email: string (must exist in database)\n\nSends password reset link to user's email."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"token\": \"reset-token-from-email\",\n    \"email\": \"john@example.com\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/reset-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "reset-password"
+                            ]
+                        },
+                        "description": "Reset password using token from email.\n\nRequired fields:\n- token: string (from reset email)\n- email: string\n- password: string (min 8 characters)\n- password_confirmation: string (must match password)\n\nOn success:\n- All tokens are revoked\n- User must login with new password"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Verify Email",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.user && response.data.user.id) {",
+                                    "        pm.collectionVariables.set('user_id', response.data.user.id);",
+                                    "        console.log('User ID saved for verification');",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": \"{{user_id}}\",\n    \"hash\": \"verification-hash-from-email\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/verify-email",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "verify-email"
+                            ]
+                        },
+                        "description": "Verify email address using link from email.\n\nRequired fields:\n- id: string (user UUID from email link)\n- hash: string (SHA1 hash from email link)\n\nEmail verification link format:\n/api/auth/verify-email?id={user_id}&hash={hash}\n\nOn success:\n- Sets email_verified_at timestamp\n- Returns success message\n\nNote: In development, email is logged to storage/logs/laravel.log"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Resend Verification Email",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/resend-verification-email",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "resend-verification-email"
+                            ]
+                        },
+                        "description": "Resend email verification notification.\n\nRequires authentication via Bearer token.\n\nSends new verification email to user's email address.\n\nReturns error if email is already verified.\n\nNote: In development, email is logged to storage/logs/laravel.log"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Authentication endpoints - ✅ Fully Implemented\n\nPhase 1 - Priority: High\n\nUsing Laravel Sanctum for token-based authentication.\n\nPublic endpoints (no auth required):\n- POST /auth/register\n- POST /auth/login\n- POST /auth/forgot-password\n- POST /auth/reset-password\n- POST /auth/verify-email\n\nProtected endpoints (require Bearer token):\n- GET /auth/me\n- PUT /auth/profile\n- PUT /auth/password\n- POST /auth/logout\n- POST /auth/logout-all\n- POST /auth/resend-verification-email\n\nEmail Verification Flow:\n1. User registers → Receives verification email\n2. User clicks link in email → Calls /verify-email with id + hash\n3. If email not received → Calls /resend-verification-email\n\nAll responses follow standard format:\n{\n  \"success\": true/false,\n  \"message\": \"Message in Vietnamese\",\n  \"data\": {...}\n}"
+        },
+        {
+            "name": "Account Types (TODO)",
+            "item": [
+                {
+                    "name": "List Account Types",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/account-types?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "account-types"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                }
+                            ]
+                        },
+                        "description": "List all account types (Not yet implemented)."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Account Types endpoints (Not yet implemented).\n\nPhase 1 - Priority: High"
+        },
+        {
+            "name": "Accounts (TODO)",
+            "item": [
+                {
+                    "name": "List Accounts",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                }
+                            ]
+                        },
+                        "description": "List user's accounts (Not yet implemented)."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Accounts endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Account Types"
+        },
+        {
+            "name": "Transactions (TODO)",
+            "item": [
+                {
+                    "name": "List Transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                }
+                            ]
+                        },
+                        "description": "List transactions (Not yet implemented)."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Transactions endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Accounts, Categories"
+        },
+        {
+            "name": "Budgets (TODO)",
+            "item": [
+                {
+                    "name": "List Budgets",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/budgets?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "budgets"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                }
+                            ]
+                        },
+                        "description": "List budgets (Not yet implemented)."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Budgets endpoints (Not yet implemented).\n\nPhase 2 - Priority: Medium\nDepends on: Categories, Transactions"
+        },
+        {
+            "name": "Goals (TODO)",
+            "item": [
+                {
+                    "name": "List Goals",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/goals?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "goals"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                }
+                            ]
+                        },
+                        "description": "List financial goals (Not yet implemented)."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Goals endpoints (Not yet implemented).\n\nPhase 2 - Priority: Medium\nDepends on: Accounts"
+        },
+        {
+            "name": "Reports (TODO)",
+            "item": [
+                {
+                    "name": "Get Summary Report",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/reports/summary",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "summary"
+                            ]
+                        },
+                        "description": "Get financial summary report (Not yet implemented)."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Reports and Analytics endpoints (Not yet implemented).\n\nPhase 3 - Priority: Low\nDepends on: All transaction modules"
+        }
+    ]
 }

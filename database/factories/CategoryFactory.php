@@ -24,7 +24,6 @@ class CategoryFactory extends Factory
             'category_type' => $type,
             'parent_id' => null,
             'icon' => fake()->randomElement(['restaurant', 'shopping_cart', 'home', 'work', 'trending_up']),
-            'color' => fake()->hexColor(),
             'is_system' => false,
         ];
     }
