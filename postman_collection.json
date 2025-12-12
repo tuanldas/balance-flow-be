@@ -45,6 +45,43 @@
 	],
 	"item": [
 		{
+			"name": "Category Icons",
+			"item": [
+				{
+					"name": "List Default Icons",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/category-icons",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"category-icons"
+							]
+						},
+						"description": "Get list of default category icons.\n\nReturns:\n- success: boolean\n- data: array of icons with:\n  - name: icon name (without extension)\n  - filename: full filename\n  - url: full URL to icon file\n\nAvailable icons:\n- Income: salary, bonus, investment, freelance, savings, other-income\n- Expense: food, shopping, transportation, housing, healthcare, education, entertainment, utilities, insurance, gift, other-expense"
+					},
+					"response": []
+				}
+			],
+			"description": "Category Icons endpoints.\n\nProvides list of default icons that can be used when creating categories.\n\nAll endpoints require authentication via Bearer token."
+		},
+		{
 			"name": "Categories",
 			"item": [
 				{
@@ -263,6 +300,80 @@
 					"response": []
 				},
 				{
+					"name": "Create Category with Icon Upload",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.collectionVariables.set('category_id', response.data.id);",
+									"        console.log('Category ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "My Category",
+									"type": "text"
+								},
+								{
+									"key": "category_type",
+									"value": "expense",
+									"type": "text"
+								},
+								{
+									"key": "color",
+									"value": "#FF5722",
+									"type": "text"
+								},
+								{
+									"key": "icon_file",
+									"type": "file",
+									"src": "",
+									"description": "Icon file (SVG, PNG, JPG - max 512KB)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						},
+						"description": "Create a new category with custom icon upload.\n\nUse form-data to upload icon file.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- icon: string (default icon name, e.g., 'salary.svg')\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code (#RRGGBB)\n- parent_id: UUID of parent category\n\nNote: icon_file takes priority over icon if both provided."
+					},
+					"response": []
+				},
+				{
 					"name": "Create Subcategory",
 					"request": {
 						"method": "POST",
@@ -381,6 +492,60 @@
 							]
 						},
 						"description": "Partial update of a category (PATCH method)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category with Icon Upload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "{{locale}}",
+								"type": "text",
+								"description": "Language preference (vi|en)"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "_method",
+									"value": "PUT",
+									"type": "text",
+									"description": "Method override for file upload"
+								},
+								{
+									"key": "name",
+									"value": "Updated Category",
+									"type": "text"
+								},
+								{
+									"key": "icon_file",
+									"type": "file",
+									"src": "",
+									"description": "New icon file (SVG, PNG, JPG - max 512KB)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"{{category_id}}"
+							]
+						},
+						"description": "Update a category with new icon upload.\n\nUse form-data with _method=PUT for file upload.\n\nOptional fields:\n- name: string (max 255)\n- icon: string (default icon name)\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code (#RRGGBB)\n\nNote:\n- icon_file takes priority over icon if both provided\n- Old icon file is deleted when new icon is uploaded\n- Cannot update system categories"
 					},
 					"response": []
 				},
