@@ -85,7 +85,7 @@
 			"name": "Categories",
 			"item": [
 				{
-					"name": "List All Categories",
+					"name": "List Categories",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -119,94 +119,12 @@
 								{
 									"key": "type",
 									"value": "income",
-									"description": "Filter by type: income or expense",
+									"description": "Filter by type: income or expense (enable to filter)",
 									"disabled": true
 								}
 							]
 						},
-						"description": "Get all categories (system + user's custom) with pagination.\n\nQuery Parameters:\n- `per_page` (optional): Number of items per page (default: 15)\n- `type` (optional): Filter by category type (income|expense)\n\nResponse includes:\n- success: boolean\n- data: array of categories with:\n  - subcategories_count: number of child categories\n  - children: array of subcategories (max 2 levels: parent & child)\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: Categories support 2-level hierarchy (parent with children). Only parent categories (parent_id = null) include the 'children' array."
-					},
-					"response": []
-				},
-				{
-					"name": "List Income Categories",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/categories?type=income&per_page=15",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories"
-							],
-							"query": [
-								{
-									"key": "type",
-									"value": "income"
-								},
-								{
-									"key": "per_page",
-									"value": "15"
-								}
-							]
-						},
-						"description": "Get only income categories with pagination."
-					},
-					"response": []
-				},
-				{
-					"name": "List Expense Categories",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/categories?type=expense&per_page=15",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories"
-							],
-							"query": [
-								{
-									"key": "type",
-									"value": "expense"
-								},
-								{
-									"key": "per_page",
-									"value": "15"
-								}
-							]
-						},
-						"description": "Get only expense categories with pagination."
+						"description": "Get categories (system + user's custom) with pagination.\n\nQuery Parameters:\n- `per_page` (optional): Number of items per page (default: 15)\n- `type` (optional): Filter by category type (income|expense)\n\nExamples:\n- All categories: /api/categories\n- Income only: /api/categories?type=income\n- Expense only: /api/categories?type=expense\n\nResponse includes:\n- success: boolean\n- data: array of categories with:\n  - subcategories_count: number of child categories\n  - children: array of subcategories (max 2 levels: parent & child)\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: Categories support 2-level hierarchy (parent with children). Only parent categories (parent_id = null) include the 'children' array."
 					},
 					"response": []
 				},
