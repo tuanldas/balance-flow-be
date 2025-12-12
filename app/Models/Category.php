@@ -94,7 +94,7 @@ class Category extends Model
      */
     public function getIconAttribute($value): ?string
     {
-        if (!$value) {
+        if (! $value) {
             return null;
         }
 

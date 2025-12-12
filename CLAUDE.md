@@ -130,11 +130,12 @@ Comprehensive Postman collection available in `postman_collection.json`.
 
 | Category | Method | Endpoint | Description |
 |----------|--------|----------|-------------|
+| **Category Icons** | GET | `/api/category-icons` | List default icons |
 | **Categories** | GET | `/api/categories` | List (paginated) |
 | | GET | `/api/categories?type=income` | Filter by type |
-| | POST | `/api/categories` | Create |
+| | POST | `/api/categories` | Create (supports icon_file upload) |
 | | GET | `/api/categories/{id}` | Get details |
-| | PUT | `/api/categories/{id}` | Update |
+| | PUT | `/api/categories/{id}` | Update (supports icon_file upload) |
 | | DELETE | `/api/categories/{id}` | Delete |
 | | GET | `/api/categories/{id}/subcategories` | Get subcategories |
 | **Auth** | POST | `/api/auth/register` | Register |

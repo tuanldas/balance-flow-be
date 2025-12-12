@@ -3,17 +3,24 @@
 namespace App\Services;
 
 use App\Repositories\Contracts\CategoryRepositoryInterface;
+use App\Services\Contracts\CategoryIconServiceInterface;
 use App\Services\Contracts\CategoryServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 
 class CategoryService extends BaseService implements CategoryServiceInterface
 {
     protected CategoryRepositoryInterface $categoryRepository;
 
-    public function __construct(CategoryRepositoryInterface $repository)
-    {
+    protected CategoryIconServiceInterface $iconService;
+
+    public function __construct(
+        CategoryRepositoryInterface $repository,
+        CategoryIconServiceInterface $iconService
+    ) {
         parent::__construct($repository);
         $this->categoryRepository = $repository;
+        $this->iconService = $iconService;
     }
 
     /**
@@ -98,7 +105,7 @@ class CategoryService extends BaseService implements CategoryServiceInterface
     /**
      * Create a new user category
      */
-    public function createUserCategory(string $userId, array $data): mixed
+    public function createUserCategory(string $userId, array $data, ?UploadedFile $iconFile = null): mixed
     {
         // Validate parent_id if provided
         if (isset($data['parent_id'])) {
@@ -124,6 +131,17 @@ class CategoryService extends BaseService implements CategoryServiceInterface
             }
         }
 
+        // Handle icon: upload file takes priority over icon name
+        if ($iconFile) {
+            $data['icon'] = $this->iconService->uploadIcon($userId, $iconFile);
+        } elseif (isset($data['icon']) && $this->iconService->isDefaultIcon($data['icon'])) {
+            // Copy default icon to user's storage
+            $data['icon'] = $this->iconService->copyDefaultIconToUser($userId, $data['icon']);
+        }
+
+        // Remove icon_file from data if present
+        unset($data['icon_file']);
+
         $data['user_id'] = $userId;
         $data['is_system'] = false;
 
@@ -133,7 +151,7 @@ class CategoryService extends BaseService implements CategoryServiceInterface
     /**
      * Update a user category
      */
-    public function updateUserCategory(string $userId, string $id, array $data): bool
+    public function updateUserCategory(string $userId, string $id, array $data, ?UploadedFile $iconFile = null): bool
     {
         $category = $this->categoryRepository->find($id);
 
@@ -180,6 +198,26 @@ class CategoryService extends BaseService implements CategoryServiceInterface
             }
         }
 
+        // Handle icon: upload file takes priority over icon name
+        $oldIcon = $category->getRawOriginal('icon');
+        if ($iconFile) {
+            $data['icon'] = $this->iconService->uploadIcon($userId, $iconFile);
+            // Delete old icon if it's a user icon
+            if ($oldIcon) {
+                $this->iconService->deleteIcon($oldIcon);
+            }
+        } elseif (isset($data['icon']) && $this->iconService->isDefaultIcon($data['icon'])) {
+            // Copy default icon to user's storage
+            $data['icon'] = $this->iconService->copyDefaultIconToUser($userId, $data['icon']);
+            // Delete old icon if it's a user icon
+            if ($oldIcon) {
+                $this->iconService->deleteIcon($oldIcon);
+            }
+        }
+
+        // Remove icon_file from data if present
+        unset($data['icon_file']);
+
         // Don't allow changing user_id or is_system
         unset($data['user_id'], $data['is_system']);
 
@@ -210,6 +248,12 @@ class CategoryService extends BaseService implements CategoryServiceInterface
         // Check if can delete
         if (! $this->categoryRepository->canDelete($id)) {
             throw new \Exception(__('categories.cannot_delete_has_transactions'));
+        }
+
+        // Delete icon file if it's a user icon
+        $icon = $category->getRawOriginal('icon');
+        if ($icon) {
+            $this->iconService->deleteIcon($icon);
         }
 
         return $this->categoryRepository->delete($id);

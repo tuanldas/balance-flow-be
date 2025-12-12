@@ -88,7 +88,8 @@ class CategoryController extends Controller
     {
         try {
             $userId = $request->user()->id;
-            $category = $this->categoryService->createUserCategory($userId, $request->validated());
+            $iconFile = $request->file('icon_file');
+            $category = $this->categoryService->createUserCategory($userId, $request->validated(), $iconFile);
 
             return response()->json([
                 'success' => true,
@@ -111,7 +112,8 @@ class CategoryController extends Controller
     {
         try {
             $userId = $request->user()->id;
-            $success = $this->categoryService->updateUserCategory($userId, $id, $request->validated());
+            $iconFile = $request->file('icon_file');
+            $success = $this->categoryService->updateUserCategory($userId, $id, $request->validated(), $iconFile);
 
             if (! $success) {
                 return response()->json([

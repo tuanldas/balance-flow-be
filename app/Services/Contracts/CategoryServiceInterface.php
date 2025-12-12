@@ -3,6 +3,7 @@
 namespace App\Services\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 
 interface CategoryServiceInterface extends BaseServiceInterface
 {
@@ -39,12 +40,12 @@ interface CategoryServiceInterface extends BaseServiceInterface
     /**
      * Create a new user category
      */
-    public function createUserCategory(string $userId, array $data): mixed;
+    public function createUserCategory(string $userId, array $data, ?UploadedFile $iconFile = null): mixed;
 
     /**
      * Update a user category
      */
-    public function updateUserCategory(string $userId, string $id, array $data): bool;
+    public function updateUserCategory(string $userId, string $id, array $data, ?UploadedFile $iconFile = null): bool;
 
     /**
      * Delete a user category

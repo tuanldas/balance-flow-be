@@ -48,4 +48,10 @@ return [
     // Validation
     'invalid_type' => 'Loại danh mục không hợp lệ. Chỉ chấp nhận: income, expense.',
     'invalid_color' => 'Mã màu không hợp lệ.',
+
+    // Icon
+    'icon_not_found' => 'Không tìm thấy icon.',
+    'icon_invalid_type' => 'File icon không hợp lệ. Chỉ chấp nhận: SVG, PNG, JPG.',
+    'icon_too_large' => 'File icon quá lớn. Kích thước tối đa: 512KB.',
+    'icon_upload_failed' => 'Tải lên icon thất bại.',
 ];

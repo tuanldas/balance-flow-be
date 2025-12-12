@@ -32,6 +32,11 @@ class ServiceLayerProvider extends ServiceProvider
             \App\Services\Contracts\AuthServiceInterface::class,
             \App\Services\AuthService::class
         );
+
+        $this->app->bind(
+            \App\Services\Contracts\CategoryIconServiceInterface::class,
+            \App\Services\CategoryIconService::class
+        );
     }
 
     /**
