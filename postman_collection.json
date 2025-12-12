@@ -270,11 +270,6 @@
 								"type": "text"
 							},
 							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
 								"key": "Accept-Language",
 								"value": "{{locale}}",
 								"type": "text",
@@ -282,8 +277,37 @@
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Salary\",\n    \"category_type\": \"income\",\n    \"icon\": \"work\",\n    \"color\": \"#4CAF50\"\n}"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Salary",
+									"type": "text"
+								},
+								{
+									"key": "category_type",
+									"value": "income",
+									"type": "text"
+								},
+								{
+									"key": "icon",
+									"value": "salary.svg",
+									"type": "text",
+									"description": "Default icon name (e.g., salary.svg, food.svg)"
+								},
+								{
+									"key": "color",
+									"value": "#4CAF50",
+									"type": "text"
+								},
+								{
+									"key": "icon_file",
+									"type": "file",
+									"src": "",
+									"description": "Custom icon file (SVG, PNG, JPG - max 512KB). Takes priority over 'icon' field.",
+									"disabled": true
+								}
+							]
 						},
 						"url": {
 							"raw": "{{base_url}}/api/categories",
@@ -295,29 +319,12 @@
 								"categories"
 							]
 						},
-						"description": "Create a new user category.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- parent_id: UUID of parent category (to create subcategory)\n- icon: string (max 50)\n- color: hex color code (#RRGGBB)\n\nValidation:\n- Name is required\n- Category type must be income or expense\n- Color must be hex format\n- Parent must exist and have same type\n- Parent cannot already have a parent (max 2 levels)\n- Categories with children cannot be converted to subcategories"
+						"description": "Create a new user category.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- parent_id: UUID of parent category (to create subcategory)\n- icon: string (default icon name, e.g., 'salary.svg')\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code (#RRGGBB)\n\nIcon options:\n1. Use 'icon' field with default icon name (e.g., 'salary.svg')\n2. Upload custom icon via 'icon_file' field\n3. icon_file takes priority over icon if both provided\n\nValidation:\n- Name is required\n- Category type must be income or expense\n- Color must be hex format\n- Parent must exist and have same type\n- Parent cannot already have a parent (max 2 levels)"
 					},
 					"response": []
 				},
 				{
-					"name": "Create Category with Icon Upload",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    if (response.data && response.data.id) {",
-									"        pm.collectionVariables.set('category_id', response.data.id);",
-									"        console.log('Category ID saved:', response.data.id);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "Create Subcategory",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -338,24 +345,36 @@
 							"formdata": [
 								{
 									"key": "name",
-									"value": "My Category",
+									"value": "Bonus",
 									"type": "text"
 								},
 								{
 									"key": "category_type",
-									"value": "expense",
+									"value": "income",
 									"type": "text"
 								},
 								{
+									"key": "parent_id",
+									"value": "{{category_id}}",
+									"type": "text"
+								},
+								{
+									"key": "icon",
+									"value": "bonus.svg",
+									"type": "text",
+									"description": "Default icon name"
+								},
+								{
 									"key": "color",
-									"value": "#FF5722",
+									"value": "#8BC34A",
 									"type": "text"
 								},
 								{
 									"key": "icon_file",
 									"type": "file",
 									"src": "",
-									"description": "Icon file (SVG, PNG, JPG - max 512KB)"
+									"description": "Custom icon file (SVG, PNG, JPG - max 512KB)",
+									"disabled": true
 								}
 							]
 						},
@@ -369,134 +388,12 @@
 								"categories"
 							]
 						},
-						"description": "Create a new category with custom icon upload.\n\nUse form-data to upload icon file.\n\nRequired fields:\n- name: string (max 255)\n- category_type: enum (income|expense)\n\nOptional fields:\n- icon: string (default icon name, e.g., 'salary.svg')\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code (#RRGGBB)\n- parent_id: UUID of parent category\n\nNote: icon_file takes priority over icon if both provided."
-					},
-					"response": []
-				},
-				{
-					"name": "Create Subcategory",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Bonus\",\n    \"category_type\": \"income\",\n    \"parent_id\": \"{{category_id}}\",\n    \"icon\": \"card_giftcard\",\n    \"color\": \"#8BC34A\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/categories",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories"
-							]
-						},
-						"description": "Create a subcategory under a parent category.\n\nRequired:\n- parent_id: UUID of parent category (must be a parent, not another subcategory)\n- category_type: must match parent's type\n\nValidation:\n- Parent category cannot already have a parent (prevents 3+ levels)\n- Subcategory type must match parent type\n- Subcategories cannot have their own children"
+						"description": "Create a subcategory under a parent category.\n\nRequired:\n- name: string (max 255)\n- category_type: must match parent's type\n- parent_id: UUID of parent category (must be a parent, not another subcategory)\n\nOptional:\n- icon: string (default icon name)\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code\n\nValidation:\n- Parent category cannot already have a parent (prevents 3+ levels)\n- Subcategory type must match parent type\n- Subcategories cannot have their own children"
 					},
 					"response": []
 				},
 				{
 					"name": "Update Category",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Monthly Salary\",\n    \"icon\": \"payments\",\n    \"color\": \"#2196F3\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories",
-								"{{category_id}}"
-							]
-						},
-						"description": "Update an existing user category.\n\nNote: \n- Cannot update system categories (is_system = true)\n- Can only update own categories\n- All fields are optional\n- Cannot change user_id or is_system"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Category (PATCH)",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "{{locale}}",
-								"type": "text",
-								"description": "Language preference (vi|en)"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Updated Category Name\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/categories/{{category_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"categories",
-								"{{category_id}}"
-							]
-						},
-						"description": "Partial update of a category (PATCH method)."
-					},
-					"response": []
-				},
-				{
-					"name": "Update Category with Icon Upload",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -519,18 +416,30 @@
 									"key": "_method",
 									"value": "PUT",
 									"type": "text",
-									"description": "Method override for file upload"
+									"description": "Method override for file upload support"
 								},
 								{
 									"key": "name",
-									"value": "Updated Category",
+									"value": "Monthly Salary",
+									"type": "text"
+								},
+								{
+									"key": "icon",
+									"value": "salary.svg",
+									"type": "text",
+									"description": "Default icon name"
+								},
+								{
+									"key": "color",
+									"value": "#2196F3",
 									"type": "text"
 								},
 								{
 									"key": "icon_file",
 									"type": "file",
 									"src": "",
-									"description": "New icon file (SVG, PNG, JPG - max 512KB)"
+									"description": "Custom icon file (SVG, PNG, JPG - max 512KB). Takes priority over 'icon' field.",
+									"disabled": true
 								}
 							]
 						},
@@ -545,7 +454,7 @@
 								"{{category_id}}"
 							]
 						},
-						"description": "Update a category with new icon upload.\n\nUse form-data with _method=PUT for file upload.\n\nOptional fields:\n- name: string (max 255)\n- icon: string (default icon name)\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code (#RRGGBB)\n\nNote:\n- icon_file takes priority over icon if both provided\n- Old icon file is deleted when new icon is uploaded\n- Cannot update system categories"
+						"description": "Update an existing user category.\n\nUse form-data with _method=PUT to support file upload.\n\nOptional fields:\n- name: string (max 255)\n- icon: string (default icon name)\n- icon_file: file (SVG, PNG, JPG - max 512KB)\n- color: hex color code (#RRGGBB)\n\nNote:\n- Cannot update system categories (is_system = true)\n- Can only update own categories\n- icon_file takes priority over icon if both provided\n- Old icon file is deleted when new icon is uploaded\n- Cannot change user_id or is_system"
 					},
 					"response": []
 				},
