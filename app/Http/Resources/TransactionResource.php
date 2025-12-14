@@ -22,7 +22,7 @@ class TransactionResource extends JsonResource
             'amount' => $isExpense ? -abs($amount) : abs($amount),
             'raw_amount' => $amount,
             'merchant_name' => $this->merchant_name,
-            'transaction_date' => $this->transaction_date->toIso8601String(),
+            'transaction_date' => $this->transaction_date,
             'notes' => $this->notes,
             'status' => $this->status,
             'category' => $this->when($this->relationLoaded('category'), function () {
@@ -39,8 +39,8 @@ class TransactionResource extends JsonResource
                 'last_4' => '0000',
             ],
             'tags' => [],
-            'created_at' => $this->created_at->toIso8601String(),
-            'updated_at' => $this->updated_at->toIso8601String(),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }
