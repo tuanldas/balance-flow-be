@@ -1059,7 +1059,7 @@
                                 {
                                     "key": "category_id",
                                     "value": "{{category_id}}",
-                                    "description": "Filter by category UUID",
+                                    "description": "Filter by category UUID(s), comma-separated for multiple",
                                     "disabled": true
                                 },
                                 {
@@ -1070,7 +1070,7 @@
                                 }
                             ]
                         },
-                        "description": "Get paginated list of transactions for the authenticated user.\n\nQuery Parameters:\n- per_page (default: 15): Number of items per page\n- sort_by (default: transaction_date): Sort field (transaction_date, amount, created_at, updated_at)\n- sort_direction (default: desc): Sort direction (asc, desc)\n- category_id (optional): Filter by category UUID\n- search (optional): Search by merchant name (case-insensitive)\n\nResponse includes:\n- success: boolean\n- data: array of transactions with category, mock account & tags\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: amount is negative for expenses, positive for income."
+                        "description": "Get paginated list of transactions for the authenticated user.\n\nQuery Parameters:\n- per_page (default: 15): Number of items per page\n- sort_by (default: transaction_date): Sort field (transaction_date, amount, created_at, updated_at)\n- sort_direction (default: desc): Sort direction (asc, desc)\n- category_id (optional): Filter by category UUID(s), comma-separated for multiple (e.g., uuid1,uuid2)\n- search (optional): Search by merchant name (case-insensitive)\n\nResponse includes:\n- success: boolean\n- data: array of transactions with category, mock account & tags\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: amount is negative for expenses, positive for income."
                     },
                     "response": []
                 },

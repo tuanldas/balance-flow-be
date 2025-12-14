@@ -209,6 +209,45 @@ class TransactionTest extends TestCase
     }
 
     /**
+     * Test: User can filter transactions by multiple categories
+     */
+    public function test_user_can_filter_transactions_by_multiple_categories(): void
+    {
+        $userCategory1 = Category::factory()->forUser($this->user->id)->expense()->create();
+        $userCategory2 = Category::factory()->forUser($this->user->id)->expense()->create();
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->count(3)
+            ->create();
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($userCategory1->id)
+            ->count(2)
+            ->create();
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($userCategory2->id)
+            ->count(4)
+            ->create();
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/transactions?category_id={$userCategory1->id},{$userCategory2->id}");
+
+        $response->assertStatus(200);
+
+        $this->assertEquals(6, $response->json('pagination.total'));
+
+        $data = $response->json('data');
+        foreach ($data as $transaction) {
+            $this->assertContains($transaction['category']['id'], [$userCategory1->id, $userCategory2->id]);
+        }
+    }
+
+    /**
      * Test: User can search transactions by merchant name
      */
     public function test_user_can_search_transactions_by_merchant_name(): void

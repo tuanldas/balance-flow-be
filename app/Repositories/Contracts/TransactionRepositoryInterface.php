@@ -42,17 +42,6 @@ interface TransactionRepositoryInterface extends BaseRepositoryInterface
     ): mixed;
 
     /**
-     * Get transactions for a user by status
-     */
-    public function getByStatus(
-        string $userId,
-        string $status,
-        int $perPage = 15,
-        array $columns = ['*'],
-        array $relations = []
-    ): mixed;
-
-    /**
      * Get total amount for user by type (income/expense)
      */
     public function getTotalByType(

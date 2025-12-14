@@ -28,8 +28,8 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         $query = $this->model->select($columns)
             ->where('user_id', $userId);
 
-        if (! empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
+        if (! empty($filters['category_ids'])) {
+            $query->whereIn('category_id', $filters['category_ids']);
         }
 
         if (! empty($filters['search'])) {
@@ -83,28 +83,6 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         $query = $this->model->select($columns)
             ->where('user_id', $userId)
             ->where('category_id', $categoryId)
-            ->orderBy('transaction_date', 'desc');
-
-        if (! empty($relations)) {
-            $query->with($relations);
-        }
-
-        return $query->paginate($perPage);
-    }
-
-    /**
-     * Get transactions for a user by status
-     */
-    public function getByStatus(
-        string $userId,
-        string $status,
-        int $perPage = 15,
-        array $columns = ['*'],
-        array $relations = []
-    ): mixed {
-        $query = $this->model->select($columns)
-            ->where('user_id', $userId)
-            ->where('status', $status)
             ->orderBy('transaction_date', 'desc');
 
         if (! empty($relations)) {

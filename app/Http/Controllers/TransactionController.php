@@ -18,7 +18,7 @@ class TransactionController extends Controller
     /**
      * Get all transactions for the authenticated user (paginated)
      * GET /api/transactions
-     * Query params: per_page, sort_by, sort_direction, category_id, search, status
+     * Query params: per_page, sort_by, sort_direction, category_id (comma-separated), search
      */
     public function index(Request $request): JsonResponse
     {
@@ -33,8 +33,12 @@ class TransactionController extends Controller
             $allowedSortFields = ['transaction_date', 'amount', 'created_at', 'updated_at'];
             $sortBy = in_array($sortBy, $allowedSortFields) ? $sortBy : 'transaction_date';
 
+            $categoryIds = $request->query('category_id')
+                ? array_filter(explode(',', $request->query('category_id')))
+                : null;
+
             $filters = array_filter([
-                'category_id' => $request->query('category_id'),
+                'category_ids' => $categoryIds,
                 'search' => $request->query('search'),
             ]);
 
