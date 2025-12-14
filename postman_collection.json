@@ -41,6 +41,11 @@
             "value": "vi",
             "type": "string",
             "description": "Language preference (vi for Vietnamese, en for English)"
+        },
+        {
+            "key": "transaction_id",
+            "value": "",
+            "type": "string"
         }
     ],
     "item": [
@@ -1007,7 +1012,7 @@
             "description": "Accounts endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Account Types"
         },
         {
-            "name": "Transactions (TODO)",
+            "name": "Transactions",
             "item": [
                 {
                     "name": "List Transactions",
@@ -1027,7 +1032,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/transactions?per_page=15",
+                            "raw": "{{base_url}}/api/transactions?per_page=15&sort_by=transaction_date&sort_direction=desc",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1038,16 +1043,235 @@
                             "query": [
                                 {
                                     "key": "per_page",
-                                    "value": "15"
+                                    "value": "15",
+                                    "description": "Number of items per page (default: 15)"
+                                },
+                                {
+                                    "key": "sort_by",
+                                    "value": "transaction_date",
+                                    "description": "Sort field: transaction_date, amount, created_at, updated_at"
+                                },
+                                {
+                                    "key": "sort_direction",
+                                    "value": "desc",
+                                    "description": "Sort direction: asc or desc"
                                 }
                             ]
                         },
-                        "description": "List transactions (Not yet implemented)."
+                        "description": "Get paginated list of transactions for the authenticated user.\n\nQuery Parameters:\n- per_page (default: 15): Number of items per page\n- sort_by (default: transaction_date): Sort field (transaction_date, amount, created_at, updated_at)\n- sort_direction (default: desc): Sort direction (asc, desc)\n\nResponse includes:\n- success: boolean\n- data: array of transactions with category, mock account & tags\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: amount is negative for expenses, positive for income."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transaction Summary",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/summary",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "summary"
+                            ],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01",
+                                    "description": "Filter start date (YYYY-MM-DD)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-12-31",
+                                    "description": "Filter end date (YYYY-MM-DD)",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get transaction summary (total income, expense, balance).\n\nOptional Query Parameters:\n- start_date: Filter by start date (YYYY-MM-DD)\n- end_date: Filter by end date (YYYY-MM-DD)\n\nResponse:\n- total_income: Sum of all completed income transactions\n- total_expense: Sum of all completed expense transactions\n- balance: total_income - total_expense"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transaction Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "{{transaction_id}}"
+                            ]
+                        },
+                        "description": "Get details of a specific transaction by ID.\n\nReturns:\n- success: boolean\n- data: transaction object with category, mock account & tags"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Transaction",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.id) {",
+                                    "        pm.collectionVariables.set('transaction_id', response.data.id);",
+                                    "        console.log('Transaction ID saved:', response.data.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"category_id\": \"{{category_id}}\",\n    \"amount\": 150000,\n    \"merchant_name\": \"Grab Food\",\n    \"transaction_date\": \"2025-12-14T10:30:00\",\n    \"notes\": \"Lunch with colleagues\",\n    \"status\": \"completed\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ]
+                        },
+                        "description": "Create a new transaction.\n\nRequired fields:\n- category_id: UUID of category (system or user's own)\n- amount: decimal (positive number, sign determined by category type)\n- transaction_date: datetime (ISO 8601 format)\n\nOptional fields:\n- merchant_name: string (max 255)\n- notes: string (max 1000)\n- status: enum (pending, completed, cancelled) - default: completed\n\nValidation:\n- Category must exist and be accessible (system or user's own)\n- Amount must be positive (0.01 to 999999999999.99)\n- Transaction date must be valid datetime"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Transaction",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 200000,\n    \"merchant_name\": \"Updated Merchant\",\n    \"notes\": \"Updated notes\",\n    \"status\": \"completed\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "{{transaction_id}}"
+                            ]
+                        },
+                        "description": "Update an existing transaction.\n\nAll fields are optional:\n- category_id: UUID (must be accessible)\n- amount: decimal (positive number)\n- merchant_name: string (max 255)\n- transaction_date: datetime\n- notes: string (max 1000)\n- status: enum (pending, completed, cancelled)\n\nNote:\n- Can only update own transactions\n- Cannot change user_id"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Transaction",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "{{transaction_id}}"
+                            ]
+                        },
+                        "description": "Delete a transaction.\n\nRestrictions:\n- Can only delete own transactions"
                     },
                     "response": []
                 }
             ],
-            "description": "Transactions endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Accounts, Categories"
+            "description": "Transaction management endpoints - ✅ Fully Implemented\n\nPhase 1 - Priority: High\n\nAll endpoints require authentication via Bearer token.\n\nFeatures:\n- CRUD operations for transactions\n- Pagination with sorting\n- Summary endpoint for income/expense totals\n- Filter by date range (summary endpoint)\n\nTransaction fields:\n- category_id: Links to a category (determines income/expense type)\n- amount: Always stored positive, displayed with sign based on category type\n- merchant_name: Optional merchant/payee name\n- transaction_date: When the transaction occurred\n- notes: Optional notes\n- status: pending, completed, or cancelled\n\nMock data (deferred features):\n- account: Returns { name: 'Default', last_4: '0000' }\n- tags: Returns []\n\nResponse format:\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"pagination\": { ... },\n  \"message\": \"...\"\n}"
         },
         {
             "name": "Budgets (TODO)",

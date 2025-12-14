@@ -203,10 +203,10 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
             return false;
         }
 
-        // Can't delete if has transactions (check when transactions table exists)
-        // if ($category->transactions()->exists()) {
-        //     return false;
-        // }
+        // Can't delete if has transactions
+        if ($category->transactions()->exists()) {
+            return false;
+        }
 
         return true;
     }

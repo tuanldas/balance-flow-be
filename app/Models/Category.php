@@ -57,6 +57,14 @@ class Category extends Model
     }
 
     /**
+     * Relationship: Category has many transactions
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
      * Scope: Get only system categories
      */
     public function scopeSystem($query)

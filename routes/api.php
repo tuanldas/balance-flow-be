@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CategoryIconController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,5 +45,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/{id}', [CategoryController::class, 'update']);
         Route::delete('/{id}', [CategoryController::class, 'destroy']);
         Route::get('/{id}/subcategories', [CategoryController::class, 'subcategories']);
+    });
+
+    // Transactions Routes
+    Route::prefix('transactions')->group(function () {
+        Route::get('/summary', [TransactionController::class, 'summary']);
+        Route::get('/', [TransactionController::class, 'index']);
+        Route::post('/', [TransactionController::class, 'store']);
+        Route::get('/{id}', [TransactionController::class, 'show']);
+        Route::put('/{id}', [TransactionController::class, 'update']);
+        Route::patch('/{id}', [TransactionController::class, 'update']);
+        Route::delete('/{id}', [TransactionController::class, 'destroy']);
     });
 });

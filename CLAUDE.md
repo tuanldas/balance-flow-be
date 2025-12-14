@@ -98,6 +98,41 @@ php artisan migrate:fresh --seed
 - Development data should be preserved between code changes
 - Only reset database when explicitly requested by user
 
+### Postman & Test Update Policy
+
+**🚫 ALWAYS update Postman collection and tests when making API changes**
+
+- ✅ When adding new API endpoints: Update `postman_collection.json` with the new endpoints
+- ✅ When modifying API endpoints: Update corresponding Postman requests
+- ✅ When adding new features: Create Feature tests in `tests/Feature/`
+- ✅ When fixing bugs: Add regression tests if applicable
+- ✅ Run tests before completing: `docker compose exec app php artisan test`
+- ✅ Run Pint before completing: `docker compose exec app ./vendor/bin/pint`
+
+**Workflow for API changes:**
+```
+1. Implement the feature/fix
+2. Create/Update Feature tests in tests/Feature/
+3. Update postman_collection.json with new/modified endpoints
+4. Run Pint to format code
+5. Run tests to verify everything passes
+6. Show summary to user
+```
+
+**Postman collection structure:**
+- Each module has its own folder (Authentication, Categories, Transactions, etc.)
+- Include all CRUD operations with proper descriptions
+- Add query parameters with descriptions
+- Include test scripts to auto-save IDs (e.g., `transaction_id`, `category_id`)
+- Add collection variables for dynamic values
+
+**Test coverage requirements:**
+- All CRUD operations (create, read, update, delete)
+- Validation errors
+- Authorization (user can only access own data)
+- Edge cases (not found, invalid data)
+- Business rules (e.g., cannot delete category with transactions)
+
 ---
 
 ## Project Overview
@@ -138,6 +173,12 @@ Comprehensive Postman collection available in `postman_collection.json`.
 | | PUT | `/api/categories/{id}` | Update (supports icon_file upload) |
 | | DELETE | `/api/categories/{id}` | Delete |
 | | GET | `/api/categories/{id}/subcategories` | Get subcategories |
+| **Transactions** | GET | `/api/transactions` | List (paginated, sortable) |
+| | GET | `/api/transactions/summary` | Get income/expense totals |
+| | POST | `/api/transactions` | Create |
+| | GET | `/api/transactions/{id}` | Get details |
+| | PUT | `/api/transactions/{id}` | Update |
+| | DELETE | `/api/transactions/{id}` | Delete |
 | **Auth** | POST | `/api/auth/register` | Register |
 | | POST | `/api/auth/login` | Login |
 | | GET | `/api/auth/me` | Get current user |
@@ -662,6 +703,7 @@ public function test_can_create_user() {
 |--------|-----------|-------|-------|---------|
 | **Categories** | 7 endpoints | Repository, Service, Controller, Tests | 16 tests | ✅ |
 | **Authentication** | 11 endpoints | AuthService, AuthController, 6 Requests | 33 tests | ✅ |
+| **Transactions** | 6 endpoints | Repository, Service, Controller, Resource, Tests | 26 tests | ✅ |
 
 **Categories Endpoints:**
 ```
@@ -680,22 +722,29 @@ POST /api/auth/forgot-password, /api/auth/reset-password
 POST /api/auth/verify-email, /api/auth/resend-verification-email
 ```
 
+**Transactions Endpoints:**
+```
+GET /api/transactions (paginated, sortable)
+GET /api/transactions/summary (income/expense totals)
+POST /api/transactions
+GET/PUT/DELETE /api/transactions/{id}
+```
+
 ### 🔲 TODO
 
 **Phase 1 (Core):**
 3. Account Types
 4. Accounts
-5. Transactions
 
 **Phase 2 (Advanced):**
-6. Recurring Transactions
-7. Budgets
-8. Goals
+5. Recurring Transactions
+6. Budgets
+7. Goals
 
 **Phase 3 (Nice to Have):**
-9. Goal Contributions
-10. Notifications
-11. Analytics & Reports
+8. Goal Contributions
+9. Notifications
+10. Analytics & Reports
 
 **Implementation Checklist for Each Module:**
 - [ ] Create migration with UUID v7 primary keys
@@ -706,6 +755,7 @@ POST /api/auth/verify-email, /api/auth/resend-verification-email
 - [ ] Create Controller with Request validation
 - [ ] Write Factory + Tests (feature & unit)
 - [ ] Add endpoints to Postman collection
+- [ ] Update CLAUDE.md with new endpoints
 
 ---
 

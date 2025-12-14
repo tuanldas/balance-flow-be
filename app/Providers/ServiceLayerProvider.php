@@ -37,6 +37,11 @@ class ServiceLayerProvider extends ServiceProvider
             \App\Services\Contracts\CategoryIconServiceInterface::class,
             \App\Services\CategoryIconService::class
         );
+
+        $this->app->bind(
+            \App\Services\Contracts\TransactionServiceInterface::class,
+            \App\Services\TransactionService::class
+        );
     }
 
     /**
