@@ -15,7 +15,8 @@ interface TransactionRepositoryInterface extends BaseRepositoryInterface
         array $columns = ['*'],
         array $relations = [],
         ?string $sortBy = 'transaction_date',
-        string $sortDirection = 'desc'
+        string $sortDirection = 'desc',
+        array $filters = []
     ): mixed;
 
     /**
@@ -35,17 +36,6 @@ interface TransactionRepositoryInterface extends BaseRepositoryInterface
     public function getByCategory(
         string $userId,
         string $categoryId,
-        int $perPage = 15,
-        array $columns = ['*'],
-        array $relations = []
-    ): mixed;
-
-    /**
-     * Get transactions for a user by status
-     */
-    public function getByStatus(
-        string $userId,
-        string $status,
         int $perPage = 15,
         array $columns = ['*'],
         array $relations = []

@@ -30,7 +30,8 @@ class TransactionService extends BaseService implements TransactionServiceInterf
         string $userId,
         int $perPage = 15,
         ?string $sortBy = 'transaction_date',
-        string $sortDirection = 'desc'
+        string $sortDirection = 'desc',
+        array $filters = []
     ): mixed {
         return $this->transactionRepository->getPaginatedForUser(
             $userId,
@@ -38,7 +39,8 @@ class TransactionService extends BaseService implements TransactionServiceInterf
             ['*'],
             ['category'],
             $sortBy,
-            $sortDirection
+            $sortDirection,
+            $filters
         );
     }
 

@@ -27,7 +27,6 @@ class StoreTransactionRequest extends FormRequest
             'merchant_name' => 'nullable|string|max:255',
             'transaction_date' => 'required|date',
             'notes' => 'nullable|string|max:1000',
-            'status' => 'nullable|in:pending,completed,cancelled',
         ];
     }
 
@@ -47,7 +46,6 @@ class StoreTransactionRequest extends FormRequest
             'transaction_date.date' => __('transactions.validation.transaction_date.date'),
             'notes.string' => __('transactions.validation.notes.string'),
             'notes.max' => __('transactions.validation.notes.max'),
-            'status.in' => __('transactions.validation.status.in'),
         ];
     }
 }

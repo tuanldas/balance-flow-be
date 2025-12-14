@@ -22,11 +22,21 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         array $columns = ['*'],
         array $relations = [],
         ?string $sortBy = 'transaction_date',
-        string $sortDirection = 'desc'
+        string $sortDirection = 'desc',
+        array $filters = []
     ): mixed {
         $query = $this->model->select($columns)
-            ->where('user_id', $userId)
-            ->orderBy($sortBy ?? 'transaction_date', $sortDirection);
+            ->where('user_id', $userId);
+
+        if (! empty($filters['category_ids'])) {
+            $query->whereIn('category_id', $filters['category_ids']);
+        }
+
+        if (! empty($filters['search'])) {
+            $query->where('merchant_name', 'ilike', '%'.$filters['search'].'%');
+        }
+
+        $query->orderBy($sortBy ?? 'transaction_date', $sortDirection);
 
         if (! empty($relations)) {
             $query->with($relations);
@@ -83,28 +93,6 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
     }
 
     /**
-     * Get transactions for a user by status
-     */
-    public function getByStatus(
-        string $userId,
-        string $status,
-        int $perPage = 15,
-        array $columns = ['*'],
-        array $relations = []
-    ): mixed {
-        $query = $this->model->select($columns)
-            ->where('user_id', $userId)
-            ->where('status', $status)
-            ->orderBy('transaction_date', 'desc');
-
-        if (! empty($relations)) {
-            $query->with($relations);
-        }
-
-        return $query->paginate($perPage);
-    }
-
-    /**
      * Get total amount for user by type (income/expense)
      */
     public function getTotalByType(
@@ -115,7 +103,6 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
     ): float {
         $query = $this->model
             ->where('user_id', $userId)
-            ->where('status', 'completed')
             ->whereHas('category', function ($q) use ($type) {
                 $q->where('category_type', $type);
             });

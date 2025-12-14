@@ -18,7 +18,6 @@ class Transaction extends Model
         'merchant_name',
         'transaction_date',
         'notes',
-        'status',
     ];
 
     protected $casts = [
@@ -50,14 +49,6 @@ class Transaction extends Model
     public function scopeForUser($query, string $userId)
     {
         return $query->where('user_id', $userId);
-    }
-
-    /**
-     * Scope: Get transactions by status
-     */
-    public function scopeStatus($query, string $status)
-    {
-        return $query->where('status', $status);
     }
 
     /**

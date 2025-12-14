@@ -24,7 +24,6 @@ class TransactionResource extends JsonResource
             'merchant_name' => $this->merchant_name,
             'transaction_date' => $this->transaction_date,
             'notes' => $this->notes,
-            'status' => $this->status,
             'category' => $this->when($this->relationLoaded('category'), function () {
                 return [
                     'id' => $this->category->id,
