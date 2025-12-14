@@ -49,6 +49,32 @@ return [
     'invalid_type' => 'Invalid category type. Only accepts: income, expense.',
     'invalid_color' => 'Invalid color code.',
 
+    // Validation messages
+    'validation' => [
+        'name' => [
+            'required' => 'Category name is required.',
+            'string' => 'Category name must be a string.',
+            'max' => 'Category name must not exceed :max characters.',
+        ],
+        'category_type' => [
+            'required' => 'Category type is required.',
+            'in' => 'Invalid category type. Only accepts: income, expense.',
+        ],
+        'parent_id' => [
+            'uuid' => 'Invalid parent category ID.',
+            'exists' => 'Parent category does not exist.',
+        ],
+        'icon' => [
+            'string' => 'Icon name must be a string.',
+            'max' => 'Icon name must not exceed :max characters.',
+        ],
+        'icon_file' => [
+            'file' => 'Invalid icon file.',
+            'mimes' => 'Invalid icon file. Only accepts: SVG, PNG, JPG.',
+            'max' => 'Icon file too large. Maximum size: 512KB.',
+        ],
+    ],
+
     // Icon
     'icon_not_found' => 'Icon not found.',
     'icon_invalid_type' => 'Invalid icon file. Only accepts: SVG, PNG, JPG.',

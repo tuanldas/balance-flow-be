@@ -33,8 +33,18 @@ class StoreCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'icon_file.mimes' => __('categories.icon_invalid_type'),
-            'icon_file.max' => __('categories.icon_too_large'),
+            'name.required' => __('categories.validation.name.required'),
+            'name.string' => __('categories.validation.name.string'),
+            'name.max' => __('categories.validation.name.max'),
+            'category_type.required' => __('categories.validation.category_type.required'),
+            'category_type.in' => __('categories.validation.category_type.in'),
+            'parent_id.uuid' => __('categories.validation.parent_id.uuid'),
+            'parent_id.exists' => __('categories.validation.parent_id.exists'),
+            'icon.string' => __('categories.validation.icon.string'),
+            'icon.max' => __('categories.validation.icon.max'),
+            'icon_file.file' => __('categories.validation.icon_file.file'),
+            'icon_file.mimes' => __('categories.validation.icon_file.mimes'),
+            'icon_file.max' => __('categories.validation.icon_file.max'),
         ];
     }
 }

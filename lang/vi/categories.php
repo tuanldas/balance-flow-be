@@ -49,6 +49,32 @@ return [
     'invalid_type' => 'Loại danh mục không hợp lệ. Chỉ chấp nhận: income, expense.',
     'invalid_color' => 'Mã màu không hợp lệ.',
 
+    // Validation messages
+    'validation' => [
+        'name' => [
+            'required' => 'Tên danh mục là bắt buộc.',
+            'string' => 'Tên danh mục phải là chuỗi ký tự.',
+            'max' => 'Tên danh mục không được vượt quá :max ký tự.',
+        ],
+        'category_type' => [
+            'required' => 'Loại danh mục là bắt buộc.',
+            'in' => 'Loại danh mục không hợp lệ. Chỉ chấp nhận: thu nhập, chi tiêu.',
+        ],
+        'parent_id' => [
+            'uuid' => 'ID danh mục cha không hợp lệ.',
+            'exists' => 'Danh mục cha không tồn tại.',
+        ],
+        'icon' => [
+            'string' => 'Tên icon phải là chuỗi ký tự.',
+            'max' => 'Tên icon không được vượt quá :max ký tự.',
+        ],
+        'icon_file' => [
+            'file' => 'File icon không hợp lệ.',
+            'mimes' => 'File icon không hợp lệ. Chỉ chấp nhận: SVG, PNG, JPG.',
+            'max' => 'File icon quá lớn. Kích thước tối đa: 512KB.',
+        ],
+    ],
+
     // Icon
     'icon_not_found' => 'Không tìm thấy icon.',
     'icon_invalid_type' => 'File icon không hợp lệ. Chỉ chấp nhận: SVG, PNG, JPG.',
