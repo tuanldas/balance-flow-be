@@ -33,13 +33,11 @@ class TransactionResource extends JsonResource
                     'icon' => $this->category->icon,
                 ];
             }),
-            // Mock data for account (deferred feature)
             'account' => [
                 'id' => null,
                 'name' => 'Default',
                 'last_4' => '0000',
             ],
-            // Mock data for tags (deferred feature)
             'tags' => [],
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),

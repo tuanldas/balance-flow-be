@@ -45,7 +45,6 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         array $columns = ['*'],
         array $relations = []
     ): Collection {
-        // Convert date-only strings to full datetime range
         $start = \Carbon\Carbon::parse($startDate)->startOfDay();
         $end = \Carbon\Carbon::parse($endDate)->endOfDay();
 
@@ -122,7 +121,6 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
             });
 
         if ($startDate && $endDate) {
-            // Convert date-only strings to full datetime range
             $start = \Carbon\Carbon::parse($startDate)->startOfDay();
             $end = \Carbon\Carbon::parse($endDate)->endOfDay();
             $query->whereBetween('transaction_date', [$start, $end]);

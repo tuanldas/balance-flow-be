@@ -22,7 +22,6 @@ return new class extends Migration
             $table->enum('status', ['pending', 'completed', 'cancelled'])->default('completed');
             $table->timestamps();
 
-            // Indexes
             $table->index('user_id');
             $table->index('category_id');
             $table->index('transaction_date');
