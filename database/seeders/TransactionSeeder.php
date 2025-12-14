@@ -78,8 +78,7 @@ class TransactionSeeder extends Seeder
         for ($i = 0; $i < $incomeCount; $i++) {
             $factory = Transaction::factory()
                 ->forUser($userId)
-                ->forCategory(fake()->randomElement($incomeCategories))
-                ->completed();
+                ->forCategory(fake()->randomElement($incomeCategories));
 
             // Apply time period
             $factory = match ($period) {
@@ -108,8 +107,7 @@ class TransactionSeeder extends Seeder
         for ($i = 0; $i < $expenseCount; $i++) {
             $factory = Transaction::factory()
                 ->forUser($userId)
-                ->forCategory(fake()->randomElement($expenseCategories))
-                ->completed();
+                ->forCategory(fake()->randomElement($expenseCategories));
 
             // Apply time period
             $factory = match ($period) {
