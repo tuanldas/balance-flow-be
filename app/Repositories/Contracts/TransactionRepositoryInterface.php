@@ -15,7 +15,8 @@ interface TransactionRepositoryInterface extends BaseRepositoryInterface
         array $columns = ['*'],
         array $relations = [],
         ?string $sortBy = 'transaction_date',
-        string $sortDirection = 'desc'
+        string $sortDirection = 'desc',
+        array $filters = []
     ): mixed;
 
     /**

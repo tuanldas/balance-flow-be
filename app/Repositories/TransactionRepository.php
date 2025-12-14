@@ -22,11 +22,21 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         array $columns = ['*'],
         array $relations = [],
         ?string $sortBy = 'transaction_date',
-        string $sortDirection = 'desc'
+        string $sortDirection = 'desc',
+        array $filters = []
     ): mixed {
         $query = $this->model->select($columns)
-            ->where('user_id', $userId)
-            ->orderBy($sortBy ?? 'transaction_date', $sortDirection);
+            ->where('user_id', $userId);
+
+        if (! empty($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        if (! empty($filters['search'])) {
+            $query->where('merchant_name', 'ilike', '%'.$filters['search'].'%');
+        }
+
+        $query->orderBy($sortBy ?? 'transaction_date', $sortDirection);
 
         if (! empty($relations)) {
             $query->with($relations);
@@ -115,7 +125,6 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
     ): float {
         $query = $this->model
             ->where('user_id', $userId)
-            ->where('status', 'completed')
             ->whereHas('category', function ($q) use ($type) {
                 $q->where('category_type', $type);
             });

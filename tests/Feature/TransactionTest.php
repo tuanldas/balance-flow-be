@@ -68,7 +68,6 @@ class TransactionTest extends TestCase
                         'merchant_name',
                         'transaction_date',
                         'notes',
-                        'status',
                         'category',
                         'account',
                         'tags',
@@ -178,6 +177,104 @@ class TransactionTest extends TestCase
     }
 
     /**
+     * Test: User can filter transactions by category
+     */
+    public function test_user_can_filter_transactions_by_category(): void
+    {
+        $userCategory = Category::factory()->forUser($this->user->id)->expense()->create();
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->count(3)
+            ->create();
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($userCategory->id)
+            ->count(2)
+            ->create();
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/transactions?category_id={$userCategory->id}");
+
+        $response->assertStatus(200);
+
+        $this->assertEquals(2, $response->json('pagination.total'));
+
+        $data = $response->json('data');
+        foreach ($data as $transaction) {
+            $this->assertEquals($userCategory->id, $transaction['category']['id']);
+        }
+    }
+
+    /**
+     * Test: User can search transactions by merchant name
+     */
+    public function test_user_can_search_transactions_by_merchant_name(): void
+    {
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->create(['merchant_name' => 'Grab Food']);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->create(['merchant_name' => 'Shopee']);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->create(['merchant_name' => 'GrabBike']);
+
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/transactions?search=Grab');
+
+        $response->assertStatus(200);
+
+        $this->assertEquals(2, $response->json('pagination.total'));
+
+        $data = $response->json('data');
+        foreach ($data as $transaction) {
+            $this->assertStringContainsStringIgnoringCase('Grab', $transaction['merchant_name']);
+        }
+    }
+
+    /**
+     * Test: User can combine multiple filters
+     */
+    public function test_user_can_combine_multiple_filters(): void
+    {
+        $userCategory = Category::factory()->forUser($this->user->id)->expense()->create();
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($userCategory->id)
+            ->create(['merchant_name' => 'Grab Food']);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($userCategory->id)
+            ->create(['merchant_name' => 'Shopee']);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->create(['merchant_name' => 'Grab Express']);
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/transactions?category_id={$userCategory->id}&search=Grab");
+
+        $response->assertStatus(200);
+
+        $this->assertEquals(1, $response->json('pagination.total'));
+
+        $data = $response->json('data');
+        $this->assertEquals('Grab Food', $data[0]['merchant_name']);
+    }
+
+    /**
      * Test: User can only see their own transactions
      */
     public function test_user_can_only_see_own_transactions(): void
@@ -256,7 +353,6 @@ class TransactionTest extends TestCase
             'merchant_name' => 'Grab Food',
             'transaction_date' => '2025-12-14T10:30:00',
             'notes' => 'Lunch',
-            'status' => 'completed',
         ];
 
         $response = $this->actingAs($this->user)->postJson('/api/transactions', $data);
@@ -531,20 +627,17 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
-            ->completed()
             ->create(['amount' => 1000000]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
-            ->completed()
             ->create(['amount' => 2000000]);
 
         // Create expense transactions
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
-            ->completed()
             ->create(['amount' => 500000]);
 
         $response = $this->actingAs($this->user)->getJson('/api/transactions/summary');
@@ -566,41 +659,6 @@ class TransactionTest extends TestCase
     }
 
     /**
-     * Test: Summary only includes completed transactions
-     */
-    public function test_summary_only_includes_completed_transactions(): void
-    {
-        // Create completed income
-        Transaction::factory()
-            ->forUser($this->user->id)
-            ->forCategory($this->incomeCategory->id)
-            ->completed()
-            ->create(['amount' => 1000000]);
-
-        // Create pending income (should not be counted)
-        Transaction::factory()
-            ->forUser($this->user->id)
-            ->forCategory($this->incomeCategory->id)
-            ->pending()
-            ->create(['amount' => 2000000]);
-
-        // Create cancelled expense (should not be counted)
-        Transaction::factory()
-            ->forUser($this->user->id)
-            ->forCategory($this->expenseCategory->id)
-            ->cancelled()
-            ->create(['amount' => 500000]);
-
-        $response = $this->actingAs($this->user)->getJson('/api/transactions/summary');
-
-        $response->assertStatus(200);
-
-        $data = $response->json('data');
-        $this->assertEquals(1000000, $data['total_income']);
-        $this->assertEquals(0, $data['total_expense']);
-    }
-
-    /**
      * Test: Summary can be filtered by date range
      */
     public function test_summary_can_be_filtered_by_date_range(): void
@@ -609,7 +667,6 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
-            ->completed()
             ->create([
                 'amount' => 1000000,
                 'transaction_date' => now()->subMonth(),
@@ -619,7 +676,6 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
-            ->completed()
             ->create([
                 'amount' => 500000,
                 'transaction_date' => now(),

@@ -27,7 +27,6 @@ class UpdateTransactionRequest extends FormRequest
             'merchant_name' => 'nullable|string|max:255',
             'transaction_date' => 'sometimes|date',
             'notes' => 'nullable|string|max:1000',
-            'status' => 'sometimes|in:pending,completed,cancelled',
         ];
     }
 
@@ -44,7 +43,6 @@ class UpdateTransactionRequest extends FormRequest
             'transaction_date.date' => __('transactions.validation.transaction_date.date'),
             'notes.string' => __('transactions.validation.notes.string'),
             'notes.max' => __('transactions.validation.notes.max'),
-            'status.in' => __('transactions.validation.status.in'),
         ];
     }
 }

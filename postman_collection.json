@@ -1055,10 +1055,22 @@
                                     "key": "sort_direction",
                                     "value": "desc",
                                     "description": "Sort direction: asc or desc"
+                                },
+                                {
+                                    "key": "category_id",
+                                    "value": "{{category_id}}",
+                                    "description": "Filter by category UUID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "description": "Search by merchant name (case-insensitive)",
+                                    "disabled": true
                                 }
                             ]
                         },
-                        "description": "Get paginated list of transactions for the authenticated user.\n\nQuery Parameters:\n- per_page (default: 15): Number of items per page\n- sort_by (default: transaction_date): Sort field (transaction_date, amount, created_at, updated_at)\n- sort_direction (default: desc): Sort direction (asc, desc)\n\nResponse includes:\n- success: boolean\n- data: array of transactions with category, mock account & tags\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: amount is negative for expenses, positive for income."
+                        "description": "Get paginated list of transactions for the authenticated user.\n\nQuery Parameters:\n- per_page (default: 15): Number of items per page\n- sort_by (default: transaction_date): Sort field (transaction_date, amount, created_at, updated_at)\n- sort_direction (default: desc): Sort direction (asc, desc)\n- category_id (optional): Filter by category UUID\n- search (optional): Search by merchant name (case-insensitive)\n\nResponse includes:\n- success: boolean\n- data: array of transactions with category, mock account & tags\n- pagination: current_page, per_page, total, last_page, from, to\n\nNote: amount is negative for expenses, positive for income."
                     },
                     "response": []
                 },
@@ -1181,7 +1193,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"category_id\": \"{{category_id}}\",\n    \"amount\": 150000,\n    \"merchant_name\": \"Grab Food\",\n    \"transaction_date\": \"2025-12-14T10:30:00\",\n    \"notes\": \"Lunch with colleagues\",\n    \"status\": \"completed\"\n}"
+                            "raw": "{\n    \"category_id\": \"{{category_id}}\",\n    \"amount\": 150000,\n    \"merchant_name\": \"Grab Food\",\n    \"transaction_date\": \"2025-12-14T10:30:00\",\n    \"notes\": \"Lunch with colleagues\"\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/transactions",
@@ -1193,7 +1205,7 @@
                                 "transactions"
                             ]
                         },
-                        "description": "Create a new transaction.\n\nRequired fields:\n- category_id: UUID of category (system or user's own)\n- amount: decimal (positive number, sign determined by category type)\n- transaction_date: datetime (ISO 8601 format)\n\nOptional fields:\n- merchant_name: string (max 255)\n- notes: string (max 1000)\n- status: enum (pending, completed, cancelled) - default: completed\n\nValidation:\n- Category must exist and be accessible (system or user's own)\n- Amount must be positive (0.01 to 999999999999.99)\n- Transaction date must be valid datetime"
+                        "description": "Create a new transaction.\n\nRequired fields:\n- category_id: UUID of category (system or user's own)\n- amount: decimal (positive number, sign determined by category type)\n- transaction_date: datetime (ISO 8601 format)\n\nOptional fields:\n- merchant_name: string (max 255)\n- notes: string (max 1000)\n\nValidation:\n- Category must exist and be accessible (system or user's own)\n- Amount must be positive (0.01 to 999999999999.99)\n- Transaction date must be valid datetime"
                     },
                     "response": []
                 },
@@ -1221,7 +1233,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"amount\": 200000,\n    \"merchant_name\": \"Updated Merchant\",\n    \"notes\": \"Updated notes\",\n    \"status\": \"completed\"\n}"
+                            "raw": "{\n    \"amount\": 200000,\n    \"merchant_name\": \"Updated Merchant\",\n    \"notes\": \"Updated notes\"\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
@@ -1234,7 +1246,7 @@
                                 "{{transaction_id}}"
                             ]
                         },
-                        "description": "Update an existing transaction.\n\nAll fields are optional:\n- category_id: UUID (must be accessible)\n- amount: decimal (positive number)\n- merchant_name: string (max 255)\n- transaction_date: datetime\n- notes: string (max 1000)\n- status: enum (pending, completed, cancelled)\n\nNote:\n- Can only update own transactions\n- Cannot change user_id"
+                        "description": "Update an existing transaction.\n\nAll fields are optional:\n- category_id: UUID (must be accessible)\n- amount: decimal (positive number)\n- merchant_name: string (max 255)\n- transaction_date: datetime\n- notes: string (max 1000)\n\nNote:\n- Can only update own transactions\n- Cannot change user_id"
                     },
                     "response": []
                 },

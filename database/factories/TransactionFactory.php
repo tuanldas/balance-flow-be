@@ -58,7 +58,6 @@ class TransactionFactory extends Factory
             'merchant_name' => fake()->randomElement($merchants),
             'transaction_date' => fake()->dateTimeBetween('-30 days', 'now'),
             'notes' => fake()->optional(0.3)->sentence(),
-            'status' => fake()->randomElement(['pending', 'completed', 'completed', 'completed', 'cancelled']),
         ];
     }
 
@@ -79,36 +78,6 @@ class TransactionFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'category_id' => $categoryId,
-        ]);
-    }
-
-    /**
-     * Indicate that the transaction is completed.
-     */
-    public function completed(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'completed',
-        ]);
-    }
-
-    /**
-     * Indicate that the transaction is pending.
-     */
-    public function pending(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'pending',
-        ]);
-    }
-
-    /**
-     * Indicate that the transaction is cancelled.
-     */
-    public function cancelled(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'cancelled',
         ]);
     }
 

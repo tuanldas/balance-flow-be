@@ -14,7 +14,8 @@ interface TransactionServiceInterface extends BaseServiceInterface
         string $userId,
         int $perPage = 15,
         ?string $sortBy = 'transaction_date',
-        string $sortDirection = 'desc'
+        string $sortDirection = 'desc',
+        array $filters = []
     ): mixed;
 
     /**

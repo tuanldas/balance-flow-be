@@ -174,6 +174,8 @@ Comprehensive Postman collection available in `postman_collection.json`.
 | | DELETE | `/api/categories/{id}` | Delete |
 | | GET | `/api/categories/{id}/subcategories` | Get subcategories |
 | **Transactions** | GET | `/api/transactions` | List (paginated, sortable) |
+| | GET | `/api/transactions?category_id=uuid` | Filter by category |
+| | GET | `/api/transactions?search=keyword` | Search by merchant name |
 | | GET | `/api/transactions/summary` | Get income/expense totals |
 | | POST | `/api/transactions` | Create |
 | | GET | `/api/transactions/{id}` | Get details |
@@ -703,7 +705,7 @@ public function test_can_create_user() {
 |--------|-----------|-------|-------|---------|
 | **Categories** | 7 endpoints | Repository, Service, Controller, Tests | 16 tests | ✅ |
 | **Authentication** | 11 endpoints | AuthService, AuthController, 6 Requests | 33 tests | ✅ |
-| **Transactions** | 6 endpoints | Repository, Service, Controller, Resource, Tests | 26 tests | ✅ |
+| **Transactions** | 8 endpoints | Repository, Service, Controller, Resource, Tests | 28 tests | ✅ |
 
 **Categories Endpoints:**
 ```
@@ -725,7 +727,14 @@ POST /api/auth/verify-email, /api/auth/resend-verification-email
 **Transactions Endpoints:**
 ```
 GET /api/transactions (paginated, sortable)
+    Query params:
+    - per_page: items per page (default: 15)
+    - sort_by: transaction_date|amount|created_at|updated_at (default: transaction_date)
+    - sort_direction: asc|desc (default: desc)
+    - category_id: filter by category UUID
+    - search: search by merchant name (case-insensitive)
 GET /api/transactions/summary (income/expense totals)
+    Query params: start_date, end_date (optional, format: Y-m-d)
 POST /api/transactions
 GET/PUT/DELETE /api/transactions/{id}
 ```

@@ -18,7 +18,7 @@ class TransactionController extends Controller
     /**
      * Get all transactions for the authenticated user (paginated)
      * GET /api/transactions
-     * Query params: per_page (default: 15), sort_by (default: transaction_date), sort_direction (default: desc)
+     * Query params: per_page, sort_by, sort_direction, category_id, search, status
      */
     public function index(Request $request): JsonResponse
     {
@@ -28,18 +28,22 @@ class TransactionController extends Controller
             $sortBy = $request->query('sort_by', 'transaction_date');
             $sortDirection = $request->query('sort_direction', 'desc');
 
-            // Validate sort direction
             $sortDirection = in_array(strtolower($sortDirection), ['asc', 'desc']) ? strtolower($sortDirection) : 'desc';
 
-            // Validate sort_by field
             $allowedSortFields = ['transaction_date', 'amount', 'created_at', 'updated_at'];
             $sortBy = in_array($sortBy, $allowedSortFields) ? $sortBy : 'transaction_date';
+
+            $filters = array_filter([
+                'category_id' => $request->query('category_id'),
+                'search' => $request->query('search'),
+            ]);
 
             $transactions = $this->transactionService->getPaginatedForUser(
                 $userId,
                 $perPage,
                 $sortBy,
-                $sortDirection
+                $sortDirection,
+                $filters
             );
 
             return response()->json([
