@@ -64,6 +64,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 8. Ask if user wants to merge back to dev
 ```
 
+**Merge Policy:**
+- ✅ ALWAYS use `git merge --no-ff` when merging feature/bugfix branches
+- ❌ DO NOT use fast-forward merge (keeps git tree clean with visible branches)
+
+```bash
+# Correct way to merge feature branch
+git checkout dev
+git merge --no-ff feature/branch-name -m "Merge branch 'feature/branch-name' into dev"
+git branch -d feature/branch-name
+```
+
 **Exceptions (when you CAN work on dev directly):**
 - Documentation updates (README, CLAUDE.md, etc.)
 - Minor refactoring that doesn't add features
