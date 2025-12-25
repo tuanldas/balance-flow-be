@@ -91,7 +91,7 @@ class TransactionSeeder extends Seeder
             // Income amounts typically larger
             $factory->create([
                 'amount' => fake()->randomFloat(2, 1000000, 50000000),
-                'merchant_name' => fake()->randomElement([
+                'name' => fake()->randomElement([
                     'Salary',
                     'Freelance Project',
                     'Investment Return',

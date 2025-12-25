@@ -26,21 +26,26 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         array $filters = []
     ): mixed {
         $query = $this->model->select($columns)
-            ->where('user_id', $userId);
-
-        if (! empty($filters['category_ids'])) {
-            $query->whereIn('category_id', $filters['category_ids']);
-        }
-
-        if (! empty($filters['search'])) {
-            $query->where('merchant_name', 'ilike', '%'.$filters['search'].'%');
-        }
-
-        $query->orderBy($sortBy ?? 'transaction_date', $sortDirection);
-
-        if (! empty($relations)) {
-            $query->with($relations);
-        }
+            ->where('user_id', $userId)
+            ->when(! empty($filters['category_ids']), fn ($q) => $q->whereIn('category_id', $filters['category_ids']))
+            ->when(! empty($filters['search']), fn ($q) => $q->where('name', 'ilike', '%'.$filters['search'].'%'))
+            ->when(
+                ! empty($filters['start_date']) && ! empty($filters['end_date']),
+                fn ($q) => $q->whereBetween('transaction_date', [
+                    \Carbon\Carbon::parse($filters['start_date'])->startOfDay(),
+                    \Carbon\Carbon::parse($filters['end_date'])->endOfDay(),
+                ])
+            )
+            ->when(
+                ! empty($filters['start_date']) && empty($filters['end_date']),
+                fn ($q) => $q->where('transaction_date', '>=', \Carbon\Carbon::parse($filters['start_date'])->startOfDay())
+            )
+            ->when(
+                empty($filters['start_date']) && ! empty($filters['end_date']),
+                fn ($q) => $q->where('transaction_date', '<=', \Carbon\Carbon::parse($filters['end_date'])->endOfDay())
+            )
+            ->orderBy($sortBy ?? 'transaction_date', $sortDirection)
+            ->when(! empty($relations), fn ($q) => $q->with($relations));
 
         return $query->paginate($perPage);
     }

@@ -18,7 +18,7 @@ class TransactionController extends Controller
     /**
      * Get all transactions for the authenticated user (paginated)
      * GET /api/transactions
-     * Query params: per_page, sort_by, sort_direction, category_id (comma-separated), search
+     * Query params: per_page, sort_by, sort_direction, category_id (comma-separated), search, start_date, end_date
      */
     public function index(Request $request): JsonResponse
     {
@@ -40,6 +40,8 @@ class TransactionController extends Controller
             $filters = array_filter([
                 'category_ids' => $categoryIds,
                 'search' => $request->query('search'),
+                'start_date' => $request->query('start_date'),
+                'end_date' => $request->query('end_date'),
             ]);
 
             $transactions = $this->transactionService->getPaginatedForUser(

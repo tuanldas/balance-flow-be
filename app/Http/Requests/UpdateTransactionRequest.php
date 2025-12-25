@@ -24,7 +24,7 @@ class UpdateTransactionRequest extends FormRequest
         return [
             'category_id' => 'sometimes|uuid|exists:categories,id',
             'amount' => 'sometimes|numeric|min:0.01|max:999999999999.99',
-            'merchant_name' => 'nullable|string|max:255',
+            'name' => 'nullable|string|max:255',
             'transaction_date' => 'sometimes|date',
             'notes' => 'nullable|string|max:1000',
         ];
@@ -38,8 +38,8 @@ class UpdateTransactionRequest extends FormRequest
             'amount.numeric' => __('transactions.validation.amount.numeric'),
             'amount.min' => __('transactions.validation.amount.min'),
             'amount.max' => __('transactions.validation.amount.max'),
-            'merchant_name.string' => __('transactions.validation.merchant_name.string'),
-            'merchant_name.max' => __('transactions.validation.merchant_name.max'),
+            'name.string' => __('transactions.validation.name.string'),
+            'name.max' => __('transactions.validation.name.max'),
             'transaction_date.date' => __('transactions.validation.transaction_date.date'),
             'notes.string' => __('transactions.validation.notes.string'),
             'notes.max' => __('transactions.validation.notes.max'),
