@@ -55,7 +55,7 @@ class TransactionFactory extends Factory
             'user_id' => User::factory(),
             'category_id' => Category::factory(),
             'amount' => fake()->randomFloat(2, 10000, 10000000),
-            'merchant_name' => fake()->randomElement($merchants),
+            'name' => fake()->randomElement($merchants),
             'transaction_date' => fake()->dateTimeBetween('-30 days', 'now'),
             'notes' => fake()->optional(0.3)->sentence(),
         ];

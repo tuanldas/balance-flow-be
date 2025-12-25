@@ -21,7 +21,7 @@ class TransactionResource extends JsonResource
             'id' => $this->id,
             'amount' => $isExpense ? -abs($amount) : abs($amount),
             'raw_amount' => $amount,
-            'merchant_name' => $this->merchant_name,
+            'name' => $this->name,
             'transaction_date' => $this->transaction_date,
             'notes' => $this->notes,
             'category' => $this->when($this->relationLoaded('category'), function () {

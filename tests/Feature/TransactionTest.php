@@ -65,7 +65,7 @@ class TransactionTest extends TestCase
                         'id',
                         'amount',
                         'raw_amount',
-                        'merchant_name',
+                        'name',
                         'transaction_date',
                         'notes',
                         'category',
@@ -250,22 +250,22 @@ class TransactionTest extends TestCase
     /**
      * Test: User can search transactions by merchant name
      */
-    public function test_user_can_search_transactions_by_merchant_name(): void
+    public function test_user_can_search_transactions_by_name(): void
     {
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
-            ->create(['merchant_name' => 'Grab Food']);
+            ->create(['name' => 'Grab Food']);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
-            ->create(['merchant_name' => 'Shopee']);
+            ->create(['name' => 'Shopee']);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
-            ->create(['merchant_name' => 'GrabBike']);
+            ->create(['name' => 'GrabBike']);
 
         $response = $this->actingAs($this->user)
             ->getJson('/api/transactions?search=Grab');
@@ -276,7 +276,7 @@ class TransactionTest extends TestCase
 
         $data = $response->json('data');
         foreach ($data as $transaction) {
-            $this->assertStringContainsStringIgnoringCase('Grab', $transaction['merchant_name']);
+            $this->assertStringContainsStringIgnoringCase('Grab', $transaction['name']);
         }
     }
 
@@ -290,17 +290,17 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($userCategory->id)
-            ->create(['merchant_name' => 'Grab Food']);
+            ->create(['name' => 'Grab Food']);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($userCategory->id)
-            ->create(['merchant_name' => 'Shopee']);
+            ->create(['name' => 'Shopee']);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
-            ->create(['merchant_name' => 'Grab Express']);
+            ->create(['name' => 'Grab Express']);
 
         $response = $this->actingAs($this->user)
             ->getJson("/api/transactions?category_id={$userCategory->id}&search=Grab");
@@ -310,7 +310,103 @@ class TransactionTest extends TestCase
         $this->assertEquals(1, $response->json('pagination.total'));
 
         $data = $response->json('data');
-        $this->assertEquals('Grab Food', $data[0]['merchant_name']);
+        $this->assertEquals('Grab Food', $data[0]['name']);
+    }
+
+    /**
+     * Test: User can filter transactions by date range (both start and end)
+     */
+    public function test_user_can_filter_transactions_by_date_range(): void
+    {
+        // Create transactions on different dates
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->create(['transaction_date' => now()->subDays(10)]);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->count(3)
+            ->create(['transaction_date' => now()->subDays(5)]);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->count(2)
+            ->create(['transaction_date' => now()->subDays(2)]);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->create(['transaction_date' => now()]);
+
+        $startDate = now()->subDays(6)->format('Y-m-d');
+        $endDate = now()->subDays(1)->format('Y-m-d');
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/transactions?start_date={$startDate}&end_date={$endDate}");
+
+        $response->assertStatus(200);
+
+        // Should return only transactions between 6 days ago and 1 day ago (3 + 2 = 5)
+        $this->assertEquals(5, $response->json('pagination.total'));
+    }
+
+    /**
+     * Test: User can filter transactions by start date only
+     */
+    public function test_user_can_filter_transactions_by_start_date_only(): void
+    {
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->count(2)
+            ->create(['transaction_date' => now()->subDays(10)]);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->count(3)
+            ->create(['transaction_date' => now()->subDays(2)]);
+
+        $startDate = now()->subDays(5)->format('Y-m-d');
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/transactions?start_date={$startDate}");
+
+        $response->assertStatus(200);
+
+        // Should return only transactions from 5 days ago to now (3 transactions)
+        $this->assertEquals(3, $response->json('pagination.total'));
+    }
+
+    /**
+     * Test: User can filter transactions by end date only
+     */
+    public function test_user_can_filter_transactions_by_end_date_only(): void
+    {
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->count(2)
+            ->create(['transaction_date' => now()->subDays(10)]);
+
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->count(3)
+            ->create(['transaction_date' => now()->subDays(2)]);
+
+        $endDate = now()->subDays(5)->format('Y-m-d');
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/transactions?end_date={$endDate}");
+
+        $response->assertStatus(200);
+
+        // Should return only transactions up to 5 days ago (2 transactions)
+        $this->assertEquals(2, $response->json('pagination.total'));
     }
 
     /**
@@ -349,7 +445,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
-            ->create(['merchant_name' => 'Test Merchant']);
+            ->create(['name' => 'Test Merchant']);
 
         $response = $this->actingAs($this->user)
             ->getJson("/api/transactions/{$transaction->id}");
@@ -359,7 +455,7 @@ class TransactionTest extends TestCase
                 'success' => true,
                 'data' => [
                     'id' => $transaction->id,
-                    'merchant_name' => 'Test Merchant',
+                    'name' => 'Test Merchant',
                 ],
             ]);
     }
@@ -389,7 +485,7 @@ class TransactionTest extends TestCase
         $data = [
             'category_id' => $this->expenseCategory->id,
             'amount' => 150000,
-            'merchant_name' => 'Grab Food',
+            'name' => 'Grab Food',
             'transaction_date' => '2025-12-14T10:30:00',
             'notes' => 'Lunch',
         ];
@@ -406,7 +502,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'category_id' => $this->expenseCategory->id,
             'amount' => 150000,
-            'merchant_name' => 'Grab Food',
+            'name' => 'Grab Food',
         ]);
     }
 
@@ -547,7 +643,7 @@ class TransactionTest extends TestCase
 
         $data = [
             'amount' => 250000,
-            'merchant_name' => 'Updated Merchant',
+            'name' => 'Updated Merchant',
             'notes' => 'Updated notes',
         ];
 
@@ -563,7 +659,7 @@ class TransactionTest extends TestCase
         $this->assertDatabaseHas('transactions', [
             'id' => $transaction->id,
             'amount' => 250000,
-            'merchant_name' => 'Updated Merchant',
+            'name' => 'Updated Merchant',
             'notes' => 'Updated notes',
         ]);
     }

@@ -52,9 +52,9 @@ return [
             'min' => 'Số tiền phải lớn hơn 0.',
             'max' => 'Số tiền quá lớn.',
         ],
-        'merchant_name' => [
-            'string' => 'Tên người nhận/nơi giao dịch phải là chuỗi ký tự.',
-            'max' => 'Tên người nhận/nơi giao dịch không được vượt quá :max ký tự.',
+        'name' => [
+            'string' => 'Tên giao dịch phải là chuỗi ký tự.',
+            'max' => 'Tên giao dịch không được vượt quá :max ký tự.',
         ],
         'transaction_date' => [
             'required' => 'Ngày giao dịch là bắt buộc.',

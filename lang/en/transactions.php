@@ -52,9 +52,9 @@ return [
             'min' => 'Amount must be greater than 0.',
             'max' => 'Amount is too large.',
         ],
-        'merchant_name' => [
-            'string' => 'Merchant name must be a string.',
-            'max' => 'Merchant name must not exceed :max characters.',
+        'name' => [
+            'string' => 'Transaction name must be a string.',
+            'max' => 'Transaction name must not exceed :max characters.',
         ],
         'transaction_date' => [
             'required' => 'Transaction date is required.',
