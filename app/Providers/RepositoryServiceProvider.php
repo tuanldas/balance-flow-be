@@ -25,6 +25,11 @@ class RepositoryServiceProvider extends ServiceProvider
             \App\Repositories\Contracts\TransactionRepositoryInterface::class,
             \App\Repositories\TransactionRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\Contracts\AccountRepositoryInterface::class,
+            \App\Repositories\AccountRepository::class
+        );
     }
 
     /**

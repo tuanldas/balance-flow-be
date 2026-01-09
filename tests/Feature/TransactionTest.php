@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Account;
+use App\Models\AccountType;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
@@ -18,12 +20,15 @@ class TransactionTest extends TestCase
 
     protected Category $expenseCategory;
 
+    protected Account $account;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Seed system categories
+        // Seed system categories and account types
         $this->artisan('db:seed', ['--class' => 'CategorySeeder']);
+        $this->artisan('db:seed', ['--class' => 'AccountTypeSeeder']);
 
         // Set default headers for all requests in this test
         $this->withHeaders([
@@ -41,6 +46,13 @@ class TransactionTest extends TestCase
         $this->expenseCategory = Category::where('is_system', true)
             ->where('category_type', 'expense')
             ->first();
+
+        // Create account for testing (account_id is now required)
+        $accountType = AccountType::first();
+        $this->account = Account::factory()
+            ->forUser($this->user)
+            ->forAccountType($accountType)
+            ->create();
     }
 
     /**
@@ -52,6 +64,7 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(5)
             ->create();
 
@@ -96,6 +109,7 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(10)
             ->create();
 
@@ -119,16 +133,19 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['transaction_date' => now()->subDays(2)]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['transaction_date' => now()]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['transaction_date' => now()->subDay()]);
 
         $response = $this->actingAs($this->user)->getJson('/api/transactions');
@@ -152,16 +169,19 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['amount' => 100]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['amount' => 300]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['amount' => 200]);
 
         $response = $this->actingAs($this->user)
@@ -186,12 +206,14 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(3)
             ->create();
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($userCategory->id)
+            ->forAccount($this->account->id)
             ->count(2)
             ->create();
 
@@ -219,18 +241,21 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(3)
             ->create();
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($userCategory1->id)
+            ->forAccount($this->account->id)
             ->count(2)
             ->create();
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($userCategory2->id)
+            ->forAccount($this->account->id)
             ->count(4)
             ->create();
 
@@ -255,16 +280,19 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['name' => 'Grab Food']);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['name' => 'Shopee']);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['name' => 'GrabBike']);
 
         $response = $this->actingAs($this->user)
@@ -290,16 +318,19 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($userCategory->id)
+            ->forAccount($this->account->id)
             ->create(['name' => 'Grab Food']);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($userCategory->id)
+            ->forAccount($this->account->id)
             ->create(['name' => 'Shopee']);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['name' => 'Grab Express']);
 
         $response = $this->actingAs($this->user)
@@ -322,23 +353,27 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['transaction_date' => now()->subDays(10)]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(3)
             ->create(['transaction_date' => now()->subDays(5)]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(2)
             ->create(['transaction_date' => now()->subDays(2)]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['transaction_date' => now()]);
 
         $startDate = now()->subDays(6)->format('Y-m-d');
@@ -361,12 +396,14 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(2)
             ->create(['transaction_date' => now()->subDays(10)]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(3)
             ->create(['transaction_date' => now()->subDays(2)]);
 
@@ -389,12 +426,14 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(2)
             ->create(['transaction_date' => now()->subDays(10)]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(3)
             ->create(['transaction_date' => now()->subDays(2)]);
 
@@ -420,12 +459,14 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(3)
             ->create();
 
         Transaction::factory()
             ->forUser($otherUser->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->count(5)
             ->create();
 
@@ -445,6 +486,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['name' => 'Test Merchant']);
 
         $response = $this->actingAs($this->user)
@@ -469,6 +511,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($otherUser->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create();
 
         $response = $this->actingAs($this->user)
@@ -484,6 +527,7 @@ class TransactionTest extends TestCase
     {
         $data = [
             'category_id' => $this->expenseCategory->id,
+            'account_id' => $this->account->id,
             'amount' => 150000,
             'name' => 'Grab Food',
             'transaction_date' => '2025-12-14T10:30:00',
@@ -501,6 +545,7 @@ class TransactionTest extends TestCase
         $this->assertDatabaseHas('transactions', [
             'user_id' => $this->user->id,
             'category_id' => $this->expenseCategory->id,
+            'account_id' => $this->account->id,
             'amount' => 150000,
             'name' => 'Grab Food',
         ]);
@@ -515,12 +560,14 @@ class TransactionTest extends TestCase
         $expense = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['amount' => 100000]);
 
         // Create income transaction
         $income = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
+            ->forAccount($this->account->id)
             ->create(['amount' => 200000]);
 
         // Get expense
@@ -545,6 +592,7 @@ class TransactionTest extends TestCase
     {
         $data = [
             'category_id' => $this->incomeCategory->id,
+            'account_id' => $this->account->id,
             'amount' => 5000000,
             'transaction_date' => now()->toIso8601String(),
         ];
@@ -556,6 +604,7 @@ class TransactionTest extends TestCase
         $this->assertDatabaseHas('transactions', [
             'user_id' => $this->user->id,
             'category_id' => $this->incomeCategory->id,
+            'account_id' => $this->account->id,
         ]);
     }
 
@@ -569,6 +618,7 @@ class TransactionTest extends TestCase
 
         $data = [
             'category_id' => $otherCategory->id,
+            'account_id' => $this->account->id,
             'amount' => 100000,
             'transaction_date' => now()->toIso8601String(),
         ];
@@ -639,6 +689,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create();
 
         $data = [
@@ -672,6 +723,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create();
 
         // Change to income category
@@ -697,6 +749,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($otherUser->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create();
 
         $response = $this->actingAs($this->user)
@@ -715,6 +768,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create();
 
         $response = $this->actingAs($this->user)
@@ -740,6 +794,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($otherUser->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create();
 
         $response = $this->actingAs($this->user)
@@ -762,17 +817,20 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
+            ->forAccount($this->account->id)
             ->create(['amount' => 1000000]);
 
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
+            ->forAccount($this->account->id)
             ->create(['amount' => 2000000]);
 
         // Create expense transactions
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create(['amount' => 500000]);
 
         $response = $this->actingAs($this->user)->getJson('/api/transactions/summary');
@@ -802,6 +860,7 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
+            ->forAccount($this->account->id)
             ->create([
                 'amount' => 1000000,
                 'transaction_date' => now()->subMonth(),
@@ -811,6 +870,7 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->incomeCategory->id)
+            ->forAccount($this->account->id)
             ->create([
                 'amount' => 500000,
                 'transaction_date' => now(),
@@ -829,22 +889,26 @@ class TransactionTest extends TestCase
     }
 
     /**
-     * Test: Response includes mock account data
+     * Test: Response includes account data when available
      */
-    public function test_response_includes_mock_account_data(): void
+    public function test_response_includes_account_data_when_available(): void
     {
         $transaction = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create();
 
         $response = $this->actingAs($this->user)
             ->getJson("/api/transactions/{$transaction->id}");
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.account.name', 'Default')
-            ->assertJsonPath('data.account.last_4', '0000')
             ->assertJsonPath('data.tags', []);
+
+        // Account field should be null if Account model doesn't exist yet
+        if (! class_exists(\App\Models\Account::class)) {
+            $this->assertNull($response->json('data.account'));
+        }
     }
 
     /**
@@ -855,6 +919,7 @@ class TransactionTest extends TestCase
         $transaction = Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
             ->create();
 
         $response = $this->actingAs($this->user)
@@ -913,6 +978,7 @@ class TransactionTest extends TestCase
         Transaction::factory()
             ->forUser($this->user->id)
             ->forCategory($category->id)
+            ->forAccount($this->account->id)
             ->create();
 
         // Try to delete category
@@ -925,5 +991,159 @@ class TransactionTest extends TestCase
         $this->assertDatabaseHas('categories', [
             'id' => $category->id,
         ]);
+    }
+
+    /**
+     * Test: User can filter transactions by account_id
+     */
+    public function test_user_can_filter_transactions_by_account_id(): void
+    {
+        // Create second account
+        $accountType = AccountType::first();
+        $secondAccount = Account::factory()
+            ->forUser($this->user)
+            ->forAccountType($accountType)
+            ->create();
+
+        // Create transactions for first account
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
+            ->count(3)
+            ->create();
+
+        // Create transactions for second account
+        Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->forAccount($secondAccount->id)
+            ->count(2)
+            ->create();
+
+        // Test filter by first account
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/transactions?account_id='.$this->account->id);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data',
+                'pagination',
+            ]);
+
+        $this->assertEquals(3, $response->json('pagination.total'));
+
+        // Test filter by second account
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/transactions?account_id='.$secondAccount->id);
+
+        $this->assertEquals(2, $response->json('pagination.total'));
+    }
+
+    /**
+     * Test: User can create transaction with account_id
+     */
+    public function test_user_can_create_transaction_with_account_id(): void
+    {
+        $transactionData = [
+            'category_id' => $this->expenseCategory->id,
+            'account_id' => $this->account->id,
+            'amount' => 50000,
+            'name' => 'Test Transaction with Account',
+            'transaction_date' => now()->format('Y-m-d'),
+            'notes' => 'Testing account_id field',
+        ];
+
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/transactions', $transactionData);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'id',
+                    'amount',
+                    'name',
+                ],
+                'message',
+            ]);
+
+        $this->assertDatabaseHas('transactions', [
+            'name' => 'Test Transaction with Account',
+            'account_id' => $this->account->id,
+        ]);
+    }
+
+    /**
+     * Test: Account ID is required when creating transaction
+     */
+    public function test_account_id_is_required(): void
+    {
+        $transactionData = [
+            'category_id' => $this->expenseCategory->id,
+            'amount' => 50000,
+            'name' => 'Test Transaction',
+            'transaction_date' => now()->format('Y-m-d'),
+        ];
+
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/transactions', $transactionData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['account_id']);
+    }
+
+    /**
+     * Test: Account ID validation works
+     */
+    public function test_account_id_must_be_valid_uuid(): void
+    {
+        $transactionData = [
+            'category_id' => $this->expenseCategory->id,
+            'account_id' => 'invalid-uuid',
+            'amount' => 50000,
+            'name' => 'Test Transaction',
+            'transaction_date' => now()->format('Y-m-d'),
+        ];
+
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/transactions', $transactionData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['account_id']);
+    }
+
+    /**
+     * Test: Transaction loads account relationship
+     */
+    public function test_transaction_loads_account_relationship(): void
+    {
+        $transaction = Transaction::factory()
+            ->forUser($this->user->id)
+            ->forCategory($this->expenseCategory->id)
+            ->forAccount($this->account->id)
+            ->create();
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/transactions/{$transaction->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'id',
+                    'amount',
+                    'name',
+                    'account' => [
+                        'id',
+                        'name',
+                        'icon',
+                        'color',
+                    ],
+                ],
+            ]);
+
+        $this->assertEquals($this->account->id, $response->json('data.account.id'));
     }
 }

@@ -32,11 +32,18 @@ class TransactionResource extends JsonResource
                     'icon' => $this->category->icon,
                 ];
             }),
-            'account' => [
-                'id' => null,
-                'name' => 'Default',
-                'last_4' => '0000',
-            ],
+            'account' => $this->when(
+                $this->relationLoaded('account') && class_exists(\App\Models\Account::class),
+                function () {
+                    return $this->account ? [
+                        'id' => $this->account->id,
+                        'name' => $this->account->name,
+                        'icon' => $this->account->icon,
+                        'color' => $this->account->color,
+                    ] : null;
+                },
+                null
+            ),
             'tags' => [],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
