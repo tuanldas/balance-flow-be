@@ -30,9 +30,6 @@ return [
     'delete_failed' => 'Failed to delete account.',
     'has_transactions' => 'Cannot delete account with transactions.',
 
-    // Toggle
-    'toggle_success' => 'Account status toggled successfully.',
-
     // Balance
     'balance_updated' => 'Balance updated successfully.',
     'insufficient_balance' => 'Insufficient balance.',
@@ -74,9 +71,6 @@ return [
         'description' => [
             'string' => 'Description must be a string.',
             'max' => 'Description must not exceed :max characters.',
-        ],
-        'is_active' => [
-            'boolean' => 'Active status must be true or false.',
         ],
     ],
 ];

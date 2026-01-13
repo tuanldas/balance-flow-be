@@ -26,14 +26,6 @@ class AccountService extends BaseService implements AccountServiceInterface
     }
 
     /**
-     * Get only active accounts for a user
-     */
-    public function getActiveForUser(string $userId): Collection
-    {
-        return $this->accountRepository->getActiveForUser($userId, ['*'], ['accountType']);
-    }
-
-    /**
      * Get paginated accounts for a user
      */
     public function getPaginatedForUser(string $userId, int $perPage = 15): mixed
@@ -63,10 +55,6 @@ class AccountService extends BaseService implements AccountServiceInterface
 
         if (! isset($data['currency'])) {
             $data['currency'] = 'VND';
-        }
-
-        if (! isset($data['is_active'])) {
-            $data['is_active'] = true;
         }
 
         $account = $this->accountRepository->create($data);
@@ -148,21 +136,5 @@ class AccountService extends BaseService implements AccountServiceInterface
         }
 
         return $this->accountRepository->updateBalance($id, $amount, $operation);
-    }
-
-    /**
-     * Toggle account active status
-     */
-    public function toggleActiveStatus(string $id, string $userId): bool
-    {
-        $account = $this->accountRepository->findForUser($id, $userId);
-
-        if (! $account) {
-            return false;
-        }
-
-        return $this->accountRepository->update($id, [
-            'is_active' => ! $account->is_active,
-        ]);
     }
 }

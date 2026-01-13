@@ -18,7 +18,7 @@ class AccountController extends Controller
     /**
      * Get all accounts for the authenticated user (paginated)
      * GET /api/accounts
-     * Query params: per_page, account_type_id, is_active
+     * Query params: per_page, account_type_id
      */
     public function index(Request $request): JsonResponse
     {
@@ -26,24 +26,10 @@ class AccountController extends Controller
             $userId = $request->user()->id;
             $perPage = (int) $request->query('per_page', 15);
             $accountTypeId = $request->query('account_type_id');
-            $isActive = $request->query('is_active');
 
             // Filter by account type
             if ($accountTypeId) {
                 $accounts = $this->accountService->getByAccountType($accountTypeId, $userId);
-
-                return response()->json([
-                    'success' => true,
-                    'data' => AccountResource::collection($accounts),
-                ]);
-            }
-
-            // Filter by active status
-            if ($isActive !== null) {
-                $isActive = filter_var($isActive, FILTER_VALIDATE_BOOLEAN);
-                $accounts = $isActive
-                    ? $this->accountService->getActiveForUser($userId)
-                    : $this->accountService->getAllForUser($userId);
 
                 return response()->json([
                     'success' => true,
@@ -205,7 +191,7 @@ class AccountController extends Controller
     }
 
     /**
-     * Get total balance across all active accounts
+     * Get total balance across all accounts
      * GET /api/accounts/balance/total
      * Query params: currency (default: VND)
      */
@@ -226,38 +212,6 @@ class AccountController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
-        }
-    }
-
-    /**
-     * Toggle account active status
-     * POST /api/accounts/{id}/toggle-active
-     */
-    public function toggleActive(Request $request, string $id): JsonResponse
-    {
-        try {
-            $userId = $request->user()->id;
-            $success = $this->accountService->toggleActiveStatus($id, $userId);
-
-            if (! $success) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('accounts.not_found'),
-                ], 404);
-            }
-
-            $account = $this->accountService->findForUser($id, $userId);
-
-            return response()->json([
-                'success' => true,
-                'data' => new AccountResource($account),
-                'message' => __('accounts.toggle_success'),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
         }
     }
 }

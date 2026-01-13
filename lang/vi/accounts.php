@@ -30,9 +30,6 @@ return [
     'delete_failed' => 'Xóa tài khoản thất bại.',
     'has_transactions' => 'Không thể xóa tài khoản có giao dịch.',
 
-    // Toggle
-    'toggle_success' => 'Thay đổi trạng thái tài khoản thành công.',
-
     // Balance
     'balance_updated' => 'Cập nhật số dư thành công.',
     'insufficient_balance' => 'Số dư không đủ.',
@@ -74,9 +71,6 @@ return [
         'description' => [
             'string' => 'Mô tả phải là chuỗi ký tự.',
             'max' => 'Mô tả không được vượt quá :max ký tự.',
-        ],
-        'is_active' => [
-            'boolean' => 'Trạng thái hoạt động phải là true hoặc false.',
         ],
     ],
 ];

@@ -24,7 +24,6 @@ class AccountResource extends JsonResource
             'icon' => $this->icon,
             'color' => $this->color,
             'description' => $this->description,
-            'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
             'account_type' => $this->whenLoaded('accountType', function () {

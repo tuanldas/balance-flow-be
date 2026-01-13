@@ -33,25 +33,6 @@ class AccountRepository extends BaseRepository implements AccountRepositoryInter
     }
 
     /**
-     * Get only active accounts for a user
-     */
-    public function getActiveForUser(
-        string $userId,
-        array $columns = ['*'],
-        array $relations = []
-    ): Collection {
-        $query = $this->model->select($columns)
-            ->where('user_id', $userId)
-            ->where('is_active', true);
-
-        if (! empty($relations)) {
-            $query->with($relations);
-        }
-
-        return $query->get();
-    }
-
-    /**
      * Get paginated accounts for a user
      */
     public function paginateForUser(
@@ -116,8 +97,7 @@ class AccountRepository extends BaseRepository implements AccountRepositoryInter
     public function getTotalBalance(string $userId, ?string $currency = null): float
     {
         $query = $this->model
-            ->where('user_id', $userId)
-            ->where('is_active', true);
+            ->where('user_id', $userId);
 
         if ($currency) {
             $query->where('currency', $currency);

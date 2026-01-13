@@ -21,12 +21,10 @@ class Account extends Model
         'icon',
         'color',
         'description',
-        'is_active',
     ];
 
     protected $casts = [
         'balance' => 'decimal:2',
-        'is_active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -53,14 +51,6 @@ class Account extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
-    }
-
-    /**
-     * Scope: Get only active accounts
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
     }
 
     /**

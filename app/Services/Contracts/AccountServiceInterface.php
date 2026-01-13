@@ -13,11 +13,6 @@ interface AccountServiceInterface extends BaseServiceInterface
     public function getAllForUser(string $userId): Collection;
 
     /**
-     * Get only active accounts for a user
-     */
-    public function getActiveForUser(string $userId): Collection;
-
-    /**
      * Get paginated accounts for a user
      */
     public function getPaginatedForUser(string $userId, int $perPage = 15): mixed;
@@ -56,9 +51,4 @@ interface AccountServiceInterface extends BaseServiceInterface
      * Update account balance
      */
     public function updateBalance(string $id, float $amount, string $operation, ?string $userId = null): bool;
-
-    /**
-     * Toggle account active status
-     */
-    public function toggleActiveStatus(string $id, string $userId): bool;
 }

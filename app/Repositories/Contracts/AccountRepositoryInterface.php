@@ -17,15 +17,6 @@ interface AccountRepositoryInterface extends BaseRepositoryInterface
     ): Collection;
 
     /**
-     * Get only active accounts for a user
-     */
-    public function getActiveForUser(
-        string $userId,
-        array $columns = ['*'],
-        array $relations = []
-    ): Collection;
-
-    /**
      * Get paginated accounts for a user
      */
     public function paginateForUser(

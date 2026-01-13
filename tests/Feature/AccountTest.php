@@ -63,7 +63,6 @@ class AccountTest extends TestCase
                         'icon',
                         'color',
                         'description',
-                        'is_active',
                         'created_at',
                         'updated_at',
                         'account_type',
@@ -135,7 +134,6 @@ class AccountTest extends TestCase
             'icon' => 'account_balance',
             'color' => '#2196F3',
             'description' => 'Test account',
-            'is_active' => true,
         ];
 
         $response = $this->actingAs($this->user)->postJson('/api/accounts', $data);
@@ -332,34 +330,6 @@ class AccountTest extends TestCase
     }
 
     /**
-     * Test: User can filter active accounts
-     */
-    public function test_user_can_filter_active_accounts(): void
-    {
-        Account::factory()
-            ->forUser($this->user)
-            ->forAccountType($this->accountType)
-            ->active()
-            ->count(3)
-            ->create();
-
-        Account::factory()
-            ->forUser($this->user)
-            ->forAccountType($this->accountType)
-            ->inactive()
-            ->count(2)
-            ->create();
-
-        $response = $this->actingAs($this->user)
-            ->getJson('/api/accounts?is_active=true');
-
-        $response->assertStatus(200);
-
-        $data = $response->json('data');
-        $this->assertCount(3, $data);
-    }
-
-    /**
      * Test: User can get total balance
      */
     public function test_user_can_get_total_balance(): void
@@ -367,23 +337,13 @@ class AccountTest extends TestCase
         Account::factory()
             ->forUser($this->user)
             ->forAccountType($this->accountType)
-            ->active()
             ->withBalance(1000000)
             ->create(['currency' => 'VND']);
 
         Account::factory()
             ->forUser($this->user)
             ->forAccountType($this->accountType)
-            ->active()
             ->withBalance(2000000)
-            ->create(['currency' => 'VND']);
-
-        // Inactive account should not be counted
-        Account::factory()
-            ->forUser($this->user)
-            ->forAccountType($this->accountType)
-            ->inactive()
-            ->withBalance(5000000)
             ->create(['currency' => 'VND']);
 
         $response = $this->actingAs($this->user)
@@ -397,32 +357,6 @@ class AccountTest extends TestCase
                     'currency' => 'VND',
                 ],
             ]);
-    }
-
-    /**
-     * Test: User can toggle account active status
-     */
-    public function test_user_can_toggle_account_active_status(): void
-    {
-        $account = Account::factory()
-            ->forUser($this->user)
-            ->forAccountType($this->accountType)
-            ->active()
-            ->create();
-
-        $this->assertTrue($account->is_active);
-
-        $response = $this->actingAs($this->user)
-            ->postJson("/api/accounts/{$account->id}/toggle-active");
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => 'Thay đổi trạng thái tài khoản thành công.',
-            ]);
-
-        $account->refresh();
-        $this->assertFalse($account->is_active);
     }
 
     /**

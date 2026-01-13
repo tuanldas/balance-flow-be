@@ -53,7 +53,6 @@ class AccountFactory extends Factory
             'icon' => fake()->randomElement($icons),
             'color' => fake()->hexColor(),
             'description' => fake()->optional(0.3)->sentence(),
-            'is_active' => fake()->boolean(90),
         ];
     }
 
@@ -74,26 +73,6 @@ class AccountFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'account_type_id' => $accountType->id,
-        ]);
-    }
-
-    /**
-     * Indicate that the account is active.
-     */
-    public function active(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_active' => true,
-        ]);
-    }
-
-    /**
-     * Indicate that the account is inactive.
-     */
-    public function inactive(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_active' => false,
         ]);
     }
 

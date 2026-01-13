@@ -29,7 +29,6 @@ class StoreAccountRequest extends FormRequest
             'icon' => 'nullable|string|max:50',
             'color' => 'nullable|string|size:7|regex:/^#[0-9A-Fa-f]{6}$/',
             'description' => 'nullable|string|max:1000',
-            'is_active' => 'nullable|boolean',
         ];
     }
 
@@ -55,7 +54,6 @@ class StoreAccountRequest extends FormRequest
             'color.regex' => __('accounts.validation.color.regex'),
             'description.string' => __('accounts.validation.description.string'),
             'description.max' => __('accounts.validation.description.max'),
-            'is_active.boolean' => __('accounts.validation.is_active.boolean'),
         ];
     }
 }
