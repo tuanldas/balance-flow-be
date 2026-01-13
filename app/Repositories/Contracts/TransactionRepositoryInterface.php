@@ -50,4 +50,15 @@ interface TransactionRepositoryInterface extends BaseRepositoryInterface
         ?string $startDate = null,
         ?string $endDate = null
     ): float;
+
+    /**
+     * Get transactions for a user by account
+     */
+    public function getByAccount(
+        string $userId,
+        string $accountId,
+        int $perPage = 15,
+        array $columns = ['*'],
+        array $relations = []
+    ): mixed;
 }

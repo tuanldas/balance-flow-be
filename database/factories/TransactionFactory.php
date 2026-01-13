@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Account;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -54,6 +55,7 @@ class TransactionFactory extends Factory
         return [
             'user_id' => User::factory(),
             'category_id' => Category::factory(),
+            'account_id' => Account::factory(),
             'amount' => fake()->randomFloat(2, 10000, 10000000),
             'name' => fake()->randomElement($merchants),
             'transaction_date' => fake()->dateTimeBetween('-30 days', 'now'),
@@ -126,6 +128,16 @@ class TransactionFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'amount' => $amount,
+        ]);
+    }
+
+    /**
+     * Indicate that the transaction is for a specific account.
+     */
+    public function forAccount(?string $accountId): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'account_id' => $accountId,
         ]);
     }
 }

@@ -18,7 +18,7 @@ class TransactionController extends Controller
     /**
      * Get all transactions for the authenticated user (paginated)
      * GET /api/transactions
-     * Query params: per_page, sort_by, sort_direction, category_id (comma-separated), search, start_date, end_date
+     * Query params: per_page, sort_by, sort_direction, category_id (comma-separated), account_id, search, start_date, end_date
      */
     public function index(Request $request): JsonResponse
     {
@@ -39,6 +39,7 @@ class TransactionController extends Controller
 
             $filters = array_filter([
                 'category_ids' => $categoryIds,
+                'account_id' => $request->query('account_id'),
                 'search' => $request->query('search'),
                 'start_date' => $request->query('start_date'),
                 'end_date' => $request->query('end_date'),
@@ -97,8 +98,12 @@ class TransactionController extends Controller
                 ], 403);
             }
 
-            // Load category relationship
-            $transaction->load('category');
+            // Load category and account relationships
+            $relations = ['category'];
+            if (class_exists(\App\Models\Account::class)) {
+                $relations[] = 'account';
+            }
+            $transaction->load($relations);
 
             return response()->json([
                 'success' => true,
@@ -122,8 +127,12 @@ class TransactionController extends Controller
             $userId = $request->user()->id;
             $transaction = $this->transactionService->createTransaction($userId, $request->validated());
 
-            // Load category relationship
-            $transaction->load('category');
+            // Load category and account relationships
+            $relations = ['category'];
+            if (class_exists(\App\Models\Account::class)) {
+                $relations[] = 'account';
+            }
+            $transaction->load($relations);
 
             return response()->json([
                 'success' => true,

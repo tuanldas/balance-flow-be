@@ -14,6 +14,7 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'category_id',
+        'account_id',
         'amount',
         'name',
         'transaction_date',
@@ -44,6 +45,14 @@ class Transaction extends Model
     }
 
     /**
+     * Relationship: Transaction belongs to Account
+     */
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    /**
      * Scope: Get transactions by user
      */
     public function scopeForUser($query, string $userId)
@@ -57,6 +66,14 @@ class Transaction extends Model
     public function scopeDateRange($query, $startDate, $endDate)
     {
         return $query->whereBetween('transaction_date', [$startDate, $endDate]);
+    }
+
+    /**
+     * Scope: Get transactions by account
+     */
+    public function scopeByAccount($query, string $accountId)
+    {
+        return $query->where('account_id', $accountId);
     }
 
     /**

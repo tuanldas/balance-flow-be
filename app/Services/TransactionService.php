@@ -33,11 +33,17 @@ class TransactionService extends BaseService implements TransactionServiceInterf
         string $sortDirection = 'desc',
         array $filters = []
     ): mixed {
+        // Only eager load account if Account model exists (after Accounts module is merged)
+        $relations = ['category'];
+        if (class_exists(\App\Models\Account::class)) {
+            $relations[] = 'account';
+        }
+
         return $this->transactionRepository->getPaginatedForUser(
             $userId,
             $perPage,
             ['*'],
-            ['category'],
+            $relations,
             $sortBy,
             $sortDirection,
             $filters

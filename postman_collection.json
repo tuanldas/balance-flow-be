@@ -46,6 +46,16 @@
             "key": "transaction_id",
             "value": "",
             "type": "string"
+        },
+        {
+            "key": "account_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "account_type_id",
+            "value": "",
+            "type": "string"
         }
     ],
     "item": [
@@ -926,10 +936,27 @@
             "description": "Authentication endpoints - ✅ Fully Implemented\n\nPhase 1 - Priority: High\n\nUsing Laravel Sanctum for token-based authentication.\n\nPublic endpoints (no auth required):\n- POST /auth/register\n- POST /auth/login\n- POST /auth/forgot-password\n- POST /auth/reset-password\n- POST /auth/verify-email\n\nProtected endpoints (require Bearer token):\n- GET /auth/me\n- PUT /auth/profile\n- PUT /auth/password\n- POST /auth/logout\n- POST /auth/logout-all\n- POST /auth/resend-verification-email\n\nEmail Verification Flow:\n1. User registers → Receives verification email\n2. User clicks link in email → Calls /verify-email with id + hash\n3. If email not received → Calls /resend-verification-email\n\nAll responses follow standard format:\n{\n  \"success\": true/false,\n  \"message\": \"Message in Vietnamese\",\n  \"data\": {...}\n}"
         },
         {
-            "name": "Account Types (TODO)",
+            "name": "Account Types",
             "item": [
                 {
                     "name": "List Account Types",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.length > 0) {",
+                                    "        pm.collectionVariables.set('account_type_id', response.data[0].id);",
+                                    "        console.log('Account Type ID saved:', response.data[0].id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "GET",
                         "header": [
@@ -946,30 +973,24 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/account-types?per_page=15",
+                            "raw": "{{base_url}}/api/account-types",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "api",
                                 "account-types"
-                            ],
-                            "query": [
-                                {
-                                    "key": "per_page",
-                                    "value": "15"
-                                }
                             ]
                         },
-                        "description": "List all account types (Not yet implemented)."
+                        "description": "Get all system account types.\n\nReturns 6 predefined account types:\n1. Tiền mặt (Cash) - icon: payments, color: #4CAF50\n2. Tài khoản ngân hàng (Bank Account) - icon: account_balance, color: #2196F3\n3. Ví điện tử (E-Wallet) - icon: account_balance_wallet, color: #9C27B0\n4. Thẻ tín dụng (Credit Card) - icon: credit_card, color: #FF9800\n5. Tiết kiệm (Savings) - icon: savings, color: #00BCD4\n6. Đầu tư (Investment) - icon: trending_up, color: #8BC34A\n\nResponse:\n- success: boolean\n- data: array of account types with id, name, icon, color, description\n\nNote: This is a read-only API. Account types are predefined and cannot be modified."
                     },
                     "response": []
                 }
             ],
-            "description": "Account Types endpoints (Not yet implemented).\n\nPhase 1 - Priority: High"
+            "description": "Account Types endpoints - ✅ Fully Implemented (Read-only API)\n\nPhase 1 - Priority: High\n\nProvides 6 predefined account types for users to reference when creating accounts.\n\nAll endpoints require authentication via Bearer token.\n\nEndpoints:\n- GET /api/account-types - List all account types\n\nAccount types are system-defined and cannot be created, updated, or deleted by users."
         },
         {
-            "name": "Accounts (TODO)",
+            "name": "Accounts",
             "item": [
                 {
                     "name": "List Accounts",
@@ -1000,16 +1021,225 @@
                             "query": [
                                 {
                                     "key": "per_page",
-                                    "value": "15"
+                                    "value": "15",
+                                    "description": "Number of items per page (default: 15)"
+                                },
+                                {
+                                    "key": "account_type_id",
+                                    "value": "{{account_type_id}}",
+                                    "description": "Filter by account type UUID",
+                                    "disabled": true
                                 }
                             ]
                         },
-                        "description": "List user's accounts (Not yet implemented)."
+                        "description": "Get paginated list of user's accounts.\n\nQuery Parameters:\n- per_page (default: 15): Number of items per page\n- account_type_id (optional): Filter by account type UUID\n\nResponse includes:\n- success: boolean\n- data: array of accounts with accountType relationship\n- pagination: current_page, per_page, total, last_page, from, to\n\nEach account includes:\n- id, user_id, account_type_id\n- name, balance, currency\n- icon, color, description\n- created_at, updated_at\n- account_type: { id, name, icon, color }"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Account Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/{{account_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "{{account_id}}"
+                            ]
+                        },
+                        "description": "Get details of a specific account by ID.\n\nReturns:\n- success: boolean\n- data: account object with accountType relationship\n\nNote: Can only access own accounts."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Account",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.data && response.data.id) {",
+                                    "        pm.collectionVariables.set('account_id', response.data.id);",
+                                    "        console.log('Account ID saved:', response.data.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"account_type_id\": \"{{account_type_id}}\",\n    \"name\": \"My Momo Wallet\",\n    \"balance\": 1000000,\n    \"currency\": \"VND\",\n    \"icon\": \"account_balance_wallet\",\n    \"color\": \"#D32F2F\",\n    \"description\": \"Personal Momo wallet\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts"
+                            ]
+                        },
+                        "description": "Create a new account.\n\nRequired fields:\n- account_type_id: UUID (must exist in account_types table)\n- name: string (max 255)\n\nOptional fields:\n- balance: decimal (default: 0, max: 999999999999.99)\n- currency: string (default: VND, allowed: VND, USD, EUR, GBP, JPY)\n- icon: string (max 50, Material Icons name)\n- color: string (7 chars, hex format #RRGGBB)\n- description: string (max 1000)\n\nValidation:\n- account_type_id must exist\n- name is required\n- currency must be one of: VND, USD, EUR, GBP, JPY\n- color must be hex format (#RRGGBB)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Account",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"My Updated Wallet\",\n    \"icon\": \"wallet\",\n    \"color\": \"#4CAF50\",\n    \"description\": \"Updated description\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/{{account_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "{{account_id}}"
+                            ]
+                        },
+                        "description": "Update an existing account.\n\nAll fields are optional:\n- account_type_id: UUID\n- name: string (max 255)\n- currency: string (VND, USD, EUR, GBP, JPY)\n- icon: string (max 50)\n- color: string (hex format #RRGGBB)\n- description: string (max 1000)\n\nIMPORTANT:\n- balance CANNOT be updated via this endpoint (security)\n- Balance updates should go through transaction system\n- Can only update own accounts"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Account",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/{{account_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "{{account_id}}"
+                            ]
+                        },
+                        "description": "Delete an account.\n\nRestrictions:\n- Can only delete own accounts\n- Future: Cannot delete accounts with transactions"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Total Balance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept-Language",
+                                "value": "{{locale}}",
+                                "type": "text",
+                                "description": "Language preference (vi|en)"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/accounts/balance/total?currency=VND",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "accounts",
+                                "balance",
+                                "total"
+                            ],
+                            "query": [
+                                {
+                                    "key": "currency",
+                                    "value": "VND",
+                                    "description": "Currency to calculate total (default: VND)"
+                                }
+                            ]
+                        },
+                        "description": "Get total balance across all accounts.\n\nQuery Parameters:\n- currency (default: VND): Currency to filter and sum balances\n\nResponse:\n- success: boolean\n- data: { total_balance: number, currency: string }\n\nNote:\n- Only sums accounts with matching currency"
                     },
                     "response": []
                 }
             ],
-            "description": "Accounts endpoints (Not yet implemented).\n\nPhase 1 - Priority: High\nDepends on: Account Types"
+            "description": "Accounts endpoints - ✅ Fully Implemented (Full CRUD API)\n\nPhase 1 - Priority: High\nDepends on: Account Types\n\nAll endpoints require authentication via Bearer token.\n\nEndpoints:\n- GET /api/accounts - List accounts (paginated, with filters)\n- GET /api/accounts/{id} - Get account details\n- POST /api/accounts - Create account\n- PUT /api/accounts/{id} - Update account\n- DELETE /api/accounts/{id} - Delete account\n- GET /api/accounts/balance/total - Get total balance\n\nFeatures:\n- Multi-currency support (VND, USD, EUR, GBP, JPY)\n- Balance protection (cannot update directly via API)\n- Filter by account_type_id\n- Total balance calculation\n\nBusiness Rules:\n- User can only access their own accounts\n- Balance cannot be updated via update endpoint (security)"
         },
         {
             "name": "Transactions",

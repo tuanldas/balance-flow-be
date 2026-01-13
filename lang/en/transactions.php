@@ -46,6 +46,11 @@ return [
             'uuid' => 'Category ID is invalid.',
             'exists' => 'Category does not exist.',
         ],
+        'account_id' => [
+            'required' => 'Account is required.',
+            'uuid' => 'Account ID is invalid.',
+            'exists' => 'Account does not exist.',
+        ],
         'amount' => [
             'required' => 'Amount is required.',
             'numeric' => 'Amount must be a number.',

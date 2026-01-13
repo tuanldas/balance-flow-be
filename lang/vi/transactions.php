@@ -46,6 +46,11 @@ return [
             'uuid' => 'ID danh mục không hợp lệ.',
             'exists' => 'Danh mục không tồn tại.',
         ],
+        'account_id' => [
+            'required' => 'Tài khoản là bắt buộc.',
+            'uuid' => 'ID tài khoản không hợp lệ.',
+            'exists' => 'Tài khoản không tồn tại.',
+        ],
         'amount' => [
             'required' => 'Số tiền là bắt buộc.',
             'numeric' => 'Số tiền phải là số.',

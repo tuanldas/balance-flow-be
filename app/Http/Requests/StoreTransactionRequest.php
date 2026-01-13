@@ -23,6 +23,7 @@ class StoreTransactionRequest extends FormRequest
     {
         return [
             'category_id' => 'required|uuid|exists:categories,id',
+            'account_id' => 'required|uuid|exists:accounts,id',
             'amount' => 'required|numeric|min:0.01|max:999999999999.99',
             'name' => 'nullable|string|max:255',
             'transaction_date' => 'required|date',
@@ -36,6 +37,9 @@ class StoreTransactionRequest extends FormRequest
             'category_id.required' => __('transactions.validation.category_id.required'),
             'category_id.uuid' => __('transactions.validation.category_id.uuid'),
             'category_id.exists' => __('transactions.validation.category_id.exists'),
+            'account_id.required' => __('transactions.validation.account_id.required'),
+            'account_id.uuid' => __('transactions.validation.account_id.uuid'),
+            'account_id.exists' => __('transactions.validation.account_id.exists'),
             'amount.required' => __('transactions.validation.amount.required'),
             'amount.numeric' => __('transactions.validation.amount.numeric'),
             'amount.min' => __('transactions.validation.amount.min'),

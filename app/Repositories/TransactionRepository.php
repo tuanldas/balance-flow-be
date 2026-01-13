@@ -28,6 +28,7 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         $query = $this->model->select($columns)
             ->where('user_id', $userId)
             ->when(! empty($filters['category_ids']), fn ($q) => $q->whereIn('category_id', $filters['category_ids']))
+            ->when(! empty($filters['account_id']), fn ($q) => $q->where('account_id', $filters['account_id']))
             ->when(! empty($filters['search']), fn ($q) => $q->where('name', 'ilike', '%'.$filters['search'].'%'))
             ->when(
                 ! empty($filters['start_date']) && ! empty($filters['end_date']),
@@ -119,5 +120,27 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         }
 
         return (float) $query->sum('amount');
+    }
+
+    /**
+     * Get transactions for a user by account
+     */
+    public function getByAccount(
+        string $userId,
+        string $accountId,
+        int $perPage = 15,
+        array $columns = ['*'],
+        array $relations = []
+    ): mixed {
+        $query = $this->model->select($columns)
+            ->where('user_id', $userId)
+            ->where('account_id', $accountId)
+            ->orderBy('transaction_date', 'desc');
+
+        if (! empty($relations)) {
+            $query->with($relations);
+        }
+
+        return $query->paginate($perPage);
     }
 }
