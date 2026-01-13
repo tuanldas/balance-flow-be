@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CategoryIconController;
@@ -37,6 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Category Icons Routes
     Route::get('/category-icons', [CategoryIconController::class, 'index']);
 
+    // Account Types Routes
+    Route::get('/account-types', [AccountTypeController::class, 'index']);
+
     // Categories Routes
     Route::prefix('categories')->group(function () {
         Route::get('/', [CategoryController::class, 'index']);
@@ -57,7 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [AccountController::class, 'update']);
         Route::patch('/{id}', [AccountController::class, 'update']);
         Route::delete('/{id}', [AccountController::class, 'destroy']);
-        Route::post('/{id}/toggle-active', [AccountController::class, 'toggleActive']);
     });
 
     // Transactions Routes

@@ -47,6 +47,11 @@ class ServiceLayerProvider extends ServiceProvider
             \App\Services\Contracts\AccountServiceInterface::class,
             \App\Services\AccountService::class
         );
+
+        $this->app->bind(
+            \App\Services\Contracts\AccountTypeServiceInterface::class,
+            \App\Services\AccountTypeService::class
+        );
     }
 
     /**
